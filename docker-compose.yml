@@ -1,19 +1,17 @@
-version: '3.8'
-
 services:
   postgres:
-    image: postgres:16
+    image: postgres:15-alpine
     container_name: wealthnav-postgres
     environment:
-      POSTGRES_USER: postgres
+      POSTGRES_USER: wealthnav
       POSTGRES_PASSWORD: dev
-      POSTGRES_DB: wealthnav
+      POSTGRES_DB: wealthnavigator
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U wealthnav"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,6 +28,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    command: redis-server --appendonly yes
 
 volumes:
   postgres_data:

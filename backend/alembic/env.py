@@ -1,13 +1,25 @@
 from logging.config import fileConfig
+import sys
+from pathlib import Path
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
+from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
+
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+# Import app configuration and models
+from app.core.config import settings
+from app.models import Base  # This imports all models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+# Override sqlalchemy.url with our settings
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -16,8 +28,6 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from app.core.database import Base
-from app.models.database_models import Thread, Message, Goal, Portfolio, Account, Simulation
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -38,13 +48,14 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    from app.core.config import settings
-    url = settings.DATABASE_URL
+    url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        compare_type=True,
+        compare_server_default=True,
     )
 
     with context.begin_transaction():
@@ -58,11 +69,27 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    from app.core.database import engine
+    # Get the database URL and convert async URL to sync for Alembic
+    db_url = config.get_main_option("sqlalchemy.url")
+    if db_url and "asyncpg" in db_url:
+        db_url = db_url.replace("postgresql+asyncpg://", "postgresql://")
 
-    with engine.connect() as connection:
+    # Create sync engine config
+    configuration = config.get_section(config.config_ini_section, {})
+    configuration["sqlalchemy.url"] = db_url
+
+    connectable = engine_from_config(
+        configuration,
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
+
+    with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            compare_type=True,
+            compare_server_default=True,
         )
 
         with context.begin_transaction():

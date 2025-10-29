@@ -3,7 +3,7 @@
  * Financial goal planning and tracking
  */
 
-import { GoalCategory } from './thread';
+import { type GoalCategory } from './thread';
 
 export interface Goal {
   id: string;

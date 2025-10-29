@@ -3,7 +3,7 @@
  * Handles persistent storage of threads and user data
  */
 
-import { Thread } from '../types/thread';
+import { type Thread } from '../types/thread';
 
 const STORAGE_VERSION = 1;
 const STORAGE_KEY = 'wealthnav_data';
