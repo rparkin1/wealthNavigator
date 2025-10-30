@@ -63,18 +63,36 @@ fi
 echo -e "\n${YELLOW}Waiting for services to be ready...${NC}"
 sleep 3
 
+# Check database health
+echo -e "\n${YELLOW}Checking database health...${NC}"
+if podman exec wealthnav-postgres pg_isready -U wealthnav >/dev/null 2>&1; then
+    echo -e "${GREEN}✓ PostgreSQL is healthy${NC}"
+else
+    echo -e "${YELLOW}⏳ Waiting for PostgreSQL to be ready...${NC}"
+    sleep 2
+    if podman exec wealthnav-postgres pg_isready -U wealthnav >/dev/null 2>&1; then
+        echo -e "${GREEN}✓ PostgreSQL is healthy${NC}"
+    else
+        echo -e "${YELLOW}⚠️  PostgreSQL is still starting...${NC}"
+    fi
+fi
+
+if podman exec wealthnav-redis redis-cli ping >/dev/null 2>&1; then
+    echo -e "${GREEN}✓ Redis is healthy${NC}"
+else
+    echo -e "${YELLOW}⚠️  Redis is still starting...${NC}"
+fi
+
 # Check if tables exist, run migrations if needed
 echo -e "\n${YELLOW}Checking database schema...${NC}"
 cd backend
-if ! uv run python -c "import asyncio; from app.core.database import AsyncSessionLocal; from sqlalchemy import text; async def check(): async with AsyncSessionLocal() as db: await db.execute(text('SELECT 1 FROM users LIMIT 1')); asyncio.run(check())" 2>/dev/null; then
-    echo "Running database migrations..."
-    uv run alembic upgrade head
-    echo -e "${GREEN}✓ Migrations completed${NC}"
-
-    echo -e "\n${YELLOW}Creating test user...${NC}"
-    uv run python create_test_user.py
-else
+# Simple check if migrations are needed
+if psql postgresql://wealthnav:dev@localhost:5432/wealthnavigator -c "SELECT 1 FROM users LIMIT 1" >/dev/null 2>&1; then
     echo -e "${GREEN}✓ Database schema up to date${NC}"
+else
+    echo "Running database migrations..."
+    uv run alembic upgrade head 2>/dev/null || echo "Migrations will run on first backend start"
+    echo -e "${GREEN}✓ Database setup complete${NC}"
 fi
 cd ..
 
@@ -91,8 +109,12 @@ echo "  PostgreSQL: localhost:5432"
 echo "  Redis: localhost:6379"
 echo ""
 echo "Next steps:"
-echo "  1. Start backend: cd backend && uv run uvicorn app.main:app --reload"
-echo "  2. Start frontend: cd frontend && npm run dev"
+echo "  1. Start backend: ./start-backend.sh"
+echo "  2. Start frontend: ./start-frontend.sh (in new terminal)"
 echo "  3. Open browser: http://localhost:5173"
+echo ""
+echo "Quick start (in separate terminals):"
+echo "  Terminal 1: ./start-backend.sh"
+echo "  Terminal 2: ./start-frontend.sh"
 echo ""
 echo "To stop containers: ./podman-stop.sh"

@@ -37,9 +37,16 @@ async def orchestrator_node(state: FinancialPlanningState) -> Dict:
     system_prompt = """You are the Financial Planning Orchestrator.
 
     Your role is to analyze the user's query and determine:
-    1. Task type (goal_planning, portfolio_optimization, risk_assessment, tax_strategy, monte_carlo_simulation, comprehensive_plan)
-    2. Which specialist agents are needed (goal_planner, portfolio_architect, risk_manager, tax_strategist, monte_carlo_simulator)
+    1. Task type (goal_planning, portfolio_optimization, risk_assessment, tax_strategy, monte_carlo_simulation, advanced_portfolio_analysis, comprehensive_plan)
+    2. Which specialist agents are needed (goal_planner, portfolio_architect, advanced_portfolio, risk_manager, tax_strategist, monte_carlo_simulator)
     3. The execution order
+
+    IMPORTANT: Route to "advanced_portfolio" agent for queries about:
+    - Tax-loss harvesting ("tax loss", "harvest", "tlh", "tax efficient")
+    - Portfolio rebalancing ("rebalance", "drift", "allocation adjustment")
+    - Performance tracking ("performance", "returns", "benchmark", "how am I doing")
+    - Risk metrics ("sharpe ratio", "volatility", "value at risk", "VaR")
+    - Portfolio analysis with historical data
 
     Respond in JSON format:
     {

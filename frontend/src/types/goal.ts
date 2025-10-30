@@ -1,29 +1,30 @@
 /**
  * Goal Types
- * Financial goal planning and tracking
+ * Financial goal planning and tracking - Matches GoalCard/GoalDashboard/GoalForm interfaces
  */
 
-import { type GoalCategory } from './thread';
+export type GoalCategory = 'retirement' | 'education' | 'home' | 'major_expense' | 'emergency' | 'legacy';
+export type GoalPriority = 'essential' | 'important' | 'aspirational';
+export type GoalStatus = 'on_track' | 'behind' | 'at_risk' | 'achieved';
 
+/**
+ * Core Goal interface - matches backend API and frontend components
+ */
 export interface Goal {
   id: string;
-  userId: string;
-  name: string;
+  title: string;
   category: GoalCategory;
+  priority: GoalPriority;
   targetAmount: number;
-  targetDate: string; // ISO date
-  priority: 'essential' | 'important' | 'aspirational';
-  successThreshold: number; // 0.0-1.0 (minimum acceptable probability)
-  currentFunding: number;
-  percentFunded: number; // 0.0-1.0
-  successProbability: number; // 0.0-1.0
-  requiredMonthlySavings: number;
-  timeline: GoalTimeline;
-  fundingSource?: FundingSource;
-  createdAt: number;
-  updatedAt: number;
+  currentAmount: number;
+  targetDate: string; // ISO date string (YYYY-MM-DD)
+  monthlyContribution?: number;
+  successProbability?: number;
+  status: GoalStatus;
+  description?: string;
 }
 
+// Legacy interfaces for backwards compatibility
 export interface GoalTimeline {
   startDate: string; // ISO date
   targetDate: string; // ISO date
@@ -41,8 +42,6 @@ export interface GoalProjections {
   percentile50: number;
   percentile90: number;
 }
-
-export type GoalStatus = 'on_track' | 'at_risk' | 'off_track' | 'achieved';
 
 export interface GoalProgress {
   goalId: string;
