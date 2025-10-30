@@ -58,5 +58,23 @@ class User(Base, TimestampMixin):
         cascade="all, delete-orphan"
     )
 
+    budget_entries: Mapped[List["BudgetEntry"]] = relationship(
+        "BudgetEntry",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
+    budget_analyses: Mapped[List["BudgetAnalysis"]] = relationship(
+        "BudgetAnalysis",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
+    recurring_transactions: Mapped[List["RecurringTransaction"]] = relationship(
+        "RecurringTransaction",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
     def __repr__(self) -> str:
         return f"<User(id={self.id}, email={self.email})>"
