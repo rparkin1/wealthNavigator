@@ -12,11 +12,14 @@ import { useState } from 'react';
 import { SocialSecurityCalculator } from './SocialSecurityCalculator';
 import { SpendingPatternEditor } from './SpendingPatternEditor';
 import { LongevityConfigurator } from './LongevityConfigurator';
+import { IncomeProjection } from './IncomeProjection';
+import { useIncomeProjection } from '../../hooks/useIncomeProjection';
 import type {
   SocialSecurityResult,
   SpendingPattern,
   LongevityResult,
   LongevityAssumptions,
+  RetirementProjectionRequest,
 } from '../../services/retirementApi';
 
 type TabView = 'overview' | 'social-security' | 'spending' | 'longevity' | 'projections';
@@ -319,6 +322,27 @@ interface ProjectionsTabProps {
 }
 
 function ProjectionsTab({ socialSecurity, spending, longevity }: ProjectionsTabProps) {
+  // Build projection request from configured data
+  const projectionRequest: RetirementProjectionRequest | null =
+    socialSecurity && spending && longevity
+      ? {
+          current_age: 65, // Default - should be from user profile
+          retirement_age: 65,
+          social_security: {
+            primary_insurance_amount: socialSecurity.monthly_benefit * 12,
+            birth_year: new Date().getFullYear() - 65, // Default
+            filing_age: 65,
+            cola_rate: 0.02,
+          },
+          spending_pattern: spending,
+          portfolio_withdrawal_rate: 0.04, // 4% rule
+          initial_portfolio: 1000000, // Default - should be from portfolio data
+          planning_age: longevity.planning_age,
+        }
+      : null;
+
+  const { projections, loading, error } = useIncomeProjection(projectionRequest);
+
   if (!socialSecurity || !spending || !longevity) {
     return (
       <div className="text-center py-12">
@@ -354,22 +378,52 @@ function ProjectionsTab({ socialSecurity, spending, longevity }: ProjectionsTabP
     );
   }
 
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+        <p className="text-gray-600">Generating income projections...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+        <div className="text-red-600 text-2xl mb-2">⚠️</div>
+        <h3 className="font-semibold text-red-900 mb-2">Error Loading Projections</h3>
+        <p className="text-sm text-red-800">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (!projections || projections.length === 0) {
+    return (
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+        <div className="text-yellow-600 text-2xl mb-2">⚠️</div>
+        <h3 className="font-semibold text-yellow-900 mb-2">No Projections Available</h3>
+        <p className="text-sm text-yellow-800">
+          Unable to generate projections with the current configuration.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="bg-green-50 border border-green-200 rounded-lg p-4">
         <p className="text-sm text-green-800">
-          ✓ All components configured! Income projections will be displayed here using the
-          retirement income API.
+          ✓ All components configured! Your comprehensive retirement income projection is shown below.
         </p>
       </div>
 
-      {/* Placeholder for actual projections */}
-      <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-        <p className="text-gray-600">
-          Income projection visualization coming soon. This will integrate with the Monte Carlo
-          simulator.
-        </p>
-      </div>
+      <IncomeProjection projections={projections} showControls={true} />
     </div>
   );
 }
