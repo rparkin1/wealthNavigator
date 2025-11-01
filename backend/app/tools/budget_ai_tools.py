@@ -9,7 +9,13 @@ import re
 from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
 
-from langchain.tools import Tool
+from typing import Callable
+
+# Optional LangChain Tool import; provide a fallback to avoid hard dependency
+try:
+    from langchain.tools import Tool as LC_Tool  # type: ignore
+except Exception:  # pragma: no cover - environment may lack specific LC APIs
+    LC_Tool = None  # type: ignore
 from langchain_anthropic import ChatAnthropic
 
 from app.agents.prompts.budget_extraction import (
@@ -330,7 +336,19 @@ class BudgetAITools:
         return multipliers.get(frequency, 12)
 
 
-def create_budget_ai_tools(llm: Optional[ChatAnthropic] = None) -> List[Tool]:
+class SimpleTool:
+    """Lightweight tool wrapper when LangChain Tool is unavailable."""
+
+    def __init__(self, name: str, description: str, func: Callable[..., Any]):
+        self.name = name
+        self.description = description
+        self.func = func
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:  # parity with LC tools
+        return self.func(*args, **kwargs)
+
+
+def create_budget_ai_tools(llm: Optional[ChatAnthropic] = None) -> List[object]:
     """Create LangChain tools for budget AI operations.
 
     Args:
@@ -341,44 +359,46 @@ def create_budget_ai_tools(llm: Optional[ChatAnthropic] = None) -> List[Tool]:
     """
     budget_tools = BudgetAITools(llm)
 
+    mk = (lambda name, desc, fn: (LC_Tool(name=name, description=desc, func=fn) if LC_Tool else SimpleTool(name, desc, fn)))
+
     return [
-        Tool(
+        mk(
             name="extract_budget_from_conversation",
             description=(
                 "Extract budget entries (income, expenses, savings) from natural language conversation. "
                 "Use this when the user describes their budget in conversational form. "
                 "Input: conversation text. Output: list of extracted budget entries with categories, amounts, and frequencies."
             ),
-            func=lambda text: json.dumps(budget_tools.extract_budget_from_conversation(text), indent=2)
+            fn=lambda text: json.dumps(budget_tools.extract_budget_from_conversation(text), indent=2)
         ),
-        Tool(
+        mk(
             name="categorize_budget_entry",
             description=(
                 "Categorize a budget entry into the appropriate category (housing, food, transportation, etc.). "
                 "Use this when you have an entry description but need to determine its category. "
                 "Input: entry description. Output: category with confidence score."
             ),
-            func=lambda desc: json.dumps(budget_tools.categorize_entry(desc), indent=2)
+            fn=lambda desc: json.dumps(budget_tools.categorize_entry(desc), indent=2)
         ),
-        Tool(
+        mk(
             name="analyze_budget_pattern",
             description=(
                 "Analyze patterns in a budget entry to determine if it's recurring, fixed/variable, and provide optimization suggestions. "
                 "Input: JSON with entry_name, amount, frequency, category. Output: pattern analysis."
             ),
-            func=lambda data: json.dumps(
+            fn=lambda data: json.dumps(
                 budget_tools.analyze_pattern(**json.loads(data)) if isinstance(data, str) else budget_tools.analyze_pattern(**data),
                 indent=2
             )
         ),
-        Tool(
+        mk(
             name="generate_budget_suggestions",
             description=(
                 "Generate intelligent budget suggestions based on user's budget entries. "
                 "Analyzes spending patterns, identifies savings opportunities, and provides actionable recommendations. "
                 "Input: list of budget entries. Output: suggestions with health score and recommendations."
             ),
-            func=lambda entries: json.dumps(
+            fn=lambda entries: json.dumps(
                 budget_tools.generate_smart_suggestions(json.loads(entries) if isinstance(entries, str) else entries),
                 indent=2
             )

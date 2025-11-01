@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import type { BudgetEntry, BudgetCategory, Frequency } from './BudgetForm';
+import type { BudgetEntry, Frequency } from './BudgetForm';
 
 export interface IncomeTrackerProps {
   entries: BudgetEntry[];

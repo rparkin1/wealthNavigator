@@ -16,6 +16,7 @@ import type {
   SocialSecurityResult,
   SpendingPattern,
   LongevityResult,
+  LongevityAssumptions,
 } from '../../services/retirementApi';
 
 type TabView = 'overview' | 'social-security' | 'spending' | 'longevity' | 'projections';
@@ -81,7 +82,7 @@ export function RetirementDashboard() {
           {activeTab === 'social-security' && (
             <div className="card">
               <SocialSecurityCalculator
-                onCalculate={(result) => {
+                onCalculate={(result: SocialSecurityResult) => {
                   setSocialSecurityData(result);
                   console.log('Social Security calculated:', result);
                 }}
@@ -92,8 +93,8 @@ export function RetirementDashboard() {
           {activeTab === 'spending' && (
             <div className="card">
               <SpendingPatternEditor
-                onChange={(pattern) => {
-                  setSpendingPattern(pattern);
+                onChange={(pattern: Record<number, number>) => {
+                  setSpendingPattern({ base_annual_spending: Object.values(pattern)[0] || 0 });
                   console.log('Spending pattern updated:', pattern);
                 }}
                 currentAge={65}
@@ -104,7 +105,7 @@ export function RetirementDashboard() {
           {activeTab === 'longevity' && (
             <div className="card">
               <LongevityConfigurator
-                onChange={(assumptions, result) => {
+                onChange={(_assumptions: LongevityAssumptions, result: LongevityResult) => {
                   setLongevityData(result);
                   console.log('Longevity calculated:', result);
                 }}

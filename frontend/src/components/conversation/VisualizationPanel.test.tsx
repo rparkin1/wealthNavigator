@@ -15,7 +15,7 @@ describe('VisualizationPanel', () => {
         title: 'Test Portfolio',
         data: { Stocks: 60, Bonds: 40 },
         config: {},
-        timestamp: Date.now(),
+        timestamp: new Date().toISOString(),
       },
     ];
 
@@ -33,14 +33,14 @@ describe('VisualizationPanel', () => {
         title: 'Portfolio Allocation',
         data: { Stocks: 60, Bonds: 40 },
         config: {},
-        timestamp: Date.now(),
+        timestamp: new Date().toISOString(),
       },
       {
         type: 'bar_chart',
         title: 'Goal Progress',
         data: { Retirement: 75, Emergency: 100 },
         config: {},
-        timestamp: Date.now(),
+        timestamp: new Date().toISOString(),
       },
     ];
 
@@ -65,7 +65,7 @@ describe('VisualizationPanel', () => {
           Cash: 30,
         },
         config: {},
-        timestamp: Date.now(),
+        timestamp: new Date().toISOString(),
       },
     ];
 
@@ -92,7 +92,7 @@ describe('VisualizationPanel', () => {
           House: 45,
         },
         config: {},
-        timestamp: Date.now(),
+        timestamp: new Date().toISOString(),
       },
     ];
 
@@ -114,7 +114,7 @@ describe('VisualizationPanel', () => {
         title: 'Growth Over Time',
         data: { '2024': 100, '2025': 120, '2026': 150 },
         config: {},
-        timestamp: Date.now(),
+        timestamp: new Date().toISOString(),
       },
     ];
 
@@ -131,7 +131,7 @@ describe('VisualizationPanel', () => {
         title: 'Monte Carlo Results',
         data: {},
         config: {},
-        timestamp: Date.now(),
+        timestamp: new Date().toISOString(),
       },
     ];
 
@@ -151,7 +151,7 @@ describe('VisualizationPanel', () => {
           { Account: 'Savings', Balance: 10000 },
         ],
         config: {},
-        timestamp: Date.now(),
+        timestamp: new Date().toISOString(),
       },
     ];
 
@@ -163,7 +163,7 @@ describe('VisualizationPanel', () => {
   });
 
   it('displays timestamp for visualization', () => {
-    const timestamp = Date.now();
+    const timestamp = new Date().toISOString();
     const visualizations = [
       {
         type: 'pie_chart',

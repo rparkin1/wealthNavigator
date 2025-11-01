@@ -21,7 +21,7 @@ export interface BudgetManagerProps {
 
 type View = 'dashboard' | 'expenses' | 'income' | 'import-export';
 
-export const BudgetManager: React.FC<BudgetManagerProps> = ({ userId }) => {
+export const BudgetManager: React.FC<BudgetManagerProps> = ({ userId: _userId }) => {
   // State
   const [entries, setEntries] = useState<BudgetEntryResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +81,8 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({ userId }) => {
   };
 
   // Save entry (create or update)
-  const handleSaveEntry = async (entry: BudgetEntry) => {
+  const handleSaveEntry = async (entryData: Partial<BudgetEntry>) => {
+    const entry = entryData as BudgetEntry;
     try {
       if (entry.id) {
         // Update existing
@@ -115,20 +116,6 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({ userId }) => {
     }
   };
 
-  // Extract budget from conversation
-  const handleExtractFromConversation = async (conversationText: string) => {
-    try {
-      setLoading(true);
-      const extracted = await budgetApi.extractBudgetFromConversation(conversationText, true);
-      setEntries(prev => [...prev, ...extracted]);
-      alert(`Successfully extracted ${extracted.length} budget entries!`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to extract budget entries');
-      console.error('Error extracting budget:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Loading state
   if (loading && entries.length === 0) {
@@ -395,7 +382,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({ userId }) => {
       {showForm && (
         <BudgetForm
           entry={editingEntry}
-          onSave={handleSaveEntry}
+          onSubmit={handleSaveEntry}
           onCancel={() => {
             setShowForm(false);
             setEditingEntry(null);

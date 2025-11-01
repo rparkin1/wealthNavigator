@@ -18,6 +18,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=r"^https?://localhost(?::\d+)?$",  # dev convenience
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -51,14 +52,18 @@ from app.api.portfolio import router as portfolio_router
 from app.api.budget import router as budget_router
 from app.api.recurring_transactions import router as recurring_router
 from app.api.retirement import router as retirement_router
+from app.api.plaid import router as plaid_router
 
 app.include_router(threads_router, prefix=settings.API_V1_PREFIX)
 app.include_router(chat_router, prefix=f"{settings.API_V1_PREFIX}/chat", tags=["chat"])
 app.include_router(goals_router, prefix=f"{settings.API_V1_PREFIX}/goals", tags=["goals"])
 app.include_router(portfolio_router, prefix=settings.API_V1_PREFIX, tags=["portfolio"])
-app.include_router(budget_router, prefix=f"{settings.API_V1_PREFIX}/budget", tags=["budget"])
-app.include_router(recurring_router, prefix=f"{settings.API_V1_PREFIX}/recurring", tags=["recurring-transactions"])
+# Routers define their own path segments (e.g., "/budget", "/recurring")
+# so we include them under the API v1 prefix only to avoid double-segmentation.
+app.include_router(budget_router, prefix=settings.API_V1_PREFIX, tags=["budget"])
+app.include_router(recurring_router, prefix=settings.API_V1_PREFIX, tags=["recurring-transactions"])
 app.include_router(retirement_router, prefix=f"{settings.API_V1_PREFIX}/retirement", tags=["retirement"])
+app.include_router(plaid_router, prefix=settings.API_V1_PREFIX, tags=["plaid"])
 
 
 if __name__ == "__main__":

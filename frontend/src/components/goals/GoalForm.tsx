@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { Goal, GoalCategory, GoalPriority } from './GoalCard';
+import type { Goal, GoalCategory, GoalPriority } from './GoalCard';
 
 export interface GoalFormProps {
   goal?: Goal | null;
@@ -85,8 +85,8 @@ export function GoalForm({ goal, onSubmit, onCancel, mode = 'create' }: GoalForm
     title: goal?.title || '',
     category: goal?.category || 'retirement',
     priority: goal?.priority || 'important',
-    targetAmount: goal?.targetAmount.toString() || '',
-    currentAmount: goal?.currentAmount.toString() || '0',
+    targetAmount: goal?.targetAmount?.toString() || '',
+    currentAmount: goal?.currentAmount?.toString() || '0',
     targetDate: goal?.targetDate ? new Date(goal.targetDate).toISOString().split('T')[0] : '',
     monthlyContribution: goal?.monthlyContribution?.toString() || '',
     description: goal?.description || '',

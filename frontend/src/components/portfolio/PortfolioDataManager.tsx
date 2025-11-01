@@ -6,8 +6,10 @@
  */
 
 import { useState, useEffect } from 'react';
-import { AccountForm, Account } from './AccountForm';
-import { HoldingForm, Holding } from './HoldingForm';
+import { AccountForm } from './AccountForm';
+import type { Account } from './AccountForm';
+import { HoldingForm } from './HoldingForm';
+import type { Holding } from './HoldingForm';
 import { ImportExportPanel } from './ImportExportPanel';
 
 export interface PortfolioDataManagerProps {
@@ -138,15 +140,6 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
     }
   };
 
-  const handleImport = async (data: any[]) => {
-    // TODO: API call to bulk import
-    console.log('Importing:', data);
-  };
-
-  const handleExport = async (): Promise<any[]> => {
-    // TODO: API call to export
-    return currentView === 'accounts' ? accounts : holdings;
-  };
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-US', {
@@ -415,7 +408,7 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
       {(modalState === 'add-holding' || modalState === 'edit-holding') && (
         <HoldingForm
           holding={editingHolding}
-          accounts={accounts}
+          accounts={accounts.map(a => ({ id: a.id || '', name: a.name, type: a.accountType }))}
           onSubmit={handleSaveHolding}
           onCancel={() => {
             setModalState('closed');

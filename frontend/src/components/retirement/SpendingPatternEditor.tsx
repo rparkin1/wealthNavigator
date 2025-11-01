@@ -54,7 +54,7 @@ export function SpendingPatternEditor({
     description: ''
   });
 
-  const updatePattern = (key: keyof SpendingPattern, value: any) => {
+  const updatePattern = (key: keyof SpendingPattern, value: number | Array<{ year: number; amount: number; description: string }>) => {
     const updated = { ...pattern, [key]: value };
     setPattern(updated);
     onChange(updated);

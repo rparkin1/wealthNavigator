@@ -21,7 +21,7 @@ export const ComprehensiveAnalysis: React.FC<ComprehensiveAnalysisProps> = ({
   const { data, loading, error, analyze } = useComprehensiveAnalysis();
   const [taxRate, setTaxRate] = useState(0.24);
   const [driftThreshold, setDriftThreshold] = useState(5.0);
-  const [selectedAnalyses, setSelectedAnalyses] = useState<AnalysisType[]>([
+  const [selectedAnalyses, setSelectedAnalyses] = useState<Array<typeof AnalysisType[keyof typeof AnalysisType]>>([
     AnalysisType.TAX_LOSS_HARVESTING,
     AnalysisType.REBALANCING,
     AnalysisType.PERFORMANCE,
@@ -39,7 +39,7 @@ export const ComprehensiveAnalysis: React.FC<ComprehensiveAnalysisProps> = ({
     await analyze(request);
   };
 
-  const toggleAnalysis = (type: AnalysisType) => {
+  const toggleAnalysis = (type: typeof AnalysisType[keyof typeof AnalysisType]) => {
     if (selectedAnalyses.includes(type)) {
       setSelectedAnalyses(selectedAnalyses.filter((t) => t !== type));
     } else {
@@ -153,7 +153,10 @@ export const ComprehensiveAnalysis: React.FC<ComprehensiveAnalysisProps> = ({
               max="1"
               step="0.01"
               value={taxRate}
-              onChange={(e) => setTaxRate(parseFloat(e.target.value))}
+              onChange={(e) => {
+                const v = e.currentTarget.valueAsNumber;
+                setTaxRate(Number.isFinite(v) ? v : 0.24);
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <p className="text-xs text-gray-500 mt-1">Enter as decimal (e.g., 0.24 for 24%)</p>
@@ -168,7 +171,10 @@ export const ComprehensiveAnalysis: React.FC<ComprehensiveAnalysisProps> = ({
               max="100"
               step="0.5"
               value={driftThreshold}
-              onChange={(e) => setDriftThreshold(parseFloat(e.target.value))}
+              onChange={(e) => {
+                const v = e.currentTarget.valueAsNumber;
+                setDriftThreshold(Number.isFinite(v) ? v : 5.0);
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>

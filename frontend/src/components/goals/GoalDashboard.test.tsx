@@ -3,9 +3,9 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { GoalDashboard } from './GoalDashboard';
-import { Goal } from './GoalCard';
+import type { Goal } from './GoalCard';
 
 describe('GoalDashboard', () => {
   const mockGoals: Goal[] = [

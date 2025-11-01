@@ -95,7 +95,7 @@ export const RecurringTransactionForm: React.FC<RecurringTransactionFormProps> =
     onSave(formData);
   };
 
-  const handleChange = (field: keyof RecurringTransaction, value: any) => {
+  const handleChange = (field: keyof RecurringTransaction, value: string | number | boolean | undefined) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => {

@@ -6,7 +6,8 @@
  */
 
 import { useState, useMemo } from 'react';
-import { GoalCard, Goal, GoalCategory, GoalPriority, GoalStatus } from './GoalCard';
+import { GoalCard } from './GoalCard';
+import type { Goal, GoalCategory, GoalPriority, GoalStatus } from './GoalCard';
 
 export interface GoalDashboardProps {
   goals: Goal[];

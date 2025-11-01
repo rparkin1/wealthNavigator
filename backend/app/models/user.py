@@ -76,5 +76,29 @@ class User(Base, TimestampMixin):
         cascade="all, delete-orphan"
     )
 
+    plaid_items: Mapped[List["PlaidItem"]] = relationship(
+        "PlaidItem",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
+    plaid_accounts: Mapped[List["PlaidAccount"]] = relationship(
+        "PlaidAccount",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
+    plaid_transactions: Mapped[List["PlaidTransaction"]] = relationship(
+        "PlaidTransaction",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
+    plaid_holdings: Mapped[List["PlaidHolding"]] = relationship(
+        "PlaidHolding",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
     def __repr__(self) -> str:
         return f"<User(id={self.id}, email={self.email})>"

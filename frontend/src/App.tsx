@@ -4,6 +4,8 @@
  */
 
 import { useState, Suspense, lazy } from 'react';
+import ErrorBoundary from './components/common/ErrorBoundary';
+import Breadcrumbs from './components/common/Breadcrumbs';
 import './index.css';
 
 // Lazy load components for better error isolation
@@ -45,7 +47,23 @@ const RetirementDashboard = lazy(() =>
   import('./components/retirement/RetirementDashboard').then(m => ({ default: m.RetirementDashboard }))
 );
 
-type View = 'home' | 'chat' | 'goals' | 'portfolio' | 'portfolio-data' | 'budget' | 'recurring' | 'retirement' | 'data-entry' | 'settings';
+// Plaid Integration
+const PlaidDashboard = lazy(() =>
+  import('./components/plaid/PlaidDashboard').then(m => ({ default: m.PlaidDashboard }))
+);
+
+type View =
+  | 'home'
+  | 'chat'
+  | 'goals'
+  | 'portfolio'
+  | 'portfolio-data'
+  | 'budget'
+  | 'recurring'
+  | 'retirement'
+  | 'plaid'
+  | 'data-entry'
+  | 'settings';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('home');
@@ -58,53 +76,112 @@ function App() {
     switch (currentView) {
       case 'chat':
         return (
-          <Suspense fallback={<LoadingView message="Loading chat interface..." />}>
-            <ChatInterface userId={userId} />
-          </Suspense>
+          <>
+            <div className="px-6 pt-4">
+              <Breadcrumbs items={[{ label: 'Home', onClick: () => setCurrentView('home') }, { label: 'Chat' }]} />
+            </div>
+            <Suspense fallback={<LoadingView message="Loading chat interface..." />}>
+              <ChatInterface userId={userId} />
+            </Suspense>
+          </>
         );
       case 'goals':
         return (
-          <Suspense fallback={<LoadingView message="Loading goals..." />}>
-            <GoalsManager userId={userId} />
-          </Suspense>
+          <>
+            <div className="px-6 pt-4">
+              <Breadcrumbs items={[{ label: 'Home', onClick: () => setCurrentView('home') }, { label: 'Goals' }]} />
+            </div>
+            <ErrorBoundary fallback={<LoadingView message="Loading goals..." />}>
+              <Suspense fallback={<LoadingView message="Loading goals..." />}>
+                <GoalsManager userId={userId} />
+              </Suspense>
+            </ErrorBoundary>
+          </>
         );
       case 'portfolio':
         return (
-          <Suspense fallback={<LoadingView message="Loading portfolio..." />}>
-            <PortfolioView userId={userId} />
-          </Suspense>
+          <>
+            <div className="px-6 pt-4">
+              <Breadcrumbs items={[{ label: 'Home', onClick: () => setCurrentView('home') }, { label: 'Portfolio' }]} />
+            </div>
+            <ErrorBoundary fallback={<LoadingView message="Loading portfolio..." />}>
+              <Suspense fallback={<LoadingView message="Loading portfolio..." />}>
+                <PortfolioView userId={userId} />
+              </Suspense>
+            </ErrorBoundary>
+          </>
         );
       case 'portfolio-data':
         return (
-          <Suspense fallback={<LoadingView message="Loading portfolio data..." />}>
-            <PortfolioDataManager userId={userId} />
-          </Suspense>
+          <>
+            <div className="px-6 pt-4">
+              <Breadcrumbs items={[{ label: 'Home', onClick: () => setCurrentView('home') }, { label: 'Portfolio Data' }]} />
+            </div>
+            <Suspense fallback={<LoadingView message="Loading portfolio data..." />}>
+              <PortfolioDataManager userId={userId} />
+            </Suspense>
+          </>
         );
       case 'budget':
         return (
-          <Suspense fallback={<LoadingView message="Loading budget manager..." />}>
-            <BudgetManager userId={userId} />
-          </Suspense>
+          <>
+            <div className="px-6 pt-4">
+              <Breadcrumbs items={[{ label: 'Home', onClick: () => setCurrentView('home') }, { label: 'Budget' }]} />
+            </div>
+            <Suspense fallback={<LoadingView message="Loading budget manager..." />}>
+              <BudgetManager userId={userId} />
+            </Suspense>
+          </>
         );
       case 'recurring':
         return (
-          <Suspense fallback={<LoadingView message="Loading recurring transactions..." />}>
-            <RecurringTransactionsManager />
-          </Suspense>
+          <>
+            <div className="px-6 pt-4">
+              <Breadcrumbs items={[{ label: 'Home', onClick: () => setCurrentView('home') }, { label: 'Recurring' }]} />
+            </div>
+            <Suspense fallback={<LoadingView message="Loading recurring transactions..." />}>
+              <RecurringTransactionsManager />
+            </Suspense>
+          </>
         );
       case 'data-entry':
-        return <DataEntryView onNavigate={(view) => setCurrentView(view)} />;
+        return (
+          <div className="p-6">
+            <div className="mb-4">
+              <Breadcrumbs items={[{ label: 'Home', onClick: () => setCurrentView('home') }, { label: 'Data Entry' }]} />
+            </div>
+            <DataEntryView onNavigate={(view) => setCurrentView(view)} />
+          </div>
+        );
       case 'retirement':
         return (
-          <Suspense fallback={<LoadingView message="Loading retirement planner..." />}>
-            <RetirementDashboard />
-          </Suspense>
+          <>
+            <div className="px-6 pt-4">
+              <Breadcrumbs items={[{ label: 'Home', onClick: () => setCurrentView('home') }, { label: 'Retirement' }]} />
+            </div>
+            <Suspense fallback={<LoadingView message="Loading retirement planner..." />}>
+              <RetirementDashboard />
+            </Suspense>
+          </>
+        );
+      case 'plaid':
+        return (
+          <ErrorBoundary fallback={<LoadingView message="Loading bank connections..." />}>
+            <Suspense fallback={<LoadingView message="Loading bank connections..." />}>
+              <PlaidDashboard />
+            </Suspense>
+          </ErrorBoundary>
         );
       case 'settings':
         return (
-          <Suspense fallback={<LoadingView message="Loading settings..." />}>
-            <UserSettings userId={userId} />
-          </Suspense>
+          <>
+            <div className="px-6 pt-4">
+              <Breadcrumbs items={[{ label: 'Home', onClick: () => setCurrentView('home') }, { label: 'Settings' }]} />
+            </div>
+            <Suspense fallback={<LoadingView message="Loading settings..." />}>
+              <UserSettings userId={userId} />
+            </Suspense>
+          </>
         );
       case 'home':
       default:
@@ -115,7 +192,7 @@ function App() {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement') ? (
+      {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'budget' || currentView === 'recurring' || currentView === 'plaid' || currentView === 'data-entry') ? (
         sidebarOpen && (
           <aside className="w-64 transition-all duration-300 bg-white border-r border-gray-200 overflow-hidden">
           <div className="p-4">
@@ -213,6 +290,16 @@ function App() {
                 }`}
               >
                 🏖️ Retirement
+              </button>
+              <button
+                onClick={() => setCurrentView('plaid')}
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                  currentView === 'plaid'
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                🏦 Bank Connections
               </button>
             </div>
           </nav>

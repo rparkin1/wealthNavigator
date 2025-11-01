@@ -9,7 +9,14 @@ import { type Goal } from '../types/goal';
 import { type Portfolio, type OptimizationParams, type OptimizationResult } from '../types/portfolio';
 import { type SimulationParams, type SimulationResult } from '../types/simulation';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+function normalizeApiBase(raw: string): string {
+  const stripped = raw.replace(/\/$/, '');
+  return /\/api\/v\d+$/.test(stripped) ? stripped : `${stripped}/api/v1`;
+}
+
+const API_BASE_URL = normalizeApiBase(
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) || 'http://localhost:8000'
+);
 
 class ApiClient {
   private client: AxiosInstance;
@@ -46,6 +53,28 @@ class ApiClient {
         return Promise.reject(error);
       }
     );
+  }
+
+  // ==================== Generic HTTP Methods ====================
+
+  async get<T = any>(url: string, config?: any): Promise<{ data: T }> {
+    return this.client.get<T>(url, config);
+  }
+
+  async post<T = any>(url: string, data?: any, config?: any): Promise<{ data: T }> {
+    return this.client.post<T>(url, data, config);
+  }
+
+  async put<T = any>(url: string, data?: any, config?: any): Promise<{ data: T }> {
+    return this.client.put<T>(url, data, config);
+  }
+
+  async patch<T = any>(url: string, data?: any, config?: any): Promise<{ data: T }> {
+    return this.client.patch<T>(url, data, config);
+  }
+
+  async delete<T = any>(url: string, config?: any): Promise<{ data: T }> {
+    return this.client.delete<T>(url, config);
   }
 
   // ==================== Thread Management ====================

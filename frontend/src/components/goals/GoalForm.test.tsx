@@ -2,10 +2,10 @@
  * GoalForm Component Tests
  */
 
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { GoalForm } from './GoalForm';
-import { Goal } from './GoalCard';
+import type { Goal } from './GoalCard';
 
 describe('GoalForm', () => {
   const mockOnSubmit = vi.fn();

@@ -122,7 +122,10 @@ export const RebalancingDashboard: React.FC<RebalancingDashboardProps> = ({
               max="100"
               step="0.5"
               value={driftThreshold}
-              onChange={(e) => setDriftThreshold(parseFloat(e.target.value))}
+              onChange={(e) => {
+                const v = e.currentTarget.valueAsNumber;
+                setDriftThreshold(Number.isFinite(v) ? v : 5.0);
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -136,7 +139,10 @@ export const RebalancingDashboard: React.FC<RebalancingDashboardProps> = ({
               max="1"
               step="0.01"
               value={taxRate}
-              onChange={(e) => setTaxRate(parseFloat(e.target.value))}
+              onChange={(e) => {
+                const v = e.currentTarget.valueAsNumber;
+                setTaxRate(Number.isFinite(v) ? v : 0.24);
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -149,7 +155,10 @@ export const RebalancingDashboard: React.FC<RebalancingDashboardProps> = ({
               min="0"
               step="1000"
               value={newContributions}
-              onChange={(e) => setNewContributions(parseFloat(e.target.value))}
+              onChange={(e) => {
+                const v = e.currentTarget.valueAsNumber;
+                setNewContributions(Number.isFinite(v) ? v : 0);
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>

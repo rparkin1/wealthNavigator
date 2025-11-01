@@ -6,7 +6,14 @@
 
 import type { BudgetEntry, BudgetCategory, Frequency } from '@/components/budget/BudgetForm';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+function normalizeApiBase(raw: string): string {
+  const stripped = raw.replace(/\/$/, '');
+  return /\/api\/v\d+$/.test(stripped) ? stripped : `${stripped}/api/v1`;
+}
+
+const API_BASE_URL = normalizeApiBase(
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) || 'http://localhost:8000'
+);
 
 // ==================== Types ====================
 
