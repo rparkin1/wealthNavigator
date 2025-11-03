@@ -97,6 +97,22 @@ class ExtractionMethod(str, enum.Enum):
     IMPORT = "import"
 
 
+class TaxTreatment(str, enum.Enum):
+    """Tax treatment for income/investment entries."""
+    ORDINARY_INCOME = "ordinary_income"  # Salary, wages, bonuses, self-employment
+    QUALIFIED_DIVIDENDS = "qualified_dividends"  # Lower tax rate (0%, 15%, 20%)
+    LONG_TERM_CAPITAL_GAINS = "long_term_capital_gains"  # Assets held >1 year
+    SHORT_TERM_CAPITAL_GAINS = "short_term_capital_gains"  # Assets held ≤1 year (ordinary rates)
+    TAX_EXEMPT = "tax_exempt"  # Municipal bond interest, Roth withdrawals
+    TAX_DEFERRED = "tax_deferred"  # Traditional IRA/401k contributions
+    NON_TAXABLE = "non_taxable"  # Return of capital, gifts, inheritances
+    SELF_EMPLOYMENT = "self_employment"  # Subject to SE tax (15.3%)
+    RENTAL_INCOME = "rental_income"  # Passive income with deductions
+    SOCIAL_SECURITY = "social_security"  # Partially taxable (0-85%)
+    PENSION = "pension"  # Ordinary income
+    OTHER = "other"
+
+
 class BudgetEntry(Base):
     """Budget entry model (income, expense, or savings)."""
 
@@ -115,6 +131,11 @@ class BudgetEntry(Base):
     frequency = Column(Enum(Frequency), nullable=False)
     type = Column(Enum(BudgetType), nullable=False, index=True)
     is_fixed = Column(Boolean, default=False, nullable=False)  # Fixed vs variable
+
+    # Tax treatment (REQ-BUD-002: Automatic categorization by tax treatment)
+    tax_treatment = Column(Enum(TaxTreatment), nullable=True, index=True)
+    is_pre_tax = Column(Boolean, default=False, nullable=False)  # Pre-tax deduction (401k, HSA)
+    is_deductible = Column(Boolean, default=False, nullable=False)  # Tax deductible expense
 
     # Optional details
     notes = Column(String(1000), nullable=True)
@@ -157,6 +178,9 @@ class BudgetEntry(Base):
             "frequency": self.frequency.value,
             "type": self.type.value,
             "is_fixed": self.is_fixed,
+            "tax_treatment": self.tax_treatment.value if self.tax_treatment else None,
+            "is_pre_tax": self.is_pre_tax,
+            "is_deductible": self.is_deductible,
             "notes": self.notes,
             "start_date": self.start_date.isoformat() if self.start_date else None,
             "end_date": self.end_date.isoformat() if self.end_date else None,

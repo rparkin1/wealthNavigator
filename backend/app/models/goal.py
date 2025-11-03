@@ -28,6 +28,24 @@ class GoalPriority(str, enum.Enum):
     ASPIRATIONAL = "aspirational"
 
 
+class GoalDependencyType(str, enum.Enum):
+    """Goal dependency relationship types"""
+    SEQUENTIAL = "sequential"  # Goal A must complete before Goal B
+    CONDITIONAL = "conditional"  # If Goal A succeeds, fund Goal B
+    SHARED_RESOURCE = "shared_resource"  # Goals share funding sources
+    MUTUALLY_EXCLUSIVE = "mutually_exclusive"  # Can only achieve one goal
+
+
+class GoalStatus(str, enum.Enum):
+    """Goal lifecycle status"""
+    PLANNING = "planning"  # Not yet active
+    ACTIVE = "active"  # Currently funding
+    ON_HOLD = "on_hold"  # Temporarily paused
+    ACHIEVED = "achieved"  # Target reached
+    ABANDONED = "abandoned"  # User gave up
+    BLOCKED = "blocked"  # Waiting on dependency
+
+
 class Goal(Base, TimestampMixin):
     """Financial goal"""
 
@@ -84,11 +102,54 @@ class Goal(Base, TimestampMixin):
     # Description
     description: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
 
+    # Goal lifecycle status (REQ-GOAL-003: Goal dependencies)
+    status: Mapped[str] = mapped_column(
+        String(20),
+        default="active",
+        nullable=False
+    )
+
+    # Dependency tracking (REQ-GOAL-003: Goal dependencies and relationships)
+    depends_on_goal_id: Mapped[Optional[str]] = mapped_column(
+        String(36),
+        ForeignKey("goals.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True
+    )
+    dependency_type: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+
+    # Shared resource allocation (REQ-GOAL-008: Asset allocation across goals)
+    allocated_accounts: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)  # JSON list of account IDs
+    funding_percentage: Mapped[float] = mapped_column(Float, default=100.0)  # % of available funds allocated
+
+    # Education-specific fields (REQ-GOAL-013: Education funding module)
+    child_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    child_age: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    education_type: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)  # "public", "private", "in_state", "out_state"
+    years_of_support: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # 4, 5, or 6 years
+
+    # Milestones (goal progress tracking)
+    milestones: Mapped[Optional[str]] = mapped_column(String(2000), nullable=True)  # JSON array of milestones
+
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="goals")
 
+    # Self-referential relationship for dependencies
+    depends_on: Mapped[Optional["Goal"]] = relationship(
+        "Goal",
+        remote_side=[id],
+        foreign_keys=[depends_on_goal_id],
+        backref="dependent_goals"
+    )
+
     simulations: Mapped[list["MonteCarloSimulation"]] = relationship(
         "MonteCarloSimulation",
+        back_populates="goal",
+        cascade="all, delete-orphan"
+    )
+
+    life_events: Mapped[list["LifeEvent"]] = relationship(
+        "LifeEvent",
         back_populates="goal",
         cascade="all, delete-orphan"
     )
