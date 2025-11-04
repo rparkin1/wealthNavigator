@@ -142,3 +142,20 @@ export interface SavedScenario extends GoalScenario {
   last_modified?: string;
   notes?: string;
 }
+
+// Explicit type re-exports for Vite/TypeScript compatibility
+export type {
+  BestWorstCaseRequest,
+  BestWorstCaseResponse,
+  GoalScenario,
+  MonteCarloScenarioResult,
+  QuickCompareResponse,
+  QuickCompareScenario,
+  SavedScenario,
+  ScenarioComparisonRequest,
+  ScenarioComparisonResponse,
+  ScenarioCreationRequest,
+  ScenarioFilter,
+  ScenarioProjection,
+  ScenarioUpdateRequest,
+};

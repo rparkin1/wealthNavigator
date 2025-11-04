@@ -165,3 +165,26 @@ export interface TradeoffAnalysis {
   tradeoffs: TradeoffMetric[];
   recommendation: string;
 }
+
+// Explicit type re-exports for Vite/TypeScript compatibility
+export type {
+  AccountAllocation,
+  AccountInfo,
+  AggregateStats,
+  CurrentAllocationResponse,
+  GlidePathProjection,
+  GlidePathResponse,
+  GoalPortfolio,
+  GoalPriorityUpdate,
+  OptimizationRequest,
+  OptimizationResponse,
+  OptimizationSummary,
+  RebalanceRequest,
+  RebalanceResponse,
+  RebalanceTrade,
+  TaxEfficiencyAnalysis,
+  TaxEfficiencyRecommendation,
+  TradeoffAnalysis,
+  TradeoffMetric,
+  TradeSummary,
+};

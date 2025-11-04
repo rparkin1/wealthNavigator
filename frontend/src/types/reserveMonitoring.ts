@@ -106,3 +106,22 @@ export interface ReserveGuidelines {
   best_practices: string[];
   common_mistakes: string[];
 }
+
+// Explicit type re-exports for Vite/TypeScript compatibility
+export type {
+  AlertSeverity,
+  IncomeStability,
+  JobSecurity,
+  ReserveAdequacyRequest,
+  ReserveAdequacyScore,
+  ReserveAlert,
+  ReserveGrowthProjection,
+  ReserveGrowthRequest,
+  ReserveGrowthSimulation,
+  ReserveGuideline,
+  ReserveGuidelines,
+  ReserveMonitoringRequest,
+  ReserveMonitoringResult,
+  ReserveRecommendation,
+  ReserveStatus,
+};

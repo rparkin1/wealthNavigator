@@ -328,3 +328,25 @@ export function getScenarioColor(period: ScenarioPeriod): string {
 export function getScenarioIcon(period: ScenarioPeriod): string {
   return SCENARIO_METADATA[period]?.icon || '📊';
 }
+
+// Explicit type re-exports for Vite/TypeScript compatibility
+export type {
+  ApplyScenarioRequest,
+  AssetStatistics,
+  CompareRequest,
+  HistoricalScenario,
+  HistoricalScenarioSelectorProps,
+  KeyEvent,
+  PeriodReturn,
+  ReturnsData,
+  ScenarioCardProps,
+  ScenarioComparison,
+  ScenarioComparisonProps,
+  ScenarioListItem,
+  ScenarioMetadata,
+  ScenarioPeriod,
+  ScenarioPlayerProps,
+  ScenarioResult,
+  ScenarioStatistics,
+  TrajectoryPoint,
+};

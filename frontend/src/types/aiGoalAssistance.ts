@@ -124,3 +124,19 @@ export interface UserContext {
   monthly_contribution?: number;
   [key: string]: any;
 }
+
+// Explicit type re-exports for Vite/TypeScript compatibility
+export type {
+  AIGoalAssistanceState,
+  AlternativeScenario,
+  ClarifyingQuestion,
+  CostEstimate,
+  EducationalContext,
+  GoalConflict,
+  GoalRecommendations,
+  GoalTemplate,
+  ParsedGoalData,
+  QuickSetupData,
+  TimelineRecommendation,
+  UserContext,
+};

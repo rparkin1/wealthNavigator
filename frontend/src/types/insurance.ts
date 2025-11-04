@@ -261,3 +261,28 @@ export interface LongTermCareForm {
   hasExistingPolicy: boolean;
   existingDailyBenefit: number;
 }
+
+// Explicit type re-exports for Vite/TypeScript compatibility
+export type {
+  DisabilityCoverage,
+  DisabilityCoverageAnalysis,
+  DisabilityCoverageRequest,
+  DisabilityForm,
+  DisabilityRecommendation,
+  InsuranceGap,
+  InsuranceGapAnalysis,
+  InsuranceGapAnalysisRequest,
+  InsuranceOptimizationState,
+  LifeInsuranceAnalysis,
+  LifeInsuranceForm,
+  LifeInsuranceNeedsRequest,
+  LifeInsuranceRecommendation,
+  LongTermCareAnalysis,
+  LongTermCareForm,
+  LongTermCareRequest,
+  LTCCostsResponse,
+  LTCRecommendation,
+  PolicyRecommendation,
+  PolicyType,
+  PolicyTypesResponse,
+};

@@ -82,3 +82,15 @@ export interface MilestoneNotification {
   message: string;
   timestamp: string;
 }
+
+// Explicit type re-exports for Vite/TypeScript compatibility
+export type {
+  Milestone,
+  MilestoneCreationRequest,
+  MilestoneNotification,
+  MilestoneUpdateRequest,
+  OverdueMilestone,
+  ProgressCheckResponse,
+  ProgressMetrics,
+  UpcomingMilestone,
+};

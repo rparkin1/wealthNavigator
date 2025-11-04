@@ -12,3 +12,9 @@ export interface ErrorResponse {
   error: string;
   detail: string;
 }
+
+// Explicit type re-exports for Vite/TypeScript compatibility
+export type {
+  ApiResponse,
+  ErrorResponse,
+};

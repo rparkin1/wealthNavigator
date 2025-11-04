@@ -157,3 +157,21 @@ export interface SyncResponse {
   modified: number;
   removed: number;
 }
+
+// Explicit type re-exports for Vite/TypeScript compatibility
+export type {
+  AccountsGetResponse,
+  HoldingsListResponse,
+  ItemsListResponse,
+  LinkTokenCreateRequest,
+  PlaidAccount,
+  PlaidHolding,
+  PlaidItem,
+  PlaidLinkTokenResponse,
+  PlaidTransaction,
+  PublicTokenExchangeRequest,
+  SyncResponse,
+  TransactionsListRequest,
+  TransactionsListResponse,
+  TransactionUpdateRequest,
+};
