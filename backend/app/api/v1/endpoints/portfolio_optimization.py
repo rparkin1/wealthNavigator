@@ -43,6 +43,26 @@ from app.services.portfolio.ai_explanations import (
     PortfolioExplanation,
     ExplanationType
 )
+from app.services.portfolio.factor_attribution_service import (
+    FamaFrenchFactorService,
+    FactorModel,
+    FamaFrenchResult
+)
+from app.services.portfolio.capm_service import (
+    CAPMService,
+    CAPMMetrics,
+    CAPMPortfolioAnalysis,
+    SecurityMarketLine
+)
+from app.models.portfolio_api import (
+    FactorAnalysisRequest,
+    FactorAnalysisResponse,
+    CAPMAnalysisRequest,
+    CAPMMetricsResponse,
+    CAPMPortfolioRequest,
+    CAPMPortfolioResponse,
+    SecurityMarketLineResponse
+)
 
 router = APIRouter(prefix="/portfolio-optimization", tags=["Portfolio Optimization"])
 
@@ -854,8 +874,361 @@ async def get_service_summary():
             "insights_alerts": {
                 "insight_categories": ["diversification", "risk", "performance", "tax", "esg", "goals"],
                 "alert_types": 9
+            },
+            "advanced_analysis": {
+                "fama_french_factor_attribution": True,
+                "capm_integration": True,
+                "factor_models": ["three_factor", "five_factor"],
+                "security_market_line": True
             }
         },
-        "api_endpoints": 11,
+        "api_endpoints": 15,
         "documentation": "/docs"
     }
+
+
+# ==================== Factor Attribution Endpoints (Fama-French) ====================
+
+@router.post(
+    "/factor-attribution",
+    response_model=FactorAnalysisResponse,
+    summary="Fama-French Factor Attribution Analysis",
+    description="Perform factor-based performance attribution using Fama-French 3-factor or 5-factor models.",
+    response_description="Complete factor analysis with exposures, attribution, and recommendations",
+    tags=["Advanced Analysis"]
+)
+async def analyze_factor_attribution(request: FactorAnalysisRequest):
+    """
+    Perform Fama-French factor attribution analysis.
+
+    **REQ-PORT-013:** Factor-based attribution (Fama-French factors)
+    **PRD Section 4:** Portfolio Optimization Engine
+
+    ## Factor Models
+    - **3-Factor Model**: Market (MKT-RF), Size (SMB), Value (HML)
+    - **5-Factor Model**: + Profitability (RMW), Investment (CMA)
+
+    ## Request Body
+    - **portfolio_returns** (required): Historical returns (daily or monthly)
+    - **market_returns** (required): Market benchmark returns (same frequency)
+    - **factor_returns** (optional): Custom factor returns. If not provided, uses historical averages
+    - **model_type** (optional): "three_factor" or "five_factor" (default: three_factor)
+    - **frequency** (optional): "daily" or "monthly" (default: daily)
+
+    ## Returns
+    - **alpha**: Excess return not explained by factors (annualized)
+    - **exposures**: Factor loadings (betas) with statistical significance
+    - **attributions**: Performance contribution by each factor
+    - **r_squared**: How much variance is explained by the model
+    - **interpretation**: Plain language explanation
+    - **recommendations**: Actionable portfolio recommendations
+
+    ## Example Request
+    ```json
+    {
+      "portfolio_returns": [0.001, 0.002, -0.001, 0.003, 0.0015],
+      "market_returns": [0.0008, 0.0015, -0.0012, 0.0025, 0.0012],
+      "model_type": "three_factor",
+      "frequency": "daily"
+    }
+    ```
+
+    ## Interpretation
+    - **Positive Alpha**: Portfolio outperforming after accounting for factor exposures
+    - **High R²**: Returns well-explained by factors
+    - **Significant Factor Betas**: Identifiable factor tilts (size, value, etc.)
+    """
+    service = FamaFrenchFactorService()
+
+    # Convert model type to enum
+    model = FactorModel.THREE_FACTOR if request.model_type == "three_factor" else FactorModel.FIVE_FACTOR
+
+    result = service.analyze_portfolio(
+        portfolio_returns=request.portfolio_returns,
+        market_returns=request.market_returns,
+        factor_returns=request.factor_returns,
+        model_type=model,
+        frequency=request.frequency
+    )
+
+    # Convert to response model
+    exposures = [
+        {"factor_name": e.factor_name, "beta": e.beta, "t_statistic": e.t_statistic,
+         "p_value": e.p_value, "is_significant": e.is_significant}
+        for e in result.exposures
+    ]
+
+    attributions = [
+        {"factor_name": a.factor_name, "beta": a.beta, "factor_return": a.factor_return,
+         "contribution": a.contribution, "contribution_pct": a.contribution_pct}
+        for a in result.attributions
+    ]
+
+    return FactorAnalysisResponse(
+        model_type=result.model_type.value,
+        alpha=result.alpha,
+        alpha_annual=result.alpha_annual,
+        alpha_t_stat=result.alpha_t_stat,
+        alpha_p_value=result.alpha_p_value,
+        r_squared=result.r_squared,
+        adjusted_r_squared=result.adjusted_r_squared,
+        exposures=exposures,
+        attributions=attributions,
+        total_return=result.total_return,
+        explained_return=result.explained_return,
+        residual_return=result.residual_return,
+        interpretation=result.interpretation,
+        recommendations=result.recommendations
+    )
+
+
+# ==================== CAPM Analysis Endpoints ====================
+
+@router.post(
+    "/capm-analysis",
+    response_model=CAPMMetricsResponse,
+    summary="CAPM Analysis for Security or Portfolio",
+    description="Analyze security or portfolio using Capital Asset Pricing Model (CAPM).",
+    response_description="Complete CAPM metrics with alpha, beta, and investment recommendation",
+    tags=["Advanced Analysis"]
+)
+async def analyze_capm(request: CAPMAnalysisRequest):
+    """
+    Perform CAPM (Capital Asset Pricing Model) analysis.
+
+    **REQ-PORT-014:** Capital Asset Pricing Model (CAPM) integration
+    **PRD Section 4:** Portfolio Optimization Engine
+
+    ## CAPM Formula
+    E(R) = Rf + β(Rm - Rf)
+
+    Where:
+    - E(R) = Expected return
+    - Rf = Risk-free rate
+    - β = Beta (systematic risk)
+    - Rm = Market return
+
+    ## Request Body
+    - **security_returns** (required): Historical returns for security/portfolio
+    - **market_returns** (required): Market benchmark returns
+    - **frequency** (optional): "daily" or "monthly" (default: daily)
+    - **security_name** (optional): Name for reporting (default: "Security")
+
+    ## Returns
+    - **beta**: Systematic risk measure with 95% confidence interval
+    - **alpha**: Jensen's alpha (actual return - expected return)
+    - **expected_return**: CAPM expected return
+    - **actual_return**: Historical actual return
+    - **position**: Over/under/fair valued relative to Security Market Line
+    - **information_ratio**: Alpha / Tracking Error
+    - **treynor_ratio**: Risk-adjusted return per unit of systematic risk
+    - **investment_recommendation**: BUY/SELL/HOLD recommendation
+
+    ## Example Request
+    ```json
+    {
+      "security_returns": [0.001, 0.002, -0.001, 0.003],
+      "market_returns": [0.0008, 0.0015, -0.0012, 0.0025],
+      "frequency": "daily",
+      "security_name": "My Portfolio"
+    }
+    ```
+
+    ## Interpretation
+    - **Beta > 1**: More volatile than market
+    - **Beta < 1**: Less volatile than market
+    - **Positive Alpha**: Outperforming CAPM expectations
+    - **Undervalued**: Trades above Security Market Line
+    """
+    service = CAPMService()
+
+    result = service.analyze_security(
+        security_returns=request.security_returns,
+        market_returns=request.market_returns,
+        frequency=request.frequency,
+        security_name=request.security_name
+    )
+
+    return CAPMMetricsResponse(
+        risk_free_rate=result.risk_free_rate,
+        market_return=result.market_return,
+        market_premium=result.market_premium,
+        beta=result.beta,
+        beta_confidence_interval=result.beta_confidence_interval,
+        expected_return=result.expected_return,
+        actual_return=result.actual_return,
+        alpha=result.alpha,
+        r_squared=result.r_squared,
+        correlation=result.correlation,
+        tracking_error=result.tracking_error,
+        information_ratio=result.information_ratio,
+        treynor_ratio=result.treynor_ratio,
+        position=result.position.value,
+        distance_from_sml=result.distance_from_sml,
+        interpretation=result.interpretation,
+        investment_recommendation=result.investment_recommendation
+    )
+
+
+@router.post(
+    "/capm-portfolio",
+    response_model=CAPMPortfolioResponse,
+    summary="CAPM Portfolio Analysis",
+    description="Comprehensive CAPM analysis for portfolio with individual holdings breakdown.",
+    response_description="Portfolio CAPM metrics with holdings analysis and recommendations",
+    tags=["Advanced Analysis"]
+)
+async def analyze_capm_portfolio(request: CAPMPortfolioRequest):
+    """
+    Perform comprehensive CAPM analysis for portfolio.
+
+    **REQ-PORT-014:** Capital Asset Pricing Model (CAPM) integration
+
+    ## Request Body
+    - **portfolio_returns** (required): Portfolio returns
+    - **market_returns** (required): Market returns
+    - **holdings** (optional): Individual holdings with returns for detailed analysis
+    - **frequency** (optional): "daily" or "monthly"
+
+    ## Returns
+    - **portfolio_metrics**: Complete CAPM analysis for portfolio
+    - **holdings_analysis**: Individual holding CAPM metrics (if provided)
+    - **systematic_risk_pct**: Percent of risk from market (R²)
+    - **idiosyncratic_risk_pct**: Percent of risk from specific factors (1 - R²)
+    - **recommendations**: Actionable portfolio recommendations
+    - **risk_warnings**: Critical risk alerts
+
+    ## Example Request
+    ```json
+    {
+      "portfolio_returns": [0.001, 0.002, -0.001, 0.003],
+      "market_returns": [0.0008, 0.0015, -0.0012, 0.0025],
+      "holdings": [
+        {
+          "name": "SPY",
+          "weight": 0.60,
+          "returns": [0.0008, 0.0015, -0.0012, 0.0025]
+        },
+        {
+          "name": "BND",
+          "weight": 0.40,
+          "returns": [0.0002, 0.0003, -0.0001, 0.0004]
+        }
+      ],
+      "frequency": "daily"
+    }
+    ```
+
+    ## Use Cases
+    - Portfolio evaluation vs. market expectations
+    - Security selection analysis (over/undervalued holdings)
+    - Risk decomposition (systematic vs. idiosyncratic)
+    - Performance attribution
+    """
+    service = CAPMService()
+
+    result = service.analyze_portfolio(
+        portfolio_returns=request.portfolio_returns,
+        market_returns=request.market_returns,
+        holdings=request.holdings,
+        frequency=request.frequency
+    )
+
+    # Convert portfolio metrics to response model
+    pm = result.portfolio_metrics
+    portfolio_metrics = CAPMMetricsResponse(
+        risk_free_rate=pm.risk_free_rate,
+        market_return=pm.market_return,
+        market_premium=pm.market_premium,
+        beta=pm.beta,
+        beta_confidence_interval=pm.beta_confidence_interval,
+        expected_return=pm.expected_return,
+        actual_return=pm.actual_return,
+        alpha=pm.alpha,
+        r_squared=pm.r_squared,
+        correlation=pm.correlation,
+        tracking_error=pm.tracking_error,
+        information_ratio=pm.information_ratio,
+        treynor_ratio=pm.treynor_ratio,
+        position=pm.position.value,
+        distance_from_sml=pm.distance_from_sml,
+        interpretation=pm.interpretation,
+        investment_recommendation=pm.investment_recommendation
+    )
+
+    return CAPMPortfolioResponse(
+        portfolio_metrics=portfolio_metrics,
+        holdings_analysis=result.holdings_analysis,
+        systematic_risk_pct=result.systematic_risk_pct,
+        idiosyncratic_risk_pct=result.idiosyncratic_risk_pct,
+        recommendations=result.recommendations,
+        risk_warnings=result.risk_warnings
+    )
+
+
+@router.get(
+    "/security-market-line",
+    response_model=SecurityMarketLineResponse,
+    summary="Security Market Line (SML) Data",
+    description="Generate Security Market Line data for visualization.",
+    response_description="SML points and sample efficient portfolios",
+    tags=["Advanced Analysis"]
+)
+async def get_security_market_line(
+    beta_min: float = 0.0,
+    beta_max: float = 2.0,
+    num_points: int = 50
+):
+    """
+    Generate Security Market Line for visualization.
+
+    **REQ-PORT-014:** CAPM integration - Security Market Line
+
+    ## Query Parameters
+    - **beta_min** (optional): Minimum beta for SML (default: 0.0)
+    - **beta_max** (optional): Maximum beta for SML (default: 2.0)
+    - **num_points** (optional): Number of points on line (default: 50)
+
+    ## Returns
+    - **points**: Array of {beta, expected_return} coordinates for plotting
+    - **portfolio_point**: Current portfolio position on SML
+    - **efficient_portfolios**: Sample efficient portfolios at different risk levels
+
+    ## Use Cases
+    - Visualize risk-return tradeoff
+    - Identify over/undervalued securities
+    - Compare portfolio to market expectations
+    - Portfolio construction guidance
+
+    ## Example Response
+    ```json
+    {
+      "points": [
+        {"beta": 0.0, "expected_return": 0.04},
+        {"beta": 0.5, "expected_return": 0.07},
+        {"beta": 1.0, "expected_return": 0.10},
+        {"beta": 1.5, "expected_return": 0.13}
+      ],
+      "portfolio_point": {"beta": 1.0, "expected_return": 0.10},
+      "efficient_portfolios": [
+        {"name": "Conservative", "beta": 0.5, "expected_return": 0.07},
+        {"name": "Moderate", "beta": 0.8, "expected_return": 0.088},
+        {"name": "Balanced", "beta": 1.0, "expected_return": 0.10},
+        {"name": "Growth", "beta": 1.2, "expected_return": 0.112},
+        {"name": "Aggressive", "beta": 1.5, "expected_return": 0.13}
+      ]
+    }
+    ```
+    """
+    service = CAPMService()
+
+    result = service.generate_security_market_line(
+        beta_range=(beta_min, beta_max),
+        num_points=num_points
+    )
+
+    return SecurityMarketLineResponse(
+        points=result.points,
+        portfolio_point=result.portfolio_point,
+        efficient_portfolios=result.efficient_portfolios
+    )

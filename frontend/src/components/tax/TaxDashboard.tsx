@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { TLHReporting } from './TLHReporting';
 import { TaxExport } from './TaxExport';
 import { MunicipalBondOptimizer } from './MunicipalBondOptimizer';
+import { RothConversionAnalysis } from './RothConversionAnalysis';
 import { useTaxManagement } from '@/hooks/useTaxManagement';
 import { formatCurrency } from '@/services/taxManagementApi';
 
@@ -21,7 +22,7 @@ interface TaxDashboardProps {
   annualIncome?: number;
 }
 
-type TabType = 'overview' | 'tlh' | 'export' | 'muni';
+type TabType = 'overview' | 'tlh' | 'export' | 'muni' | 'roth';
 
 // ==================== Component ====================
 
@@ -41,6 +42,7 @@ export const TaxDashboard: React.FC<TaxDashboardProps> = ({
     { id: 'tlh' as TabType, label: 'Tax-Loss Harvesting', icon: '📉' },
     { id: 'export' as TabType, label: 'Tax Export', icon: '📄' },
     { id: 'muni' as TabType, label: 'Municipal Bonds', icon: '🏛️' },
+    { id: 'roth' as TabType, label: 'Roth Conversion', icon: '💰' },
   ];
 
   // Calculate tax alpha on mount
@@ -216,12 +218,32 @@ export const TaxDashboard: React.FC<TaxDashboardProps> = ({
                   Optimize Allocation →
                 </div>
               </div>
+
+              {/* Roth Conversion */}
+              <div
+                className="bg-white border rounded-lg p-6 cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => setSelectedTab('roth')}
+              >
+                <h3 className="text-lg font-semibold mb-3">💰 Roth Conversion</h3>
+                <p className="text-gray-600 mb-4">
+                  Backdoor Roth analysis for high-income earners and tax optimization
+                </p>
+                <div className="bg-orange-50 p-4 rounded">
+                  <div className="text-sm text-gray-600">Strategy Type</div>
+                  <div className="text-lg font-bold text-orange-700">
+                    Backdoor Roth / Traditional
+                  </div>
+                </div>
+                <div className="mt-3 text-sm text-blue-600 font-medium">
+                  Analyze Conversion →
+                </div>
+              </div>
             </div>
 
             {/* Quick Actions */}
             <div className="bg-white border rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <button
                   onClick={() => setSelectedTab('tlh')}
                   className="p-4 border rounded hover:border-blue-500 hover:bg-blue-50 transition-colors text-left"
@@ -249,6 +271,15 @@ export const TaxDashboard: React.FC<TaxDashboardProps> = ({
                     State-specific recommendations
                   </div>
                 </button>
+                <button
+                  onClick={() => setSelectedTab('roth')}
+                  className="p-4 border rounded hover:border-orange-500 hover:bg-orange-50 transition-colors text-left"
+                >
+                  <div className="font-medium">💰 Analyze Roth Conversion</div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    Backdoor Roth & tax impact
+                  </div>
+                </button>
               </div>
             </div>
 
@@ -272,6 +303,9 @@ export const TaxDashboard: React.FC<TaxDashboardProps> = ({
                 </li>
                 <li>
                   Review asset location annually during rebalancing
+                </li>
+                <li>
+                  💰 <strong>NEW!</strong> Consider Backdoor Roth conversions if income exceeds direct Roth IRA limits
                 </li>
               </ul>
             </div>
@@ -300,6 +334,10 @@ export const TaxDashboard: React.FC<TaxDashboardProps> = ({
             federalTaxRate={federalTaxRate}
             annualIncome={annualIncome}
           />
+        )}
+
+        {selectedTab === 'roth' && (
+          <RothConversionAnalysis />
         )}
       </div>
     </div>

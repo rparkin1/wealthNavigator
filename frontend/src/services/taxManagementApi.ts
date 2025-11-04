@@ -55,6 +55,52 @@ export interface TaxAlphaResult {
   strategies_active: number;
 }
 
+export interface RothConversionEligibility {
+  is_eligible: boolean;
+  strategy: string;
+  max_conversion_amount: number;
+  income_limit_status: string;
+  pro_rata_rule_applies: boolean;
+  pro_rata_taxable_percentage: number;
+  eligibility_notes: string[];
+  warnings: string[];
+}
+
+export interface ConversionTaxImpact {
+  conversion_amount: number;
+  ordinary_income_tax: number;
+  state_tax: number;
+  total_tax_due: number;
+  effective_tax_rate: number;
+  marginal_rate_impact: boolean;
+  next_bracket_threshold: number;
+  recommended_max_conversion: number;
+  tax_bracket_before: string;
+  tax_bracket_after: string;
+}
+
+export interface RothConversionRecommendation {
+  recommended: boolean;
+  strategy: string;
+  timing: string;
+  recommended_amount: number;
+  estimated_tax: number;
+  break_even_years: number;
+  lifetime_benefit: number;
+  reasoning: string[];
+  action_steps: string[];
+  considerations: string[];
+}
+
+export interface BackdoorRothAnalysis {
+  eligibility: RothConversionEligibility;
+  tax_impact: ConversionTaxImpact;
+  recommendation: RothConversionRecommendation;
+  current_year_contribution_limit: number;
+  remaining_contribution_room: number;
+  five_year_rule_date: string | null;
+}
+
 export interface StateTaxRates {
   all_rates: Record<string, { rate: number; formatted: string }>;
   high_tax_states: Record<string, any>;
@@ -302,5 +348,56 @@ export function buildExampleMuniRequest() {
     in_state_yield: 0.035,
     out_of_state_yield: 0.038,
     taxable_yield: 0.045,
+  };
+}
+
+/**
+ * Analyze Roth conversion opportunity
+ */
+export async function analyzeRothConversion(params: {
+  age: number;
+  income: number;
+  filing_status: 'single' | 'married_joint' | 'married_separate';
+  traditional_ira_balance: number;
+  traditional_ira_basis: number;
+  roth_ira_balance: number;
+  retirement_age: number;
+  current_marginal_rate: number;
+  expected_retirement_rate: number;
+  state_tax_rate?: number;
+  current_year_contributions?: number;
+  proposed_conversion_amount?: number;
+}): Promise<BackdoorRothAnalysis> {
+  const response = await fetch(`${API_BASE_URL}${API_PREFIX}/roth-conversion/analyze`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to analyze Roth conversion');
+  }
+
+  return response.json();
+}
+
+/**
+ * Build example Roth conversion request
+ */
+export function buildExampleRothConversionRequest() {
+  return {
+    age: 35,
+    income: 175000,
+    filing_status: 'married_joint' as const,
+    traditional_ira_balance: 50000,
+    traditional_ira_basis: 7000,
+    roth_ira_balance: 25000,
+    retirement_age: 65,
+    current_marginal_rate: 0.24,
+    expected_retirement_rate: 0.22,
+    state_tax_rate: 0.05,
+    current_year_contributions: 0,
+    proposed_conversion_amount: undefined,
   };
 }

@@ -18,6 +18,13 @@ from app.services.tax_management_service import (
     TaxExportResult,
     MunicipalBondRecommendation
 )
+from app.services.roth_conversion_service import (
+    RothConversionService,
+    BackdoorRothAnalysis,
+    RothConversionEligibility,
+    ConversionTaxImpact,
+    RothConversionRecommendation
+)
 
 router = APIRouter(prefix="/tax-management", tags=["Tax Management"])
 
@@ -56,6 +63,22 @@ class TaxAlphaRequest(BaseModel):
     tlh_benefit: float = Field(ge=0, default=0)
     withdrawal_benefit: float = Field(ge=0, default=0)
     muni_benefit: float = Field(ge=0, default=0)
+
+
+class RothConversionRequest(BaseModel):
+    """Backdoor Roth conversion analysis request"""
+    age: int = Field(ge=18, le=100, description="Current age")
+    income: float = Field(gt=0, description="Modified Adjusted Gross Income (MAGI)")
+    filing_status: str = Field(description="Tax filing status: single, married_joint, married_separate")
+    traditional_ira_balance: float = Field(ge=0, description="Traditional IRA balance")
+    traditional_ira_basis: float = Field(ge=0, description="Non-deductible contributions (basis)")
+    roth_ira_balance: float = Field(ge=0, description="Current Roth IRA balance")
+    retirement_age: int = Field(ge=50, le=80, description="Expected retirement age")
+    current_marginal_rate: float = Field(ge=0, le=1, description="Current marginal tax rate")
+    expected_retirement_rate: float = Field(ge=0, le=1, description="Expected retirement tax rate")
+    state_tax_rate: float = Field(ge=0, le=0.15, default=0.05, description="State tax rate")
+    current_year_contributions: float = Field(ge=0, default=0, description="IRA contributions this year")
+    proposed_conversion_amount: Optional[float] = Field(None, description="Proposed conversion amount")
 
 
 # ==================== Endpoints ====================
@@ -407,6 +430,124 @@ async def health_check():
     }
 
 
+@router.post(
+    "/roth-conversion/analyze",
+    response_model=BackdoorRothAnalysis,
+    summary="Analyze Roth conversion opportunity",
+    description="Comprehensive backdoor Roth conversion analysis with eligibility, tax impact, and recommendations"
+)
+async def analyze_roth_conversion(request: RothConversionRequest):
+    """
+    Analyze Roth conversion opportunity (including Backdoor Roth).
+
+    **REQ-TAX-007:** Roth conversion opportunity identification
+    **Phase 3 Feature:** Backdoor Roth conversion automation
+
+    ## Features
+    - Eligibility check (income limits, pro-rata rule)
+    - Tax impact calculation (federal + state)
+    - Strategic recommendation with timing
+    - Break-even analysis
+    - Lifetime benefit estimation
+    - Action steps and considerations
+
+    ## Strategies Analyzed
+    - **Traditional Conversion:** Traditional IRA → Roth IRA
+    - **Backdoor Roth:** Non-deductible IRA → Roth IRA (high income)
+    - **Mega Backdoor:** After-tax 401(k) → Roth (employer plan)
+    - **Partial Conversion:** Convert portion to manage tax brackets
+
+    ## Example Request
+    ```json
+    {
+      "age": 35,
+      "income": 175000,
+      "filing_status": "married_joint",
+      "traditional_ira_balance": 50000,
+      "traditional_ira_basis": 7000,
+      "roth_ira_balance": 25000,
+      "retirement_age": 65,
+      "current_marginal_rate": 0.24,
+      "expected_retirement_rate": 0.22,
+      "state_tax_rate": 0.05,
+      "current_year_contributions": 0,
+      "proposed_conversion_amount": null
+    }
+    ```
+
+    ## Example Response
+    ```json
+    {
+      "eligibility": {
+        "is_eligible": true,
+        "strategy": "backdoor",
+        "max_conversion_amount": 7000,
+        "income_limit_status": "within_limit",
+        "pro_rata_rule_applies": true,
+        "pro_rata_taxable_percentage": 86.0
+      },
+      "tax_impact": {
+        "conversion_amount": 7000,
+        "ordinary_income_tax": 1440,
+        "state_tax": 350,
+        "total_tax_due": 1790,
+        "effective_tax_rate": 0.256
+      },
+      "recommendation": {
+        "recommended": true,
+        "strategy": "backdoor",
+        "timing": "immediate",
+        "recommended_amount": 7000,
+        "estimated_tax": 1790,
+        "break_even_years": 3.2,
+        "lifetime_benefit": 18500
+      }
+    }
+    ```
+
+    ## Key Concepts
+
+    ### Backdoor Roth
+    Allows high-income earners to contribute to Roth IRA indirectly:
+    1. Contribute to traditional IRA (non-deductible)
+    2. Immediately convert to Roth IRA
+    3. Pay taxes only on earnings between contribution and conversion
+
+    ### Pro-Rata Rule
+    If you have existing pre-tax IRA balances, conversions are taxed proportionally:
+    - Total IRA: $100,000 (pre-tax: $93,000, basis: $7,000)
+    - Convert: $7,000
+    - Taxable: $7,000 × (93,000/100,000) = $6,510 (93%)
+
+    ### Five-Year Rule
+    Converted amounts become penalty-free:
+    - After 5 years from January 1 of conversion year
+    - AND age 59½ or qualified exception
+    """
+    try:
+        service = RothConversionService()
+
+        result = service.analyze_backdoor_roth(
+            age=request.age,
+            income=request.income,
+            filing_status=request.filing_status,
+            traditional_ira_balance=request.traditional_ira_balance,
+            traditional_ira_basis=request.traditional_ira_basis,
+            roth_ira_balance=request.roth_ira_balance,
+            retirement_age=request.retirement_age,
+            current_marginal_rate=request.current_marginal_rate,
+            expected_retirement_rate=request.expected_retirement_rate,
+            state_tax_rate=request.state_tax_rate,
+            current_year_contributions=request.current_year_contributions,
+            proposed_conversion_amount=request.proposed_conversion_amount,
+        )
+
+        return result
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get(
     "/summary",
     summary="Service summary",
@@ -423,7 +564,8 @@ async def service_summary():
             "Municipal Bond Optimization (REQ-TAX-014)",
             "Asset Location Optimization (REQ-TAX-001-003)",
             "Withdrawal Strategy Optimization (REQ-TAX-007-009)",
-            "Tax Reporting (REQ-TAX-010, 012)"
+            "Tax Reporting (REQ-TAX-010, 012)",
+            "Backdoor Roth Conversion Analysis (REQ-TAX-007, Phase 3)"
         ],
         "export_formats": [
             "CSV (generic)",
@@ -432,7 +574,7 @@ async def service_summary():
             "TaxACT",
             "H&R Block"
         ],
-        "api_endpoints": 7,
+        "api_endpoints": 8,
         "state_tax_rates": 50,
-        "optimization_strategies": 4
+        "optimization_strategies": 5
     }
