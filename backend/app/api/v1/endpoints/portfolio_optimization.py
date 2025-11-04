@@ -64,7 +64,7 @@ from app.models.portfolio_api import (
     SecurityMarketLineResponse
 )
 
-router = APIRouter(prefix="/portfolio-optimization", tags=["Portfolio Optimization"])
+router = APIRouter(tags=["Portfolio Optimization"])
 
 
 # ==================== Request/Response Models ====================

@@ -16,7 +16,7 @@ from datetime import datetime
 
 from ....services.estate.estate_planning_service import EstatePlanningService
 
-router = APIRouter(prefix="/api/v1/estate-planning", tags=["estate_planning"])
+router = APIRouter(prefix="/estate-planning", tags=["estate_planning"])
 
 
 # Request/Response Models

@@ -30,7 +30,7 @@ from app.services.risk.hedging_education import (
     HedgingEducationTopic
 )
 
-router = APIRouter(prefix="/risk-management", tags=["Risk Management"])
+router = APIRouter(tags=["Risk Management"])
 
 
 # ==================== Request/Response Models ====================
