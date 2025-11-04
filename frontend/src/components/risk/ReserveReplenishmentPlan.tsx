@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { ReserveRecommendation } from '../../types/reserveMonitoring';
+import type { ReserveRecommendation } from '../../types/reserveMonitoring';
 
 export interface ReserveReplenishmentPlanProps {
   currentReserves: number;

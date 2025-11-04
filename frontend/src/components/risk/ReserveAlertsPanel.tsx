@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { ReserveAlert } from '../../types/reserveMonitoring';
+import type { ReserveAlert } from '../../types/reserveMonitoring';
 
 export interface ReserveAlertsPanelProps {
   alerts: ReserveAlert[];

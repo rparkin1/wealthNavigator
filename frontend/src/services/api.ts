@@ -4,10 +4,22 @@
  */
 
 import axios, { type AxiosInstance, AxiosError } from 'axios';
-import { type Thread, type ThreadListItem } from '../types/thread';
-import { type Goal } from '../types/goal';
-import { type Portfolio, type OptimizationParams, type OptimizationResult } from '../types/portfolio';
-import { type SimulationParams, type SimulationResult } from '../types/simulation';
+import type {
+  type Thread,
+  type ThreadListItem
+} from '../types/thread';
+import type {
+  type Goal
+} from '../types/goal';
+import type {
+  type Portfolio,
+  type OptimizationParams,
+  type OptimizationResult
+} from '../types/portfolio';
+import type {
+  type SimulationParams,
+  type SimulationResult
+} from '../types/simulation';
 
 function normalizeApiBase(raw: string): string {
   const stripped = raw.replace(/\/$/, '');
