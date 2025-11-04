@@ -10,6 +10,8 @@ import {
   formatPercentage,
   getStrategyIcon,
   buildExampleHedgingRequest,
+} from '../../services/riskManagementApi';
+import type {
   HedgingStrategy,
 } from '../../services/riskManagementApi';
 

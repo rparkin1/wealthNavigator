@@ -670,3 +670,32 @@ export function getConcentrationRiskColor(level: string): string {
   };
   return colors[level] || '#6b7280';
 }
+
+// Explicit type re-exports for Vite/TypeScript compatibility
+export type {
+  // Risk Management Types
+  HealthCheckResponse,
+  ServiceSummaryResponse,
+  RiskAssessmentRequest,
+  RiskAssessmentResult,
+  RiskMetrics,
+  StressTestRequest,
+  StressTestResult,
+  StressTestingSuite,
+  HedgingRequest,
+  HedgingStrategy,
+  HedgingRecommendation,
+  MonteCarloStressRequest,
+  MonteCarloStressResult,
+  StressScenario,
+  StressScenariosResponse,
+  // Diversification Types
+  HoldingInfo,
+  DiversificationMetrics,
+  ConcentrationRisk,
+  DiversificationRecommendation,
+  DiversificationAnalysisResult,
+  DiversificationAnalysisRequest,
+  SimplifiedHoldingRequest,
+  SimplifiedDiversificationRequest,
+};
