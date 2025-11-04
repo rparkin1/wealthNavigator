@@ -303,10 +303,10 @@ class BudgetAITools:
         """
         text_lower = text.lower()
 
-        if any(word in text_lower for word in ["week", "weekly", "per week"]):
-            return "weekly"
-        elif any(word in text_lower for word in ["biweekly", "bi-weekly", "every two weeks", "every other week"]):
+        if any(word in text_lower for word in ["biweekly", "bi-weekly", "every two weeks", "every other week"]):
             return "biweekly"
+        elif any(word in text_lower for word in ["week", "weekly", "per week"]):
+            return "weekly"
         elif any(word in text_lower for word in ["month", "monthly", "per month"]):
             return "monthly"
         elif any(word in text_lower for word in ["quarter", "quarterly", "every 3 months"]):

@@ -67,6 +67,7 @@ from app.api.v1.endpoints.portfolio_optimization import router as portfolio_opti
 from app.api.v1.endpoints.risk_management import router as risk_management_router
 from app.api.v1.endpoints.reserve_monitoring import router as reserve_monitoring_router
 from app.api.v1.endpoints.tax_management import router as tax_management_router
+from app.api.v1.endpoints.estate_planning import router as estate_planning_router
 
 app.include_router(threads_router, prefix=settings.API_V1_PREFIX)
 app.include_router(chat_router, prefix=f"{settings.API_V1_PREFIX}/chat", tags=["chat"])
@@ -100,6 +101,9 @@ app.include_router(reserve_monitoring_router, prefix=settings.API_V1_PREFIX, tag
 
 # Tax Management v1 endpoints
 app.include_router(tax_management_router, prefix=settings.API_V1_PREFIX, tags=["tax-management"])
+
+# Estate Planning v1 endpoints
+app.include_router(estate_planning_router, prefix=settings.API_V1_PREFIX, tags=["estate-planning"])
 
 # Section 6: What-If Analysis & Scenario Planning - NEW!
 from app.api.v1 import life_events, historical_scenarios
