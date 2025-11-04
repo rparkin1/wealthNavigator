@@ -14,6 +14,8 @@ import {
   buildExampleStressRequest,
 } from '../../services/riskManagementApi';
 import { DiversificationDashboard } from './DiversificationDashboard';
+import { DiversificationAnalysisDashboard } from './DiversificationAnalysisDashboard';
+import { HedgingStrategyDashboard } from '../hedging/HedgingStrategyDashboard';
 
 export interface RiskDashboardProps {
   portfolioValue: number;
@@ -43,7 +45,7 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
     loadStressScenarios,
   } = useRiskManagement();
 
-  const [selectedTab, setSelectedTab] = useState<'risk' | 'stress' | 'scenarios' | 'diversification'>('risk');
+  const [selectedTab, setSelectedTab] = useState<'risk' | 'stress' | 'scenarios' | 'diversification' | 'hedging'>('risk');
   const [selectedScenarios, setSelectedScenarios] = useState<string[]>([
     '2008_financial_crisis',
     '2020_covid_crash',
@@ -129,7 +131,7 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
-          {(['risk', 'stress', 'scenarios', 'diversification'] as const).map((tab) => (
+          {(['risk', 'stress', 'scenarios', 'diversification', 'hedging'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setSelectedTab(tab)}
@@ -148,6 +150,7 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
               {tab === 'stress' && '⚡ Stress Testing'}
               {tab === 'scenarios' && '🎯 Scenarios'}
               {tab === 'diversification' && '🌐 Diversification'}
+              {tab === 'hedging' && '🛡️ Hedging'}
             </button>
           ))}
         </div>
@@ -680,8 +683,38 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
 
         {/* Diversification Tab (REQ-RISK-008, 009, 010) */}
         {selectedTab === 'diversification' && (
-          <DiversificationDashboard
+          <div style={{ padding: '24px' }}>
+            <DiversificationAnalysisDashboard
+              portfolioValue={portfolioValue}
+              holdings={Object.entries(allocation).map(([assetClass, weight]) => ({
+                symbol: assetClass,
+                name: assetClass.replace(/_/g, ' '),
+                value: portfolioValue * weight,
+                weight: weight,
+                asset_class: assetClass,
+                sector: undefined,
+                industry: undefined,
+                geography: undefined,
+                manager: undefined,
+              }))}
+              onAnalysisComplete={(analysis) => {
+                console.log('Diversification analysis complete:', analysis);
+              }}
+            />
+          </div>
+        )}
+
+        {/* Hedging Tab (REQ-RISK-004, 005, 006, 007) */}
+        {selectedTab === 'hedging' && riskResult && (
+          <HedgingStrategyDashboard
             portfolioValue={portfolioValue}
+            allocation={allocation}
+            riskMetrics={{
+              annual_volatility: volatility,
+              beta: riskResult.metrics.beta,
+              max_drawdown: riskResult.metrics.max_drawdown,
+              risk_level: riskResult.metrics.risk_level,
+            }}
           />
         )}
       </div>

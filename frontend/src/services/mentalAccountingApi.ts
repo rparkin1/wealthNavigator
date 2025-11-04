@@ -1,0 +1,199 @@
+/**
+ * Mental Accounting API Service
+ *
+ * API client for REQ-GOAL-009: Mental account buckets
+ */
+
+import type {
+  MentalAccountBucket,
+  AllMentalAccountsResponse,
+  CreateBucketRequest,
+  AllocateAccountRequest,
+  AccountAllocation,
+  RebalancingAnalysis,
+  AnalyzeRebalancingRequest,
+  GrowthProjection,
+  ProjectGrowthRequest,
+  MentalAccountingDashboard,
+} from '../types/mentalAccounting';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+/**
+ * Create a mental account bucket for a goal
+ */
+export async function createMentalAccountBucket(
+  request: CreateBucketRequest
+): Promise<MentalAccountBucket> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/mental-accounting/create-bucket`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(request),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to create mental account bucket');
+  }
+
+  return response.json();
+}
+
+/**
+ * Get all mental account buckets for a user
+ */
+export async function getAllMentalAccounts(
+  userId: string,
+  expectedReturn: number = 0.07,
+  returnVolatility: number = 0.15
+): Promise<AllMentalAccountsResponse> {
+  const params = new URLSearchParams({
+    expected_return: expectedReturn.toString(),
+    return_volatility: returnVolatility.toString(),
+  });
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/mental-accounting/users/${userId}/all-buckets?${params}`,
+    {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get mental accounts');
+  }
+
+  return response.json();
+}
+
+/**
+ * Get mental account bucket for a specific goal
+ */
+export async function getGoalMentalAccount(
+  goalId: string,
+  expectedReturn: number = 0.07,
+  returnVolatility: number = 0.15
+): Promise<MentalAccountBucket> {
+  const params = new URLSearchParams({
+    expected_return: expectedReturn.toString(),
+    return_volatility: returnVolatility.toString(),
+  });
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/mental-accounting/${goalId}/bucket?${params}`,
+    {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get goal mental account');
+  }
+
+  return response.json();
+}
+
+/**
+ * Allocate an account (or portion) to a specific goal
+ */
+export async function allocateAccountToGoal(
+  request: AllocateAccountRequest
+): Promise<AccountAllocation> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/mental-accounting/allocate-account`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(request),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to allocate account to goal');
+  }
+
+  return response.json();
+}
+
+/**
+ * Analyze rebalancing needs across mental accounts
+ */
+export async function analyzeRebalancingNeeds(
+  request: AnalyzeRebalancingRequest
+): Promise<RebalancingAnalysis> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/mental-accounting/analyze-rebalancing`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(request),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to analyze rebalancing needs');
+  }
+
+  return response.json();
+}
+
+/**
+ * Project mental account growth over time
+ */
+export async function projectMentalAccountGrowth(
+  request: ProjectGrowthRequest
+): Promise<GrowthProjection> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/mental-accounting/project-growth`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(request),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to project growth');
+  }
+
+  return response.json();
+}
+
+/**
+ * Get comprehensive mental accounting dashboard
+ */
+export async function getMentalAccountingDashboard(
+  userId: string
+): Promise<MentalAccountingDashboard> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/mental-accounting/dashboard?user_id=${userId}`,
+    {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get dashboard');
+  }
+
+  return response.json();
+}

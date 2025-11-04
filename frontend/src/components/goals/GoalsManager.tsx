@@ -19,6 +19,7 @@ import { MentalAccountBuckets } from './MentalAccountBuckets';
 import { BucketAllocationEditor } from './BucketAllocationEditor';
 import { FundingWaterfallChart } from './FundingWaterfallChart';
 import { BucketRebalancer } from './BucketRebalancer';
+import { GoalFundingCalculator } from './GoalFundingCalculator';
 import type { Goal } from './GoalCard';
 import type { UserContext } from '../../types/aiGoalAssistance';
 import type { GoalDependency } from '../../types/goalDependencies';
@@ -61,6 +62,10 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
   const [selectedGoalForMentalAccounting, setSelectedGoalForMentalAccounting] = useState<Goal | null>(null);
   const [mentalAccountBuckets, setMentalAccountBuckets] = useState<MentalAccountBucket[]>([]);
   const [totalPortfolioValue, setTotalPortfolioValue] = useState<number>(100000); // TODO: Get from actual accounts
+
+  // Goal Funding modal
+  const [showGoalFundingCalculator, setShowGoalFundingCalculator] = useState(false);
+  const [selectedGoalForFunding, setSelectedGoalForFunding] = useState<Goal | null>(null);
 
   // Default user context if not provided
   const defaultUserContext: UserContext = userContext || {
@@ -394,6 +399,27 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
             </button>
           </div>
         )}
+
+        {/* Goal Funding Row */}
+        {goals.length > 0 && (
+          <div className="flex gap-2 pl-4 border-l-2 border-green-300">
+            <span className="text-sm font-medium text-gray-600 self-center mr-2">Goal Funding:</span>
+            {goals.map((goal) => (
+              <div key={goal.id} className="relative group">
+                <button
+                  onClick={() => {
+                    setSelectedGoalForFunding(goal);
+                    setShowGoalFundingCalculator(true);
+                  }}
+                  className="px-3 py-1.5 bg-green-50 border border-green-200 text-green-700 rounded-md text-sm font-medium hover:bg-green-100 hover:border-green-300 transition-colors flex items-center gap-2"
+                >
+                  <span>💰</span>
+                  <span>{goal.title}</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Goal Dashboard */}
@@ -673,6 +699,37 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
                 onRebalanceComplete={() => {
                   loadMentalAccounts();
                   setShowBucketRebalancer(false);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Goal Funding Calculator Modal */}
+      {showGoalFundingCalculator && selectedGoalForFunding && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-auto">
+            <div className="p-6">
+              <GoalFundingCalculator
+                goalId={selectedGoalForFunding.id}
+                initialTargetAmount={selectedGoalForFunding.targetAmount}
+                initialCurrentAmount={selectedGoalForFunding.currentAmount || 0}
+                initialMonthlyContribution={selectedGoalForFunding.monthlyContribution || 0}
+                initialYearsToGoal={
+                  selectedGoalForFunding.targetDate
+                    ? Math.max(
+                        1,
+                        Math.round(
+                          (new Date(selectedGoalForFunding.targetDate).getTime() - Date.now()) /
+                            (1000 * 60 * 60 * 24 * 365)
+                        )
+                      )
+                    : 20
+                }
+                onClose={() => {
+                  setShowGoalFundingCalculator(false);
+                  setSelectedGoalForFunding(null);
                 }}
               />
             </div>

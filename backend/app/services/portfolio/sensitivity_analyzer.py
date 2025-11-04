@@ -273,3 +273,123 @@ class SensitivityAnalyzer:
             goal.life_expectancy = int(value)
         elif variable == 'target_amount':
             goal.target_amount = value
+
+    async def break_even_analysis(
+        self,
+        goal: Goal,
+        variable1: str,
+        variable2: str,
+        target_probability: float = 0.90,
+        grid_size: int = 20,
+        iterations_per_point: int = 500,
+    ) -> Dict[str, Any]:
+        """
+        Calculate break-even frontier between two variables.
+
+        Args:
+            goal: Base goal configuration
+            variable1: First variable (typically cost/risk)
+            variable2: Second variable (typically return/contribution)
+            target_probability: Target success probability for break-even
+            grid_size: Grid resolution for analysis
+            iterations_per_point: Monte Carlo iterations per point
+
+        Returns:
+            Dict with break-even curve data and analysis
+        """
+
+        base_value1 = self._get_variable_value(goal, variable1)
+        base_value2 = self._get_variable_value(goal, variable2)
+
+        # Test ranges: ±30% for comprehensive break-even analysis
+        test_values1 = np.linspace(
+            base_value1 * 0.7,
+            base_value1 * 1.3,
+            grid_size
+        )
+
+        break_even_points = []
+
+        # For each value of variable1, find break-even value of variable2
+        for val1 in test_values1:
+            # Binary search for break-even value
+            min_val2 = base_value2 * 0.5
+            max_val2 = base_value2 * 2.0
+            tolerance = base_value2 * 0.01
+
+            while max_val2 - min_val2 > tolerance:
+                mid_val2 = (min_val2 + max_val2) / 2
+
+                test_goal = goal.copy()
+                self._set_variable_value(test_goal, variable1, val1)
+                self._set_variable_value(test_goal, variable2, mid_val2)
+
+                result = self.mc_engine.run_simulation(
+                    goal=test_goal,
+                    iterations=iterations_per_point,
+                )
+
+                if result.success_probability >= target_probability:
+                    max_val2 = mid_val2
+                else:
+                    min_val2 = mid_val2
+
+            break_even_val2 = (min_val2 + max_val2) / 2
+            break_even_points.append({
+                variable1: float(val1),
+                variable2: float(break_even_val2),
+            })
+
+        # Calculate current position relative to break-even curve
+        current_delta = self._calculate_break_even_delta(
+            goal=goal,
+            variable1=variable1,
+            variable2=variable2,
+            break_even_points=break_even_points,
+            base_value1=base_value1,
+            base_value2=base_value2,
+        )
+
+        return {
+            'variable1': variable1,
+            'variable2': variable2,
+            'break_even_curve': break_even_points,
+            'current_value1': base_value1,
+            'current_value2': base_value2,
+            'target_probability': target_probability,
+            'current_delta': current_delta,
+            'analysis_type': 'break_even',
+        }
+
+    def _calculate_break_even_delta(
+        self,
+        goal: Goal,
+        variable1: str,
+        variable2: str,
+        break_even_points: List[Dict],
+        base_value1: float,
+        base_value2: float,
+    ) -> Dict[str, Any]:
+        """Calculate how far current position is from break-even curve"""
+
+        # Find closest point on break-even curve
+        closest_point = min(
+            break_even_points,
+            key=lambda p: abs(p[variable1] - base_value1)
+        )
+
+        required_value2 = closest_point[variable2]
+        delta = base_value2 - required_value2
+        delta_percentage = (delta / required_value2) * 100 if required_value2 != 0 else 0
+
+        # Determine if current position is above or below break-even
+        above_break_even = base_value2 >= required_value2
+
+        return {
+            'required_value': required_value2,
+            'current_value': base_value2,
+            'delta': delta,
+            'delta_percentage': delta_percentage,
+            'above_break_even': above_break_even,
+            'status': 'safe' if above_break_even else 'at_risk',
+        }
