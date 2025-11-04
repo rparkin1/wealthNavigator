@@ -41,5 +41,8 @@ coverage/
 .swarm/
 *.tmp
 
+# Claude Flow
+.claude-flow/
+
 # Development documentation
 development_docs/
