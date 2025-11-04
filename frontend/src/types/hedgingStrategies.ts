@@ -76,3 +76,14 @@ export interface HedgingEducationContent {
   quick_reference: Record<string, string>;
   glossary: Record<string, string>;
 }
+
+// Explicit type re-exports for Vite/TypeScript compatibility
+export type {
+  HedgingStrategyType,
+  HedgingStrategy,
+  HedgingObjectives,
+  HedgingRecommendation,
+  HedgingRequest,
+  HedgingEducationTopic,
+  HedgingEducationContent,
+};

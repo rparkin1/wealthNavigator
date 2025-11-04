@@ -3,7 +3,7 @@
  * API client for hedging strategy recommendations and education
  */
 
-import {
+import type {
   HedgingRecommendation,
   HedgingRequest,
   HedgingEducationContent,
