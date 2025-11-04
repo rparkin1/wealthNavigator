@@ -13,6 +13,7 @@ import {
   buildExampleRiskRequest,
   buildExampleStressRequest,
 } from '../../services/riskManagementApi';
+import { DiversificationDashboard } from './DiversificationDashboard';
 
 export interface RiskDashboardProps {
   portfolioValue: number;
@@ -42,7 +43,7 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
     loadStressScenarios,
   } = useRiskManagement();
 
-  const [selectedTab, setSelectedTab] = useState<'risk' | 'stress' | 'scenarios'>('risk');
+  const [selectedTab, setSelectedTab] = useState<'risk' | 'stress' | 'scenarios' | 'diversification'>('risk');
   const [selectedScenarios, setSelectedScenarios] = useState<string[]>([
     '2008_financial_crisis',
     '2020_covid_crash',
@@ -128,7 +129,7 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
-          {(['risk', 'stress', 'scenarios'] as const).map((tab) => (
+          {(['risk', 'stress', 'scenarios', 'diversification'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setSelectedTab(tab)}
@@ -146,6 +147,7 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
               {tab === 'risk' && '📊 Risk Assessment'}
               {tab === 'stress' && '⚡ Stress Testing'}
               {tab === 'scenarios' && '🎯 Scenarios'}
+              {tab === 'diversification' && '🌐 Diversification'}
             </button>
           ))}
         </div>
@@ -674,6 +676,13 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
               </div>
             )}
           </div>
+        )}
+
+        {/* Diversification Tab (REQ-RISK-008, 009, 010) */}
+        {selectedTab === 'diversification' && (
+          <DiversificationDashboard
+            portfolioValue={portfolioValue}
+          />
         )}
       </div>
     </div>

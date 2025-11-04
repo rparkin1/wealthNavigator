@@ -78,6 +78,14 @@ const CustomScenarioBuilder = lazy(() =>
   import('./components/scenarios/CustomScenarioBuilder').then(m => ({ default: m.CustomScenarioBuilder }))
 );
 
+// Education Funding (Section 2.5)
+const EducationFundingDashboard = lazy(() =>
+  import('./components/education/EducationFundingDashboard').then(m => ({ default: m.EducationFundingDashboard }))
+);
+const Plan529Calculator = lazy(() =>
+  import('./components/education/Plan529Calculator').then(m => ({ default: m.Plan529Calculator }))
+);
+
 type View =
   | 'home'
   | 'chat'
@@ -87,6 +95,8 @@ type View =
   | 'budget'
   | 'recurring'
   | 'retirement'
+  | 'education'
+  | '529-calculator'
   | 'plaid'
   | 'data-entry'
   | 'settings'
@@ -193,6 +203,38 @@ function App() {
             </Suspense>
           </>
         );
+      case 'education':
+        return (
+          <>
+            <div className="px-6 pt-4">
+              <Breadcrumbs items={[{ label: 'Home', onClick: () => setCurrentView('home') }, { label: 'Education Funding' }]} />
+            </div>
+            <ErrorBoundary fallback={<LoadingView message="Loading education planning..." />}>
+              <Suspense fallback={<LoadingView message="Loading education planning..." />}>
+                <EducationFundingDashboard userId={userId} />
+              </Suspense>
+            </ErrorBoundary>
+          </>
+        );
+      case '529-calculator':
+        return (
+          <>
+            <div className="px-6 pt-4">
+              <Breadcrumbs
+                items={[
+                  { label: 'Home', onClick: () => setCurrentView('home') },
+                  { label: 'Education Funding', onClick: () => setCurrentView('education') },
+                  { label: '529 Calculator' }
+                ]}
+              />
+            </div>
+            <ErrorBoundary fallback={<LoadingView message="Loading 529 calculator..." />}>
+              <Suspense fallback={<LoadingView message="Loading 529 calculator..." />}>
+                <Plan529Calculator />
+              </Suspense>
+            </ErrorBoundary>
+          </>
+        );
       case 'plaid':
         return (
           <ErrorBoundary fallback={<LoadingView message="Loading bank connections..." />}>
@@ -248,7 +290,7 @@ function App() {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'budget' || currentView === 'recurring' || currentView === 'plaid' || currentView === 'data-entry' || currentView === 'what-if' || currentView === 'life-events' || currentView === 'scenarios') ? (
+      {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'education' || currentView === '529-calculator' || currentView === 'budget' || currentView === 'recurring' || currentView === 'plaid' || currentView === 'data-entry' || currentView === 'what-if' || currentView === 'life-events' || currentView === 'scenarios') ? (
         sidebarOpen && (
           <aside className="w-64 transition-all duration-300 bg-white border-r border-gray-200 overflow-hidden">
           <div className="p-4">
@@ -346,6 +388,16 @@ function App() {
                 }`}
               >
                 🏖️ Retirement
+              </button>
+              <button
+                onClick={() => setCurrentView('education')}
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                  currentView === 'education' || currentView === '529-calculator'
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                🎓 Education Funding
               </button>
               <button
                 onClick={() => setCurrentView('plaid')}

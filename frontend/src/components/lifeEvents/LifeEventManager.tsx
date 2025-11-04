@@ -67,7 +67,9 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
     loadEvents();
   }, [goalId, filterType, filterEnabled]);
 
-  const loadEvents = async () => {
+  const getUserId = () => localStorage.getItem('user_id') || 'test-user-123';
+
+  const loadEvents = async (): Promise<LifeEvent[]> => {
     setLoading(true);
     setError(null);
 
@@ -77,7 +79,11 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
       if (filterType) params.append('event_type', filterType);
       if (filterEnabled !== null) params.append('enabled_only', String(filterEnabled));
 
-      const response = await fetch(`/api/v1/life-events/events?${params}`);
+      const response = await fetch(`/api/v1/life-events/events?${params}`, {
+        headers: {
+          'X-User-Id': getUserId(),
+        },
+      });
       if (!response.ok) throw new Error(`Failed to load life events (HTTP ${response.status})`);
 
       const contentType = response.headers.get('content-type') || '';
@@ -87,8 +93,10 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
       }
       const data = await response.json();
       setEvents(data);
+      return data;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
+      return [];
     } finally {
       setLoading(false);
     }
@@ -110,6 +118,9 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
     try {
       const response = await fetch(`/api/v1/life-events/events/${eventId}`, {
         method: 'DELETE',
+        headers: {
+          'X-User-Id': getUserId(),
+        },
       });
 
       if (!response.ok) throw new Error('Failed to delete event');
@@ -124,6 +135,9 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
     try {
       const response = await fetch(`/api/v1/life-events/events/${eventId}/toggle`, {
         method: 'POST',
+        headers: {
+          'X-User-Id': getUserId(),
+        },
       });
 
       if (!response.ok) throw new Error('Failed to toggle event');
@@ -143,7 +157,7 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
     try {
       const response = await fetch(`/api/v1/life-events/events/${event.id}/simulate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-User-Id': getUserId() },
         body: JSON.stringify({
           goal_id: event.goal_id,
           iterations: 5000,
@@ -152,18 +166,45 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
 
       if (!response.ok) throw new Error('Simulation failed');
 
-      await loadEvents();
-      setSelectedEvent(events.find(e => e.id === event.id) || null);
+      const updated = await loadEvents();
+      setSelectedEvent(updated.find(e => e.id === event.id) || null);
       setShowComparison(true);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Simulation failed');
     }
   };
 
-  const handleFormClose = async (saved: boolean) => {
+  const handleFormClose = async (saved?: boolean) => {
     setShowForm(false);
     setSelectedEvent(null);
     if (saved) await loadEvents();
+  };
+
+  const handleFormSave = async (data: any) => {
+    try {
+      if (selectedEvent) {
+        // Update existing event
+        const response = await fetch(`/api/v1/life-events/events/${selectedEvent.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'X-User-Id': getUserId() },
+          body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error('Failed to update event');
+      } else {
+        // Create new event
+        const payload = { ...data, goal_id: goalId };
+        const response = await fetch(`/api/v1/life-events/events`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-User-Id': getUserId() },
+          body: JSON.stringify(payload),
+        });
+        if (!response.ok) throw new Error('Failed to create event');
+      }
+      await loadEvents();
+      handleFormClose(true);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to save event');
+    }
   };
 
   const filteredEvents = events.filter(event => {
@@ -275,7 +316,20 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
 
       {/* Content */}
       {viewMode === 'timeline' ? (
-        <LifeEventTimeline events={filteredEvents} onEventClick={handleEdit} />
+        <LifeEventTimeline
+          events={filteredEvents.map(e => ({
+            id: e.id,
+            name: e.name,
+            year: e.start_year,
+            duration: e.duration_years,
+            type: e.event_type,
+            enabled: e.enabled,
+          }))}
+          onEventClick={(id) => {
+            const ev = events.find(e => e.id === id);
+            if (ev) handleEdit(ev);
+          }}
+        />
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {filteredEvents.length === 0 ? (
@@ -429,9 +483,9 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
       {/* Modals */}
       {showForm && (
         <LifeEventForm
-          event={selectedEvent}
-          goalId={goalId}
-          onClose={handleFormClose}
+          onClose={() => handleFormClose(false)}
+          onSave={handleFormSave}
+          initialData={selectedEvent || undefined}
         />
       )}
 

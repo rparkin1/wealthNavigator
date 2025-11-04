@@ -454,3 +454,219 @@ export function buildExampleMonteCarloRequest(): MonteCarloStressRequest {
     confidence_level: 0.05,
   };
 }
+
+// ==================== Diversification Analysis (REQ-RISK-008, 009, 010) ====================
+
+export interface HoldingInfo {
+  symbol: string;
+  name: string;
+  value: number;
+  weight: number;
+  asset_class: string;
+  sector?: string;
+  industry?: string;
+  geography?: string;
+  manager?: string;
+}
+
+export interface DiversificationMetrics {
+  total_holdings: number;
+  effective_holdings: number;
+  top_1_concentration: number;
+  top_5_concentration: number;
+  top_10_concentration: number;
+  herfindahl_index: number;
+  asset_class_count: number;
+  sector_count: number;
+  industry_count: number;
+  geography_count: number;
+  manager_count: number;
+  effective_asset_classes: number;
+  effective_sectors: number;
+  effective_industries: number;
+  effective_geographies: number;
+  diversification_score: number;
+  diversification_level: 'poor' | 'fair' | 'good' | 'excellent';
+}
+
+export interface ConcentrationRisk {
+  risk_type: 'security' | 'sector' | 'industry' | 'geography' | 'asset_class' | 'manager';
+  risk_level: 'low' | 'medium' | 'high' | 'critical';
+  concentration_pct: number;
+  details: string;
+  affected_holdings: string[];
+}
+
+export interface DiversificationRecommendation {
+  recommendation_type: 'reallocation' | 'addition' | 'reduction';
+  priority: 'high' | 'medium' | 'low';
+  description: string;
+  suggested_action: string;
+  expected_impact: string;
+  alternative_investments: string[];
+}
+
+export interface DiversificationAnalysisResult {
+  portfolio_value: number;
+  metrics: DiversificationMetrics;
+  concentration_risks: ConcentrationRisk[];
+  recommendations: DiversificationRecommendation[];
+  asset_class_breakdown: Record<string, number>;
+  sector_breakdown: Record<string, number>;
+  industry_breakdown: Record<string, number>;
+  geography_breakdown: Record<string, number>;
+  manager_breakdown: Record<string, number>;
+  top_10_holdings: HoldingInfo[];
+}
+
+export interface DiversificationAnalysisRequest {
+  portfolio_value: number;
+  holdings: HoldingInfo[];
+}
+
+export interface SimplifiedHoldingRequest {
+  symbol: string;
+  name: string;
+  value: number;
+  asset_class: string;
+  sector?: string;
+  industry?: string;
+  geography?: string;
+  manager?: string;
+}
+
+export interface SimplifiedDiversificationRequest {
+  holdings: SimplifiedHoldingRequest[];
+}
+
+/**
+ * Analyze portfolio diversification
+ * REQ-RISK-008: Diversification metrics
+ * REQ-RISK-009: Concentration risk identification
+ * REQ-RISK-010: Diversification recommendations
+ */
+export async function analyzeDiversification(
+  request: DiversificationAnalysisRequest
+): Promise<DiversificationAnalysisResult> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/diversification/analyze`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to analyze diversification');
+  }
+
+  return response.json();
+}
+
+/**
+ * Analyze diversification with simplified input (auto-calculate weights)
+ */
+export async function analyzeDiversificationSimple(
+  request: SimplifiedDiversificationRequest
+): Promise<DiversificationAnalysisResult> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/diversification/analyze-simple`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to analyze diversification');
+  }
+
+  return response.json();
+}
+
+/**
+ * Get example diversification analysis
+ */
+export async function getExampleDiversificationAnalysis(): Promise<DiversificationAnalysisResult> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/diversification/example`, {
+    method: 'GET',
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get example diversification analysis');
+  }
+
+  return response.json();
+}
+
+/**
+ * Get concentration risk thresholds
+ */
+export async function getConcentrationThresholds(): Promise<Record<string, any>> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/diversification/thresholds`, {
+    method: 'GET',
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get concentration thresholds');
+  }
+
+  return response.json();
+}
+
+/**
+ * Get diversification recommendations only (faster endpoint)
+ */
+export async function getDiversificationRecommendations(
+  request: DiversificationAnalysisRequest
+): Promise<{
+  recommendations: DiversificationRecommendation[];
+  concentration_risks: ConcentrationRisk[];
+  diversification_score: number;
+  diversification_level: string;
+}> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/diversification/recommendations-only`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get diversification recommendations');
+  }
+
+  return response.json();
+}
+
+/**
+ * Get diversification level color
+ */
+export function getDiversificationLevelColor(level: string): string {
+  const colors: Record<string, string> = {
+    excellent: '#22c55e',
+    good: '#84cc16',
+    fair: '#eab308',
+    poor: '#ef4444',
+  };
+  return colors[level] || '#6b7280';
+}
+
+/**
+ * Get concentration risk color
+ */
+export function getConcentrationRiskColor(level: string): string {
+  const colors: Record<string, string> = {
+    low: '#22c55e',
+    medium: '#eab308',
+    high: '#f97316',
+    critical: '#ef4444',
+  };
+  return colors[level] || '#6b7280';
+}

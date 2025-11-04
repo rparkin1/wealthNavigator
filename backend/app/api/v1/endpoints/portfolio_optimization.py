@@ -38,6 +38,11 @@ from app.services.portfolio.portfolio_insights import (
     PortfolioInsight,
     PortfolioAlert
 )
+from app.services.portfolio.ai_explanations import (
+    AIExplanationsService,
+    PortfolioExplanation,
+    ExplanationType
+)
 
 router = APIRouter(prefix="/portfolio-optimization", tags=["Portfolio Optimization"])
 
@@ -654,6 +659,149 @@ async def generate_portfolio_alerts(request: AlertsRequest):
     return alerts
 
 
+# ==================== AI Explanations Endpoints (REQ-PORT-010) ====================
+
+@router.post("/explain-allocation", response_model=PortfolioExplanation)
+async def explain_portfolio_allocation(
+    allocation: Dict[str, float],
+    user_profile: Dict
+):
+    """
+    Get AI-powered explanation of portfolio allocation.
+
+    REQ-PORT-010: Explaining allocations in plain language
+
+    Request Body:
+    - allocation: Portfolio allocation {asset_code: weight}
+    - user_profile: User profile with risk_tolerance, time_horizon_years, primary_goal
+
+    Returns:
+    - Plain language explanation with educational notes
+    """
+    ai_service = AIExplanationsService()
+
+    explanation = ai_service.explain_allocation(
+        allocation=allocation,
+        user_profile=user_profile
+    )
+
+    return explanation
+
+
+@router.get("/explain-concept/{concept}", response_model=PortfolioExplanation)
+async def explain_investment_concept(concept: str):
+    """
+    Explain investment concepts in plain language.
+
+    REQ-PORT-010: Investment education
+
+    Supported concepts:
+    - diversification
+    - risk_tolerance
+    - rebalancing
+    - expected_return
+    - volatility
+    - asset_allocation
+    - time_horizon
+    - tax_efficiency
+
+    Returns:
+    - Plain language explanation with examples
+    """
+    ai_service = AIExplanationsService()
+
+    explanation = ai_service.explain_investment_concept(concept)
+
+    return explanation
+
+
+@router.post("/translate-goal", response_model=PortfolioExplanation)
+async def translate_goal_to_allocation(
+    goal_description: str,
+    goal_amount: float,
+    years_to_goal: int,
+    current_savings: float = 0
+):
+    """
+    Translate financial goal into recommended allocation.
+
+    REQ-PORT-010: Translating goals into allocations
+
+    Request Body:
+    - goal_description: Natural language goal description
+    - goal_amount: Target amount
+    - years_to_goal: Years until goal
+    - current_savings: Current amount saved
+
+    Returns:
+    - Recommended allocation with explanation
+    """
+    ai_service = AIExplanationsService()
+
+    explanation = ai_service.translate_goal_to_allocation(
+        goal_description=goal_description,
+        goal_amount=goal_amount,
+        years_to_goal=years_to_goal,
+        current_savings=current_savings
+    )
+
+    return explanation
+
+
+@router.post("/explain-design", response_model=PortfolioExplanation)
+async def explain_portfolio_design(
+    allocation: Dict[str, float],
+    goals: List[Dict]
+):
+    """
+    Explain how portfolio is designed to meet goals.
+
+    REQ-PORT-010: Describing portfolio design
+
+    Request Body:
+    - allocation: Portfolio allocation
+    - goals: User's financial goals
+
+    Returns:
+    - Explanation of portfolio design rationale
+    """
+    ai_service = AIExplanationsService()
+
+    explanation = ai_service.explain_portfolio_design(
+        allocation=allocation,
+        goals=goals
+    )
+
+    return explanation
+
+
+@router.post("/ask-question", response_model=PortfolioExplanation)
+async def answer_portfolio_question(
+    question: str,
+    portfolio_context: Dict
+):
+    """
+    Answer user questions about their portfolio.
+
+    REQ-PORT-012: Answering portfolio questions
+
+    Request Body:
+    - question: User's question
+    - portfolio_context: Portfolio data for context
+
+    Returns:
+    - AI-generated answer with educational notes
+    """
+    ai_service = AIExplanationsService()
+
+    explanation = ai_service.answer_portfolio_question(
+        question=question,
+        portfolio_context=portfolio_context
+    )
+
+    return explanation
+
+
 # ==================== Utility Endpoints ====================
 
 @router.get("/health")
@@ -689,9 +837,18 @@ async def get_service_summary():
                 "esg_options": 3
             },
             "optimization_levels": ["goal", "account", "household"],
+            "ai_guidance": {
+                "plain_language_explanations": True,
+                "investment_education": True,
+                "goal_translation": True,
+                "portfolio_design_explanation": True,
+                "qa_capability": True
+            },
             "esg_screening": {
                 "presets": 4,
                 "exclusion_criteria": len(ExclusionCriteria),
+                "trade_off_analysis": True,
+                "alternative_suggestions": True,
                 "esg_criteria": len(ESGCriteria)
             },
             "insights_alerts": {

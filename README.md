@@ -194,6 +194,27 @@ npm install
 npm run dev
 ```
 
+### Frontend API Base URL & Dev Proxy
+
+- The frontend calls the backend API using either:
+  - `VITE_API_BASE_URL` (e.g., `http://localhost:8000`), or
+  - A development proxy for relative `/api/*` requests.
+
+- Configure environment (recommended):
+  - Create/update `frontend/.env` with:
+    - `VITE_API_BASE_URL=http://localhost:8000`
+  - Alternatively set in your shell before `npm run dev`:
+    - macOS/Linux: `export VITE_API_BASE_URL=http://localhost:8000`
+    - Windows (PowerShell): `$env:VITE_API_BASE_URL='http://localhost:8000'`
+
+- Dev proxy is enabled in `frontend/vite.config.ts`:
+  - Requests to `/api/*` during `npm run dev` are proxied to `VITE_API_BASE_URL`.
+  - Example: frontend calls `/api/v1/life-events/events` → proxied to `http://localhost:8000/api/v1/life-events/events`.
+
+- If you see `Unexpected token '<'` when loading pages:
+  - It means the frontend received HTML (e.g., index.html) instead of JSON.
+  - Fix by ensuring the backend is running on `VITE_API_BASE_URL`, or use the relative `/api/*` path so the dev proxy forwards the request correctly.
+
 ---
 
 ## Documentation
