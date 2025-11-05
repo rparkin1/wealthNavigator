@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useTaxManagement, TLHReportParams } from '@/hooks/useTaxManagement';
+import { useTaxManagement } from '@/hooks/useTaxManagement';
+import type { TLHReportParams } from '@/hooks/useTaxManagement';
 import { formatCurrency, formatPercentage } from '@/services/taxManagementApi';
 
 // ==================== Types ====================
