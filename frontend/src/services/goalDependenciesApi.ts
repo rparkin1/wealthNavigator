@@ -2,10 +2,11 @@
  * Goal Dependencies API Service
  *
  * Provides multi-goal relationship management and dependency tracking.
- * Backend endpoints: /api/v1/goal-dependencies/*
+ * Backend endpoints: /api/v1/goal-planning/dependencies/*
  */
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const BASE_PATH = '/api/v1/goal-planning/dependencies';
 
 import type {
   GoalDependency,
@@ -22,7 +23,7 @@ import type {
 export async function createDependency(
   request: DependencyCreationRequest
 ): Promise<GoalDependency> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/goal-dependencies`, {
+  const response = await fetch(`${API_BASE_URL}${BASE_PATH}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -43,7 +44,7 @@ export async function createDependency(
  * Get all dependencies for the current user
  */
 export async function getAllDependencies(): Promise<GoalDependency[]> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/goal-dependencies`, {
+  const response = await fetch(`${API_BASE_URL}${BASE_PATH}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -67,7 +68,7 @@ export async function getGoalDependencies(goalId: string): Promise<{
   dependents: GoalDependency[];
 }> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/goal-dependencies/goal/${goalId}`,
+    `${API_BASE_URL}${BASE_PATH}/goal/${goalId}`,
     {
       method: 'GET',
       headers: {
@@ -93,7 +94,7 @@ export async function updateDependency(
   request: DependencyUpdateRequest
 ): Promise<GoalDependency> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/goal-dependencies/${dependencyId}`,
+    `${API_BASE_URL}${BASE_PATH}/${dependencyId}`,
     {
       method: 'PATCH',
       headers: {
@@ -117,7 +118,7 @@ export async function updateDependency(
  */
 export async function deleteDependency(dependencyId: string): Promise<void> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/goal-dependencies/${dependencyId}`,
+    `${API_BASE_URL}${BASE_PATH}/${dependencyId}`,
     {
       method: 'DELETE',
       headers: {
@@ -140,7 +141,7 @@ export async function validateDependencies(
   goalIds: string[]
 ): Promise<DependencyValidation> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/goal-dependencies/validate`,
+    `${API_BASE_URL}${BASE_PATH}/validate`,
     {
       method: 'POST',
       headers: {
@@ -166,7 +167,7 @@ export async function getOptimizedTimeline(
   goalIds: string[]
 ): Promise<DependencyTimeline[]> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/goal-dependencies/timeline`,
+    `${API_BASE_URL}${BASE_PATH}/timeline`,
     {
       method: 'POST',
       headers: {
@@ -192,7 +193,7 @@ export async function optimizeSequencing(
   goalIds: string[]
 ): Promise<DependencyOptimization> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/goal-dependencies/optimize`,
+    `${API_BASE_URL}${BASE_PATH}/optimize`,
     {
       method: 'POST',
       headers: {

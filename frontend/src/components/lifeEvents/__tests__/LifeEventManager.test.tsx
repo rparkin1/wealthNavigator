@@ -77,6 +77,8 @@ describe('LifeEventManager', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(lifeEventsApi.getAllLifeEvents).mockResolvedValue(mockEvents);
+    // Mock getEventTemplates for when template selector opens
+    vi.mocked(lifeEventsApi.getEventTemplates).mockResolvedValue([]);
   });
 
   describe('Rendering', () => {

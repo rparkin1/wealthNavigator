@@ -360,5 +360,3 @@ export function getStatusLabel(probability: number): string {
   if (probability >= 0.40) return 'At Risk';
   return 'Critical';
 }
-
-export { GoalFundingApiError };

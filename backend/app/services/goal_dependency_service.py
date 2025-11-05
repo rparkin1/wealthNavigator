@@ -8,7 +8,7 @@ Implements REQ-GOAL-003: Goal dependencies and relationships (sequential, condit
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, update
 
 from app.models.goal import Goal, GoalCategory, GoalPriority, GoalDependencyType, GoalStatus
 
@@ -61,7 +61,10 @@ class GoalDependencyService:
             parent_goal = parent_result.scalar_one_or_none()
 
             if parent_goal and parent_goal.status != GoalStatus.ACHIEVED.value:
-                dependent_goal.status = GoalStatus.BLOCKED.value
+                # NOTE: status is a computed property, so we can't set it directly
+                # The status will be computed based on dependencies and progress
+                # TODO: Consider adding a separate 'blocked_by' field or dependency check in status property
+                pass
 
         await db.commit()
         return True
@@ -185,13 +188,10 @@ class GoalDependencyService:
             completed_goal_id: ID of goal that was just achieved
         """
         # Find goals dependent on completed goal
+        # NOTE: status property returns progress status (on_track/behind/at_risk), not lifecycle
+        # status (blocked). For now, we unblock all dependent goals regardless of computed status.
         result = await db.execute(
-            select(Goal).where(
-                and_(
-                    Goal.depends_on_goal_id == completed_goal_id,
-                    Goal.status == GoalStatus.BLOCKED.value
-                )
-            )
+            select(Goal).where(Goal.depends_on_goal_id == completed_goal_id)
         )
         dependent_goals = result.scalars().all()
 
@@ -223,19 +223,20 @@ class GoalDependencyService:
         Returns:
             Dictionary mapping goal_id to allocated amount
         """
-        # Get all active goals
+        # Get all goals for user
+        # NOTE: Can't filter by status since it's a computed property returning progress status
+        # (on_track/behind/at_risk), not lifecycle status (active/blocked).
+        # Since we're distributing funds, we include all non-achieved goals.
         result = await db.execute(
-            select(Goal).where(
-                and_(
-                    Goal.user_id == user_id,
-                    Goal.status == GoalStatus.ACTIVE.value
-                )
-            ).order_by(
+            select(Goal).where(Goal.user_id == user_id).order_by(
                 Goal.priority.desc(),  # Essential > Important > Aspirational
                 Goal.target_date.asc()  # Earlier goals first
             )
         )
-        goals = result.scalars().all()
+        all_goals = result.scalars().all()
+
+        # Filter out achieved goals (100% funded)
+        goals = [g for g in all_goals if g.status != "achieved"]
 
         allocation = {}
         remaining_funds = total_monthly_savings
@@ -374,16 +375,17 @@ class GoalDependencyService:
         Returns:
             Timeline of goals with projected completion dates
         """
-        # Get all active goals ordered by dependencies
+        # Get all goals for user
+        # NOTE: Can't filter by status since it's a computed property returning progress status
+        # (on_track/behind/at_risk), not lifecycle status (active/blocked).
+        # For timeline calculation, we include all non-achieved goals.
         result = await db.execute(
-            select(Goal).where(
-                and_(
-                    Goal.user_id == user_id,
-                    Goal.status.in_([GoalStatus.ACTIVE.value, GoalStatus.BLOCKED.value])
-                )
-            )
+            select(Goal).where(Goal.user_id == user_id)
         )
-        goals = result.scalars().all()
+        all_goals = result.scalars().all()
+
+        # Filter out achieved goals (100% funded)
+        goals = [g for g in all_goals if g.status != "achieved"]
 
         # Build dependency graph
         goal_map = {g.id: g for g in goals}

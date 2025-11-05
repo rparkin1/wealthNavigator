@@ -52,9 +52,8 @@ def test_goal(db: Session, test_user: User):
         current_amount=500000,
         target_date="2045-01-01",
         monthly_contribution=2000,
-        expected_return=0.07,
-        risk_tolerance=0.6,
         success_threshold=0.85,
+        funding_percentage=100.0,
     )
     db.add(goal)
     db.commit()

@@ -5,14 +5,16 @@ Pytest configuration and shared fixtures for backend tests
 import pytest
 import asyncio
 from typing import AsyncGenerator
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from app.models.base import Base
 from app.main import app
 
 
-# Test database URL
-TEST_DATABASE_URL = "postgresql+asyncpg://wealthnav:dev@localhost:5432/wealthnavigator_test"
+# Test database URL - Using SQLite for tests (no external database required)
+# For true isolation, use in-memory: sqlite+aiosqlite:///:memory:
+# For debugging, use file-based: sqlite+aiosqlite:///./test.db
+TEST_DATABASE_URL = "sqlite+aiosqlite:///./test.db"
 
 
 @pytest.fixture(scope="session")
@@ -124,7 +126,8 @@ def sample_portfolio_data():
 @pytest.fixture(scope="function")
 async def client(async_engine) -> AsyncGenerator[AsyncClient, None]:
     """Create async HTTP client for testing."""
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
 
 
@@ -138,3 +141,15 @@ def test_user_id() -> str:
 async def db(async_session) -> AsyncSession:
     """Provide database session alias for compatibility."""
     return async_session
+
+
+@pytest.fixture
+def auth_headers():
+    """Mock authentication headers for API tests"""
+    return {"Authorization": "Bearer test_token"}
+
+
+@pytest.fixture
+def test_user_token():
+    """Mock user token for integration tests"""
+    return "test_token"

@@ -45,6 +45,20 @@ describe('HistoricalScenarioSelector', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(historicalScenariosApi.getAllScenarios).mockResolvedValue(mockScenarios);
+
+    // Mock helper functions that are used in the component
+    vi.mocked(historicalScenariosApi.getRiskLevelColor).mockReturnValue({
+      bg: 'bg-yellow-50',
+      text: 'text-yellow-700',
+      border: 'border-yellow-200',
+    });
+
+    vi.mocked(historicalScenariosApi.getVolatilityLabel).mockReturnValue('Moderate');
+
+    vi.mocked(historicalScenariosApi.getDrawdownSeverity).mockReturnValue({
+      label: 'Severe',
+      color: 'red',
+    });
   });
 
   describe('Rendering', () => {
