@@ -157,7 +157,7 @@ export function DiversificationAnalysisDashboard({
               Effective Securities
             </div>
             <div style={{ fontSize: '28px', fontWeight: 700 }}>
-              {analysis.metrics.effective_securities.toFixed(1)}
+              {analysis.metrics?.effective_securities?.toFixed(1) ?? 'N/A'}
             </div>
           </div>
 
@@ -166,7 +166,7 @@ export function DiversificationAnalysisDashboard({
               Herfindahl Index
             </div>
             <div style={{ fontSize: '28px', fontWeight: 700 }}>
-              {(analysis.metrics.herfindahl_index * 10000).toFixed(0)}
+              {((analysis.metrics?.herfindahl_index ?? 0) * 10000).toFixed(0)}
             </div>
             <div style={{ fontSize: '11px', color: '#9ca3af' }}>Lower is better</div>
           </div>
