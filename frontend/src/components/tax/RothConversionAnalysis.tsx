@@ -7,7 +7,8 @@
  */
 
 import React, { useState } from 'react';
-import { analyzeRothConversion, BackdoorRothAnalysis, formatCurrency, formatPercentage } from '@/services/taxManagementApi';
+import { analyzeRothConversion, formatCurrency, formatPercentage } from '@/services/taxManagementApi';
+import type { BackdoorRothAnalysis } from '@/services/taxManagementApi';
 
 // ==================== Types ====================
 
