@@ -155,25 +155,31 @@ class TestPortfolioOptimizationPerformance:
     @pytest.mark.asyncio
     async def test_optimization_under_5_seconds(self):
         """Portfolio optimization should complete in <5 seconds"""
-        from app.tools.portfolio_optimizer import optimize_portfolio
+        from app.tools.portfolio_optimizer import optimize_portfolio, AssetClass, OptimizationParams
 
-        # Test data
-        asset_classes = ["US Stocks", "International Stocks", "Bonds", "REITs", "Cash"]
-        expected_returns = [0.10, 0.09, 0.04, 0.08, 0.02]
-        volatilities = [0.18, 0.20, 0.06, 0.15, 0.01]
+        # Test data - create AssetClass objects
+        asset_classes = [
+            AssetClass(name="US Stocks", expected_return=0.10, volatility=0.18),
+            AssetClass(name="International Stocks", expected_return=0.09, volatility=0.20),
+            AssetClass(name="Bonds", expected_return=0.04, volatility=0.06),
+            AssetClass(name="REITs", expected_return=0.08, volatility=0.15),
+            AssetClass(name="Cash", expected_return=0.02, volatility=0.01),
+        ]
+
+        params = OptimizationParams(
+            asset_classes=asset_classes,
+            risk_tolerance=0.6,  # Moderate risk tolerance
+            time_horizon=10,
+        )
 
         start_time = time.time()
-        result = await optimize_portfolio(
-            asset_classes=asset_classes,
-            expected_returns=expected_returns,
-            volatilities=volatilities,
-            target_return=0.08,
-        )
+        result = await optimize_portfolio(params)
         execution_time = time.time() - start_time
 
         assert execution_time < 5.0, f"Optimization took {execution_time:.2f}s, expected <5s"
-        assert "allocation" in result
-        assert "metrics" in result
+        assert result.allocation is not None
+        assert result.expected_return > 0
+        assert result.expected_volatility > 0
 
         print(f"\n✓ Portfolio optimization: {execution_time:.2f}s")
 

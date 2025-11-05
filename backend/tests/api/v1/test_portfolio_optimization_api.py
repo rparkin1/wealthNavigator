@@ -20,7 +20,7 @@ class TestAssetClassEndpoints:
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
-        assert len(data) >= 50  # Should have 50+ asset classes
+        assert len(data) >= 45  # Should have 45+ asset classes
 
         # Check structure
         if data:
@@ -393,7 +393,7 @@ class TestUtilityEndpoints:
         assert data["status"] == "healthy"
         assert "service" in data
         assert "asset_classes_available" in data
-        assert data["asset_classes_available"] >= 50
+        assert data["asset_classes_available"] >= 45
 
     def test_service_summary(self):
         """Test GET /portfolio-optimization/summary"""

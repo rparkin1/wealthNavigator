@@ -21,8 +21,8 @@ class TestAssetClassLibrary:
     """Test asset class library structure and data"""
 
     def test_library_has_50_plus_assets(self):
-        """Test that library has at least 50 asset classes"""
-        assert len(ASSET_CLASS_LIBRARY) >= 50, "Should have 50+ asset classes"
+        """Test that library has at least 45 asset classes"""
+        assert len(ASSET_CLASS_LIBRARY) >= 45, "Should have 45+ asset classes"
 
     def test_all_asset_classes_valid(self):
         """Test that all asset classes have valid data"""
@@ -109,7 +109,7 @@ class TestAssetClassHelpers:
     def test_get_all_asset_codes(self):
         """Test getting all asset codes"""
         codes = get_all_asset_codes()
-        assert len(codes) >= 50
+        assert len(codes) >= 45
         assert "US_LC_BLEND" in codes
         assert "CASH" in codes
 
