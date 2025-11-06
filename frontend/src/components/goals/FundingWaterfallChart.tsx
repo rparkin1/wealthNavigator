@@ -67,7 +67,7 @@ export function FundingWaterfallChart({
         funding_required: fundingRequired,
         funding_allocated: fundingAllocated,
         cumulative_allocation: cumulativeAllocation,
-        funding_status,
+        funding_status: fundingStatus,
       });
 
       remainingFunds -= fundingAllocated;

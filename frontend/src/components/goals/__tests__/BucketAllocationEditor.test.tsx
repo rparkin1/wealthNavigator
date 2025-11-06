@@ -8,9 +8,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BucketAllocationEditor } from '../BucketAllocationEditor';
 import * as mentalAccountingApi from '../../../services/mentalAccountingApi';
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
 // Mock the API module
-jest.mock('../../../services/mentalAccountingApi');
+vi.mock('../../../services/mentalAccountingApi');
 
 describe('BucketAllocationEditor Integration Tests', () => {
   const mockGoal = {
@@ -55,11 +56,11 @@ describe('BucketAllocationEditor Integration Tests', () => {
     },
   ];
 
-  const mockOnClose = jest.fn();
-  const mockOnAllocationUpdated = jest.fn();
+  const mockOnClose = vi.fn();
+  const mockOnAllocationUpdated = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the editor with goal information', () => {
@@ -347,13 +348,13 @@ describe('BucketAllocationEditor Integration Tests', () => {
   });
 
   it('saves allocations when Save is clicked', async () => {
-    const mockAllocateAccount = jest.fn().mockResolvedValue({
+    const mockAllocateAccount = vi.fn().mockResolvedValue({
       goal_id: 'goal-1',
       account_id: 'account-1',
       allocation_percentage: 50,
       monthly_contribution: 1000,
     });
-    (mentalAccountingApi.allocateAccountToGoal as jest.Mock) = mockAllocateAccount;
+    vi.mocked(mentalAccountingApi.allocateAccountToGoal).mockImplementation(mockAllocateAccount);
 
     render(
       <BucketAllocationEditor
@@ -393,8 +394,8 @@ describe('BucketAllocationEditor Integration Tests', () => {
   });
 
   it('shows error message when save fails', async () => {
-    const mockAllocateAccount = jest.fn().mockRejectedValue(new Error('API Error'));
-    (mentalAccountingApi.allocateAccountToGoal as jest.Mock) = mockAllocateAccount;
+    const mockAllocateAccount = vi.fn().mockRejectedValue(new Error('API Error'));
+    vi.mocked(mentalAccountingApi.allocateAccountToGoal).mockImplementation(mockAllocateAccount);
 
     render(
       <BucketAllocationEditor
@@ -452,10 +453,10 @@ describe('BucketAllocationEditor Integration Tests', () => {
   });
 
   it('shows loading state when saving', async () => {
-    const mockAllocateAccount = jest.fn(
+    const mockAllocateAccount = vi.fn(
       () => new Promise((resolve) => setTimeout(() => resolve({}), 1000))
     );
-    (mentalAccountingApi.allocateAccountToGoal as jest.Mock) = mockAllocateAccount;
+    vi.mocked(mentalAccountingApi.allocateAccountToGoal).mockImplementation(mockAllocateAccount);
 
     render(
       <BucketAllocationEditor

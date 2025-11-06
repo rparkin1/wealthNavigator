@@ -8,9 +8,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BucketRebalancer } from '../BucketRebalancer';
 import * as mentalAccountingApi from '../../../services/mentalAccountingApi';
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
 // Mock the API module
-jest.mock('../../../services/mentalAccountingApi');
+vi.mock('../../../services/mentalAccountingApi');
 
 describe('BucketRebalancer Integration Tests', () => {
   const mockBuckets = [
@@ -88,11 +89,11 @@ describe('BucketRebalancer Integration Tests', () => {
 
   const userId = 'user-123';
   const totalPortfolioValue = 535000;
-  const mockOnRebalanceComplete = jest.fn();
+  const mockOnRebalanceComplete = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (mentalAccountingApi.analyzeRebalancingNeeds as jest.Mock).mockResolvedValue(mockAnalysis);
+    vi.clearAllMocks();
+    vi.mocked(mentalAccountingApi.analyzeRebalancingNeeds).mockResolvedValue(mockAnalysis);
   });
 
   it('renders the rebalancer with loading state initially', () => {
@@ -270,7 +271,7 @@ describe('BucketRebalancer Integration Tests', () => {
       ],
     };
 
-    (mentalAccountingApi.analyzeRebalancingNeeds as jest.Mock).mockResolvedValue(
+    vi.mocked(mentalAccountingApi.analyzeRebalancingNeeds).mockResolvedValue(
       multipleRecommendations
     );
 
@@ -386,7 +387,7 @@ describe('BucketRebalancer Integration Tests', () => {
       recommendations: [],
     };
 
-    (mentalAccountingApi.analyzeRebalancingNeeds as jest.Mock).mockResolvedValue(balancedAnalysis);
+    vi.mocked(mentalAccountingApi.analyzeRebalancingNeeds).mockResolvedValue(balancedAnalysis);
 
     render(
       <BucketRebalancer
@@ -510,7 +511,7 @@ describe('BucketRebalancer Integration Tests', () => {
   });
 
   it('handles API errors gracefully', async () => {
-    (mentalAccountingApi.analyzeRebalancingNeeds as jest.Mock).mockRejectedValue(
+    vi.mocked(mentalAccountingApi.analyzeRebalancingNeeds).mockRejectedValue(
       new Error('API Error')
     );
 
@@ -564,7 +565,7 @@ describe('BucketRebalancer Integration Tests', () => {
       ],
     };
 
-    (mentalAccountingApi.analyzeRebalancingNeeds as jest.Mock).mockResolvedValue(
+    vi.mocked(mentalAccountingApi.analyzeRebalancingNeeds).mockResolvedValue(
       mediumPriorityAnalysis
     );
 
@@ -593,7 +594,7 @@ describe('BucketRebalancer Integration Tests', () => {
       ],
     };
 
-    (mentalAccountingApi.analyzeRebalancingNeeds as jest.Mock).mockResolvedValue(
+    vi.mocked(mentalAccountingApi.analyzeRebalancingNeeds).mockResolvedValue(
       lowPriorityAnalysis
     );
 
@@ -628,7 +629,7 @@ describe('BucketRebalancer Integration Tests', () => {
       ],
     };
 
-    (mentalAccountingApi.analyzeRebalancingNeeds as jest.Mock).mockResolvedValue(
+    vi.mocked(mentalAccountingApi.analyzeRebalancingNeeds).mockResolvedValue(
       multipleRecommendations
     );
 

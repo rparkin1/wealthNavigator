@@ -8,10 +8,24 @@ import * as lifeEventsApi from '../../../services/lifeEventsApi';
 // Mock fetch
 global.fetch = vi.fn();
 
+// Mock localStorage
+const localStorageMock = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+  length: 0,
+  key: vi.fn(),
+};
+Object.defineProperty(global, 'localStorage', {
+  value: localStorageMock,
+  writable: true,
+});
+
 describe('Life Events API Service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.setItem('user_id', 'test-user-123');
+    localStorageMock.getItem.mockReturnValue('test-user-123');
   });
 
   describe('getAllLifeEvents', () => {

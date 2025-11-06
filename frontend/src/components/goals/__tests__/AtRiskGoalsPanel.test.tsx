@@ -7,9 +7,10 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { AtRiskGoalsPanel } from '../AtRiskGoalsPanel';
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 describe('AtRiskGoalsPanel Integration Tests', () => {
   const mockUserId = 'test-user-123';
@@ -48,11 +49,11 @@ describe('AtRiskGoalsPanel Integration Tests', () => {
   ];
 
   beforeEach(() => {
-    (global.fetch as jest.Mock).mockClear();
+    vi.mocked(global.fetch).mockClear();
   });
 
   it('fetches and displays at-risk goals', async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ at_risk_goals: mockAtRiskGoals, total_goals: 3, at_risk_count: 2 }),
     });
@@ -66,7 +67,7 @@ describe('AtRiskGoalsPanel Integration Tests', () => {
   });
 
   it('shows loading state', () => {
-    (global.fetch as jest.Mock).mockImplementation(
+    vi.mocked(global.fetch).mockImplementation(
       () => new Promise(() => {}) // Never resolves
     );
 
@@ -75,7 +76,7 @@ describe('AtRiskGoalsPanel Integration Tests', () => {
   });
 
   it('shows success message when no at-risk goals', async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ at_risk_goals: [], total_goals: 3, at_risk_count: 0 }),
     });
@@ -88,7 +89,7 @@ describe('AtRiskGoalsPanel Integration Tests', () => {
   });
 
   it('displays correct success probability', async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ at_risk_goals: mockAtRiskGoals }),
     });
@@ -102,7 +103,7 @@ describe('AtRiskGoalsPanel Integration Tests', () => {
   });
 
   it('displays shortfall amounts', async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ at_risk_goals: mockAtRiskGoals }),
     });
@@ -116,7 +117,7 @@ describe('AtRiskGoalsPanel Integration Tests', () => {
   });
 
   it('allows sorting by shortfall amount', async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ at_risk_goals: mockAtRiskGoals }),
     });
@@ -135,7 +136,7 @@ describe('AtRiskGoalsPanel Integration Tests', () => {
   });
 
   it('expands goal card to show recommendations', async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ at_risk_goals: mockAtRiskGoals }),
     });
@@ -163,7 +164,7 @@ describe('AtRiskGoalsPanel Integration Tests', () => {
   });
 
   it('shows risk level indicators', async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ at_risk_goals: mockAtRiskGoals }),
     });
@@ -177,9 +178,9 @@ describe('AtRiskGoalsPanel Integration Tests', () => {
   });
 
   it('calls onGoalClick when goal is clicked', async () => {
-    const onGoalClick = jest.fn();
+    const onGoalClick = vi.fn();
 
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ at_risk_goals: mockAtRiskGoals }),
     });
@@ -195,7 +196,7 @@ describe('AtRiskGoalsPanel Integration Tests', () => {
   });
 
   it('uses custom success threshold', async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ at_risk_goals: mockAtRiskGoals }),
     });
@@ -211,9 +212,9 @@ describe('AtRiskGoalsPanel Integration Tests', () => {
   });
 
   it('handles API errors gracefully', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('API Error'));
+    vi.mocked(global.fetch).mockRejectedValueOnce(new Error('API Error'));
 
     render(<AtRiskGoalsPanel userId={mockUserId} />);
 

@@ -5,6 +5,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 import InsuranceOptimizationDashboard from '../InsuranceOptimizationDashboard';
 import LifeInsuranceCalculator from '../LifeInsuranceCalculator';
 import DisabilityCoverageAnalyzer from '../DisabilityCoverageAnalyzer';
@@ -13,7 +14,7 @@ import InsuranceGapAnalysis from '../InsuranceGapAnalysis';
 import { insuranceOptimizationApi } from '../../../services/insuranceOptimizationApi';
 
 // Mock the API
-jest.mock('../../../services/insuranceOptimizationApi');
+vi.mock('../../../services/insuranceOptimizationApi');
 
 describe('Insurance Optimization Dashboard', () => {
   test('renders dashboard with all tabs', () => {
@@ -68,7 +69,7 @@ describe('Life Insurance Calculator', () => {
   };
 
   beforeEach(() => {
-    (insuranceOptimizationApi.calculateLifeInsuranceNeeds as jest.Mock).mockResolvedValue(mockLifeAnalysis);
+    vi.mocked(insuranceOptimizationApi.calculateLifeInsuranceNeeds).mockResolvedValue(mockLifeAnalysis);
   });
 
   test('renders calculator form', () => {
@@ -162,7 +163,7 @@ describe('Disability Coverage Analyzer', () => {
   };
 
   beforeEach(() => {
-    (insuranceOptimizationApi.analyzeDisabilityCoverage as jest.Mock).mockResolvedValue(mockDisabilityAnalysis);
+    vi.mocked(insuranceOptimizationApi.analyzeDisabilityCoverage).mockResolvedValue(mockDisabilityAnalysis);
   });
 
   test('renders analyzer form', () => {
@@ -244,7 +245,7 @@ describe('Long-Term Care Planner', () => {
   };
 
   beforeEach(() => {
-    (insuranceOptimizationApi.calculateLTCNeeds as jest.Mock).mockResolvedValue(mockLTCAnalysis);
+    vi.mocked(insuranceOptimizationApi.calculateLTCNeeds).mockResolvedValue(mockLTCAnalysis);
   });
 
   test('renders planner form', () => {
@@ -338,7 +339,7 @@ describe('Insurance Gap Analysis', () => {
   } as any;
 
   beforeEach(() => {
-    (insuranceOptimizationApi.analyzeInsuranceGaps as jest.Mock).mockResolvedValue(mockGapAnalysis);
+    vi.mocked(insuranceOptimizationApi.analyzeInsuranceGaps).mockResolvedValue(mockGapAnalysis);
   });
 
   test('shows message when analyses incomplete', () => {
