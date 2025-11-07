@@ -24,6 +24,15 @@ export interface DiversificationAnalysisDashboardProps {
   onAnalysisComplete?: (analysis: DiversificationAnalysisResult) => void;
 }
 
+// Helper function to transform breakdown data from API format to component format
+function transformBreakdown(breakdown: Record<string, number>): Array<{ name: string; weight: number; holdings_count: number }> {
+  return Object.entries(breakdown || {}).map(([name, weight]) => ({
+    name: name.replace(/_/g, ' '),
+    weight,
+    holdings_count: 0, // Backend doesn't provide this, would need to calculate from holdings
+  }));
+}
+
 export function DiversificationAnalysisDashboard({
   portfolioValue,
   holdings,
@@ -187,7 +196,7 @@ export function DiversificationAnalysisDashboard({
             📊 Top 5 Holdings
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {analysis.top_holdings.slice(0, 5).map((holding, index) => (
+            {(analysis.top_10_holdings || []).slice(0, 5).map((holding, index) => (
               <div
                 key={holding.symbol}
                 style={{
@@ -468,7 +477,7 @@ export function DiversificationAnalysisDashboard({
         <div>
           <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>🏭 Sector Breakdown</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {analysis.concentration_breakdown.sector.map((item, index) => (
+            {(analysis.concentration_breakdown?.sector || transformBreakdown(analysis.sector_breakdown)).map((item, index) => (
               <div
                 key={index}
                 style={{
@@ -510,7 +519,7 @@ export function DiversificationAnalysisDashboard({
         <div>
           <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>🌍 Geography Breakdown</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {analysis.concentration_breakdown.geography.map((item, index) => (
+            {(analysis.concentration_breakdown?.geography || transformBreakdown(analysis.geography_breakdown)).map((item, index) => (
               <div
                 key={index}
                 style={{
@@ -552,7 +561,7 @@ export function DiversificationAnalysisDashboard({
         <div>
           <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>💼 Asset Class Breakdown</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {analysis.concentration_breakdown.asset_class.map((item, index) => (
+            {(analysis.concentration_breakdown?.asset_class || transformBreakdown(analysis.asset_class_breakdown)).map((item, index) => (
               <div
                 key={index}
                 style={{

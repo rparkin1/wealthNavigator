@@ -42,12 +42,18 @@ class ApiClient {
       },
     });
 
-    // Add request interceptor for auth tokens (when implemented)
+    // Add request interceptor for auth tokens and user ID
     this.client.interceptors.request.use((config) => {
       const token = localStorage.getItem('auth_token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+
+      // Add X-User-Id header for backend authentication
+      // In production, this should come from auth context
+      const userId = localStorage.getItem('user_id') || 'test-user-123';
+      config.headers['X-User-Id'] = userId;
+
       return config;
     });
 

@@ -25,8 +25,8 @@ async def get_current_user(x_user_id: Optional[str] = Header(default=None)) -> C
   """Return the current user based on request context.
 
   - Reads `X-User-Id` header when provided
-  - Falls back to a deterministic dev ID to keep endpoints usable
+  - Falls back to dev user ID that matches frontend default
   """
-  user_id = x_user_id or "00000000-0000-0000-0000-000000000000"
+  user_id = x_user_id or "test-user-123"
   return CurrentUser(user_id)
 

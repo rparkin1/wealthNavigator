@@ -26,11 +26,15 @@ const BASE_PATH = '/api/v1/goal-planning/mental-accounting';
 export async function createMentalAccountBucket(
   request: CreateBucketRequest
 ): Promise<MentalAccountBucket> {
+  const userId = localStorage.getItem('user_id') || 'test-user-123';
   const response = await fetch(
     `${API_BASE_URL}${BASE_PATH}/create-bucket`,
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Id': userId
+      },
       credentials: 'include',
       body: JSON.stringify(request),
     }
@@ -57,11 +61,15 @@ export async function getAllMentalAccounts(
     return_volatility: returnVolatility.toString(),
   });
 
+  const currentUserId = localStorage.getItem('user_id') || 'test-user-123';
   const response = await fetch(
     `${API_BASE_URL}${BASE_PATH}/users/${userId}/all-buckets?${params}`,
     {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Id': currentUserId
+      },
       credentials: 'include',
     }
   );
@@ -87,11 +95,15 @@ export async function getGoalMentalAccount(
     return_volatility: returnVolatility.toString(),
   });
 
+  const userId = localStorage.getItem('user_id') || 'test-user-123';
   const response = await fetch(
     `${API_BASE_URL}${BASE_PATH}/${goalId}/bucket?${params}`,
     {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Id': userId
+      },
       credentials: 'include',
     }
   );
@@ -110,11 +122,15 @@ export async function getGoalMentalAccount(
 export async function allocateAccountToGoal(
   request: AllocateAccountRequest
 ): Promise<AccountAllocation> {
+  const userId = localStorage.getItem('user_id') || 'test-user-123';
   const response = await fetch(
     `${API_BASE_URL}${BASE_PATH}/allocate-account`,
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Id': userId
+      },
       credentials: 'include',
       body: JSON.stringify(request),
     }
@@ -134,11 +150,15 @@ export async function allocateAccountToGoal(
 export async function analyzeRebalancingNeeds(
   request: AnalyzeRebalancingRequest
 ): Promise<RebalancingAnalysis> {
+  const userId = localStorage.getItem('user_id') || 'test-user-123';
   const response = await fetch(
     `${API_BASE_URL}${BASE_PATH}/analyze-rebalancing`,
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Id': userId
+      },
       credentials: 'include',
       body: JSON.stringify(request),
     }
@@ -158,11 +178,15 @@ export async function analyzeRebalancingNeeds(
 export async function projectMentalAccountGrowth(
   request: ProjectGrowthRequest
 ): Promise<GrowthProjection> {
+  const userId = localStorage.getItem('user_id') || 'test-user-123';
   const response = await fetch(
     `${API_BASE_URL}${BASE_PATH}/project-growth`,
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Id': userId
+      },
       credentials: 'include',
       body: JSON.stringify(request),
     }
@@ -182,11 +206,15 @@ export async function projectMentalAccountGrowth(
 export async function getMentalAccountingDashboard(
   userId: string
 ): Promise<MentalAccountingDashboard> {
+  const currentUserId = localStorage.getItem('user_id') || 'test-user-123';
   const response = await fetch(
     `${API_BASE_URL}${BASE_PATH}/dashboard?user_id=${userId}`,
     {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Id': currentUserId
+      },
       credentials: 'include',
     }
   );

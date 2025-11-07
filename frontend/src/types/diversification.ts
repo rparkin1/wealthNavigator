@@ -117,17 +117,25 @@ export interface DiversificationRecommendation {
 // ============================================================================
 
 export interface DiversificationAnalysisResult {
+  portfolio_value: number;
   metrics: DiversificationMetrics;
-  top_holdings: TopHolding[];
-  concentration_breakdown: {
+  concentration_risks: ConcentrationRisk[];
+  recommendations: DiversificationRecommendation[];
+  asset_class_breakdown: Record<string, number>;
+  sector_breakdown: Record<string, number>;
+  industry_breakdown: Record<string, number>;
+  geography_breakdown: Record<string, number>;
+  manager_breakdown: Record<string, number>;
+  top_10_holdings: HoldingInfo[];
+  // Legacy fields for backward compatibility
+  top_holdings?: TopHolding[];
+  concentration_breakdown?: {
     sector: ConcentrationBreakdown[];
     geography: ConcentrationBreakdown[];
     asset_class: ConcentrationBreakdown[];
     manager: ConcentrationBreakdown[];
   };
-  concentration_risks: ConcentrationRisk[];
-  recommendations: DiversificationRecommendation[];
-  summary: string;
+  summary?: string;
 }
 
 // ============================================================================
