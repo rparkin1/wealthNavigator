@@ -170,15 +170,22 @@ class PortfolioInsightsService:
         """Analyze portfolio diversification."""
         insights = []
 
+        if not allocation:
+            return insights
+
         # Calculate Herfindahl-Hirschman Index
         hhi = sum(w ** 2 for w in allocation.values())
         n = len(allocation)
         max_hhi = 1.0
         min_hhi = 1.0 / n if n > 0 else 1.0
+        denominator = max(max_hhi - min_hhi, 1e-9)
 
-        diversification_score = 1.0 - (hhi - min_hhi) / (max_hhi - min_hhi) if max_hhi != min_hhi else 1.0
+        diversification_score = 1.0 - (hhi - min_hhi) / denominator
+        diversification_score = max(0.0, min(1.0, diversification_score))
 
-        if diversification_score >= 0.75:
+        top_positions = sorted(allocation.items(), key=lambda x: x[1], reverse=True)[:3]
+
+        if diversification_score >= 0.70:
             insights.append(PortfolioInsight(
                 category="diversification",
                 title="Well-Diversified Portfolio",
@@ -187,18 +194,33 @@ class PortfolioInsightsService:
                 confidence=0.9,
                 data={"diversification_score": diversification_score, "num_assets": n}
             ))
-        elif diversification_score < 0.50:
-            # Find concentrated positions
-            concentrated = {k: v for k, v in allocation.items() if v > 0.25}
+        elif diversification_score <= 0.60:
+            concentrated = {k: v for k, v in allocation.items() if v >= 0.20}
 
             insights.append(PortfolioInsight(
                 category="diversification",
                 title="Concentration Risk Detected",
                 description=f"Your portfolio has low diversification (score: {diversification_score:.1%}). "
-                           f"{len(concentrated)} position(s) exceed 25% allocation.",
+                           f"{len(concentrated)} major holding(s) exceed 20% allocation.",
                 impact="negative",
                 confidence=0.85,
-                data={"diversification_score": diversification_score, "concentrated_positions": concentrated}
+                data={
+                    "diversification_score": diversification_score,
+                    "concentrated_positions": concentrated
+                }
+            ))
+        else:
+            insights.append(PortfolioInsight(
+                category="diversification",
+                title="Moderate Diversification",
+                description=f"Diversification score of {diversification_score:.1%} suggests room to broaden exposure. "
+                           f"Top holdings: {', '.join(f'{k} ({v:.0%})' for k, v in top_positions)}.",
+                impact="neutral",
+                confidence=0.7,
+                data={
+                    "diversification_score": diversification_score,
+                    "top_positions": dict(top_positions)
+                }
             ))
 
         # Asset class coverage
@@ -212,7 +234,7 @@ class PortfolioInsightsService:
             insights.append(PortfolioInsight(
                 category="diversification",
                 title="Good Asset Class Coverage",
-                description=f"Portfolio spans {len(categories)} asset class categories: {', '.join(categories)}",
+                description=f"Portfolio spans {len(categories)} asset class categories: {', '.join(sorted(categories))}",
                 impact="positive",
                 confidence=0.8,
                 data={"categories": list(categories)}
@@ -261,7 +283,7 @@ class PortfolioInsightsService:
             if performance.sharpe_ratio_1y > 1.0:
                 insights.append(PortfolioInsight(
                     category="risk",
-                    title="Excellent Risk-Adjusted Returns",
+                    title="Excellent Sharpe Ratio",
                     description=f"Sharpe ratio of {performance.sharpe_ratio_1y:.2f} indicates strong risk-adjusted performance.",
                     impact="positive",
                     confidence=0.9,
@@ -270,7 +292,7 @@ class PortfolioInsightsService:
             elif performance.sharpe_ratio_1y < 0.5:
                 insights.append(PortfolioInsight(
                     category="risk",
-                    title="Poor Risk-Adjusted Returns",
+                    title="Poor Sharpe Ratio",
                     description=f"Sharpe ratio of {performance.sharpe_ratio_1y:.2f} suggests risk is not being adequately compensated.",
                     impact="negative",
                     confidence=0.8,
@@ -288,7 +310,7 @@ class PortfolioInsightsService:
 
         # 1-year return analysis
         if performance.total_return_1y is not None:
-            if performance.total_return_1y > 0.15:
+            if performance.total_return_1y >= 0.10:
                 insights.append(PortfolioInsight(
                     category="performance",
                     title="Strong 1-Year Performance",
@@ -310,7 +332,7 @@ class PortfolioInsightsService:
 
         # Benchmark comparison
         if performance.vs_benchmark_1y is not None:
-            if performance.vs_benchmark_1y > 0.02:
+            if performance.vs_benchmark_1y >= 0.02:
                 insights.append(PortfolioInsight(
                     category="performance",
                     title="Outperforming Benchmark",

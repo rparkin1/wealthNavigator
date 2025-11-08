@@ -18,18 +18,16 @@ class TestEducationFundingIntegration:
     @pytest.mark.asyncio
     async def test_calculate_education_cost(
         self,
-        client: AsyncClient,
-        test_user_token: str
+        authenticated_client: AsyncClient
     ):
         """Test education cost calculation endpoint."""
-        response = await client.post(
+        response = await authenticated_client.post(
             "/api/v1/education-funding/calculate-cost",
             json={
                 "education_type": "private",
                 "years_until_college": 10,
                 "years_of_support": 4
-            },
-            headers={"Authorization": f"Bearer {test_user_token}"}
+            }
         )
 
         assert response.status_code == 200
@@ -42,11 +40,10 @@ class TestEducationFundingIntegration:
     @pytest.mark.asyncio
     async def test_calculate_total_need(
         self,
-        client: AsyncClient,
-        test_user_token: str
+        authenticated_client: AsyncClient
     ):
         """Test total education need calculation."""
-        response = await client.post(
+        response = await authenticated_client.post(
             "/api/v1/education-funding/total-need",
             json={
                 "education_type": "public_in_state",
@@ -54,7 +51,6 @@ class TestEducationFundingIntegration:
                 "college_start_age": 18,
                 "years_of_support": 4
             },
-            headers={"Authorization": f"Bearer {test_user_token}"}
         )
 
         assert response.status_code == 200
@@ -67,11 +63,10 @@ class TestEducationFundingIntegration:
     @pytest.mark.asyncio
     async def test_529_strategy_calculation(
         self,
-        client: AsyncClient,
-        test_user_token: str
+        authenticated_client: AsyncClient
     ):
         """Test 529 plan strategy calculation."""
-        response = await client.post(
+        response = await authenticated_client.post(
             "/api/v1/education-funding/529-strategy",
             json={
                 "target_amount": 200000,
@@ -80,7 +75,6 @@ class TestEducationFundingIntegration:
                 "expected_return": 0.06,
                 "state_tax_deduction": 0.05
             },
-            headers={"Authorization": f"Bearer {test_user_token}"}
         )
 
         assert response.status_code == 200
@@ -95,11 +89,10 @@ class TestEducationFundingIntegration:
     @pytest.mark.asyncio
     async def test_financial_aid_estimation(
         self,
-        client: AsyncClient,
-        test_user_token: str
+        authenticated_client: AsyncClient
     ):
         """Test financial aid estimation."""
-        response = await client.post(
+        response = await authenticated_client.post(
             "/api/v1/education-funding/financial-aid",
             json={
                 "parent_income": 120000,
@@ -107,7 +100,6 @@ class TestEducationFundingIntegration:
                 "student_assets": 5000,
                 "num_children": 1
             },
-            headers={"Authorization": f"Bearer {test_user_token}"}
         )
 
         assert response.status_code == 200
@@ -120,11 +112,10 @@ class TestEducationFundingIntegration:
     @pytest.mark.asyncio
     async def test_multi_child_optimization(
         self,
-        client: AsyncClient,
-        test_user_token: str
+        authenticated_client: AsyncClient
     ):
         """Test multi-child funding optimization."""
-        response = await client.post(
+        response = await authenticated_client.post(
             "/api/v1/education-funding/optimize-multi-child",
             json={
                 "children": [
@@ -143,7 +134,6 @@ class TestEducationFundingIntegration:
                 ],
                 "total_monthly_savings": 2000.0
             },
-            headers={"Authorization": f"Bearer {test_user_token}"}
         )
 
         assert response.status_code == 200
@@ -160,11 +150,10 @@ class TestEducationFundingIntegration:
     @pytest.mark.asyncio
     async def test_education_timeline(
         self,
-        client: AsyncClient,
-        test_user_token: str
+        authenticated_client: AsyncClient
     ):
         """Test education timeline generation."""
-        response = await client.post(
+        response = await authenticated_client.post(
             "/api/v1/education-funding/timeline",
             json=[
                 {
@@ -180,7 +169,6 @@ class TestEducationFundingIntegration:
                     "years_of_support": 4
                 }
             ],
-            headers={"Authorization": f"Bearer {test_user_token}"}
         )
 
         assert response.status_code == 200
@@ -194,15 +182,13 @@ class TestEducationFundingIntegration:
     @pytest.mark.asyncio
     async def test_savings_vehicle_recommendation(
         self,
-        client: AsyncClient,
-        test_user_token: str
+        authenticated_client: AsyncClient
     ):
         """Test savings vehicle recommendation."""
         # Test for long time horizon (529 recommended)
-        response = await client.post(
+        response = await authenticated_client.post(
             "/api/v1/education-funding/savings-vehicle",
             json={"years_until_college": 12, "state": "CA"},
-            headers={"Authorization": f"Bearer {test_user_token}"}
         )
 
         assert response.status_code == 200
@@ -213,10 +199,9 @@ class TestEducationFundingIntegration:
         assert "529 Plan" in data["vehicle"]
 
         # Test for short time horizon (savings recommended)
-        response = await client.post(
+        response = await authenticated_client.post(
             "/api/v1/education-funding/savings-vehicle",
             json={"years_until_college": 2},
-            headers={"Authorization": f"Bearer {test_user_token}"}
         )
 
         assert response.status_code == 200
@@ -226,11 +211,10 @@ class TestEducationFundingIntegration:
     @pytest.mark.asyncio
     async def test_grandparent_coordination(
         self,
-        client: AsyncClient,
-        test_user_token: str
+        authenticated_client: AsyncClient
     ):
         """Test grandparent contribution coordination."""
-        response = await client.post(
+        response = await authenticated_client.post(
             "/api/v1/education-funding/coordinate-grandparents",
             json={
                 "child_name": "Emma",
@@ -241,7 +225,6 @@ class TestEducationFundingIntegration:
                 "years_until_college": 10,
                 "expected_return": 0.06
             },
-            headers={"Authorization": f"Bearer {test_user_token}"}
         )
 
         assert response.status_code == 200
@@ -257,11 +240,10 @@ class TestEducationFundingIntegration:
     @pytest.mark.asyncio
     async def test_multi_child_with_grandparents(
         self,
-        client: AsyncClient,
-        test_user_token: str
+        authenticated_client: AsyncClient
     ):
         """Test multi-child optimization with grandparent contributions."""
-        response = await client.post(
+        response = await authenticated_client.post(
             "/api/v1/education-funding/optimize-multi-child-grandparents",
             json={
                 "children": [
@@ -281,7 +263,6 @@ class TestEducationFundingIntegration:
                 "parent_monthly_savings": 2000.0,
                 "grandparent_annual_budget": 20000.0
             },
-            headers={"Authorization": f"Bearer {test_user_token}"}
         )
 
         assert response.status_code == 200

@@ -45,7 +45,8 @@ class SoftDeleteMixin:
 
     def soft_delete(self) -> None:
         """Soft delete this record"""
-        self.deleted_at = datetime.utcnow()
+        from datetime import timezone
+        self.deleted_at = datetime.now(timezone.utc)
 
     def restore(self) -> None:
         """Restore a soft deleted record"""

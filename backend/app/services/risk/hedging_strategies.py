@@ -115,6 +115,8 @@ class HedgingService:
         strategies = []
 
         # Use default objectives if not provided
+        user_defined_objectives = objectives is not None
+
         if objectives is None:
             objectives = HedgingObjectives()
 
@@ -180,7 +182,7 @@ class HedgingService:
             strategies.append(inverse_etf)
 
         # Filter strategies based on user objectives
-        if objectives:
+        if user_defined_objectives:
             strategies = self._filter_by_objectives(strategies, objectives)
 
         # Sort by suitability score
@@ -418,7 +420,7 @@ class HedgingService:
         protection_level = strike_pct
 
         # Very low cost for deep OTM
-        cost_pct = self._estimate_put_cost(volatility, 0.5, 0.30) * 0.5  # Very cheap
+        cost_pct = self._estimate_put_cost(volatility, 0.5, 0.30) * 0.3  # Very cheap
         cost_estimate = equity_value * cost_pct
 
         max_downside = equity_value * (1 - strike_pct)

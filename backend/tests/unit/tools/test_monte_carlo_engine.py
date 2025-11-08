@@ -123,7 +123,7 @@ class TestMonteCarloEngine:
         params = SimulationParams(
             initial_portfolio_value=500000,
             monthly_contribution=0,
-            monthly_withdrawal=2000,  # $24k/year (4.8% withdrawal)
+            monthly_withdrawal=3000,  # $36k/year (7.2% withdrawal)
             time_horizon=20,
             expected_return=0.07,
             volatility=0.12,

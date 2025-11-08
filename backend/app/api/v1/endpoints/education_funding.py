@@ -7,7 +7,7 @@ Handles education cost calculations, 529 planning, and multi-child optimization.
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from app.core.database import get_db
 from app.services.education_funding_service import EducationFundingService
@@ -24,15 +24,7 @@ class EducationCostRequest(BaseModel):
     years_until_college: int = Field(..., ge=0, description="Years until child starts college")
     years_of_support: int = Field(default=4, ge=1, le=10, description="Number of years to fund")
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "education_type": "public_in_state",
-                "years_until_college": 10,
-                "years_of_support": 4
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class EducationCostResponse(BaseModel):
     """Response model for education cost"""
@@ -44,19 +36,7 @@ class EducationCostResponse(BaseModel):
     education_type: str
     years_until_college: int
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "tuition": 18500,
-                "room_and_board": 21000,
-                "books_and_supplies": 2050,
-                "other_expenses": 4180,
-                "total_annual": 45730,
-                "education_type": "public_in_state",
-                "years_until_college": 10
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class TotalEducationNeedRequest(BaseModel):
     """Request model for total education need calculation"""
@@ -65,16 +45,7 @@ class TotalEducationNeedRequest(BaseModel):
     college_start_age: int = Field(default=18, ge=16, le=25)
     years_of_support: int = Field(default=4, ge=1, le=10)
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "education_type": "private",
-                "child_age": 5,
-                "college_start_age": 18,
-                "years_of_support": 4
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class TotalEducationNeedResponse(BaseModel):
     """Response model for total education need"""
@@ -84,17 +55,7 @@ class TotalEducationNeedResponse(BaseModel):
     years_until_college: int
     annual_costs: List[float]
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "total_need": 543947,
-                "education_type": "private",
-                "child_age": 5,
-                "years_until_college": 13,
-                "annual_costs": [124502, 131230, 138337, 145840]
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class Plan529Request(BaseModel):
     """Request model for 529 plan strategy"""
@@ -104,17 +65,7 @@ class Plan529Request(BaseModel):
     expected_return: float = Field(default=0.06, ge=0, le=0.20)
     state_tax_deduction: float = Field(default=0.0, ge=0, le=0.15)
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "target_amount": 200000,
-                "current_savings": 10000,
-                "years_until_college": 10,
-                "expected_return": 0.06,
-                "state_tax_deduction": 0.05
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class Plan529Response(BaseModel):
     """Response model for 529 plan strategy"""
@@ -126,19 +77,7 @@ class Plan529Response(BaseModel):
     tax_savings: float
     recommendation: str
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "monthly_contribution": 1152.75,
-                "annual_contribution": 13833.00,
-                "total_contributions": 138330.00,
-                "projected_balance": 200000.00,
-                "shortfall": 0.0,
-                "tax_savings": 6916.50,
-                "recommendation": "Contribute $1,152.75/month to reach goal"
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class FinancialAidRequest(BaseModel):
     """Request model for financial aid calculation"""
@@ -147,16 +86,7 @@ class FinancialAidRequest(BaseModel):
     student_assets: float = Field(default=0, ge=0)
     num_children: int = Field(default=1, ge=1)
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "parent_income": 120000,
-                "parent_assets": 250000,
-                "student_assets": 5000,
-                "num_children": 1
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class FinancialAidResponse(BaseModel):
     """Response model for financial aid estimation"""
@@ -167,18 +97,7 @@ class FinancialAidResponse(BaseModel):
     student_asset_contribution: float
     recommendation: str
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "expected_family_contribution": 41110.00,
-                "estimated_need_based_aid": 0.0,
-                "parent_income_contribution": 27000.00,
-                "parent_asset_contribution": 14100.00,
-                "student_asset_contribution": 1000.00,
-                "recommendation": "Minimal need - plan to cover full cost"
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class ChildEducation(BaseModel):
     """Child education information for multi-child planning"""
@@ -193,17 +112,7 @@ class MultiChildRequest(BaseModel):
     children: List[ChildEducation] = Field(..., min_length=1)
     total_monthly_savings: float = Field(..., gt=0)
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "children": [
-                    {"name": "Emma", "age": 10, "education_type": "public_in_state", "years_of_support": 4},
-                    {"name": "Liam", "age": 7, "education_type": "private", "years_of_support": 4}
-                ],
-                "total_monthly_savings": 2000.0
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class MultiChildResponse(BaseModel):
     """Response model for multi-child allocation"""
@@ -211,35 +120,14 @@ class MultiChildResponse(BaseModel):
     total_allocated: float
     children_data: List[dict]
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "allocations": {
-                    "Emma": 900.0,
-                    "Liam": 1100.0
-                },
-                "total_allocated": 2000.0,
-                "children_data": [
-                    {"name": "Emma", "urgency": 0.125, "total_need": 180000},
-                    {"name": "Liam", "urgency": 0.091, "total_need": 450000}
-                ]
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class SavingsVehicleRequest(BaseModel):
     """Request model for savings vehicle recommendation"""
     years_until_college: int = Field(..., ge=0)
     state: Optional[str] = Field(None, max_length=2)
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "years_until_college": 12,
-                "state": "CA"
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 # Endpoints
 
@@ -497,19 +385,7 @@ class GrandparentCoordinationRequest(BaseModel):
     years_until_college: int = Field(..., gt=0)
     expected_return: float = Field(default=0.06, ge=0, le=0.20)
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "child_name": "Emma",
-                "parent_monthly_contribution": 500.0,
-                "grandparent_annual_contribution": 10000.0,
-                "target_amount": 200000.0,
-                "current_savings": 15000.0,
-                "years_until_college": 10,
-                "expected_return": 0.06
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class MultiChildGrandparentRequest(BaseModel):
     """Request model for multi-child optimization with grandparents"""
@@ -517,18 +393,7 @@ class MultiChildGrandparentRequest(BaseModel):
     parent_monthly_savings: float = Field(..., gt=0)
     grandparent_annual_budget: float = Field(..., ge=0)
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "children": [
-                    {"name": "Emma", "age": 10, "education_type": "public_in_state", "years_of_support": 4},
-                    {"name": "Liam", "age": 7, "education_type": "private", "years_of_support": 4}
-                ],
-                "parent_monthly_savings": 2000.0,
-                "grandparent_annual_budget": 20000.0
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 @router.post(
     "/coordinate-grandparents",

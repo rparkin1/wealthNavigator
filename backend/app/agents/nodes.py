@@ -5,20 +5,20 @@ Each node is a specialized financial planning agent that operates on the state.
 """
 
 from typing import Dict
-from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import HumanMessage, SystemMessage
 from datetime import datetime
 
 from .state import FinancialPlanningState, AgentResponse, Message
 from app.core.config import settings
+from app.core.llm import get_chat_model
 
 
-# Initialize Claude model
-llm = ChatAnthropic(
+# Initialize Claude model (falls back to stub when API key unavailable)
+llm = get_chat_model(
     model="claude-sonnet-4-20250514",
     api_key=settings.ANTHROPIC_API_KEY,
     temperature=0.7,
-    max_tokens=4096
+    max_tokens=4096,
 )
 
 

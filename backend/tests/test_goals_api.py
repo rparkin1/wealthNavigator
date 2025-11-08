@@ -10,7 +10,7 @@ from app.models import Goal, GoalCategory, GoalPriority
 
 
 @pytest.mark.asyncio
-async def test_create_goal(client: AsyncClient, test_user_id: str):
+async def test_create_goal(authenticated_client: AsyncClient, test_user):
     """Test creating a new goal"""
     goal_data = {
         "title": "Retirement Savings",
@@ -23,10 +23,10 @@ async def test_create_goal(client: AsyncClient, test_user_id: str):
         "description": "Save for retirement by age 65"
     }
 
-    response = await client.post(
+    response = await authenticated_client.post(
         "/api/v1/goals",
         json=goal_data,
-        params={"user_id": test_user_id}
+        params={"user_id": test_user.id}
     )
 
     assert response.status_code == 201
@@ -43,12 +43,12 @@ async def test_create_goal(client: AsyncClient, test_user_id: str):
 
 
 @pytest.mark.asyncio
-async def test_list_goals(client: AsyncClient, test_user_id: str, db: AsyncSession):
+async def test_list_goals(authenticated_client: AsyncClient, test_user, db: AsyncSession):
     """Test listing all goals for a user"""
     # Create test goals
     goals = [
         Goal(
-            user_id=test_user_id,
+            user_id=test_user.id,
             title="Retirement",
             category=GoalCategory.RETIREMENT,
             priority=GoalPriority.ESSENTIAL,
@@ -57,7 +57,7 @@ async def test_list_goals(client: AsyncClient, test_user_id: str, db: AsyncSessi
             target_date="2050-12-31"
         ),
         Goal(
-            user_id=test_user_id,
+            user_id=test_user.id,
             title="College Fund",
             category=GoalCategory.EDUCATION,
             priority=GoalPriority.IMPORTANT,
@@ -71,9 +71,9 @@ async def test_list_goals(client: AsyncClient, test_user_id: str, db: AsyncSessi
         db.add(goal)
     await db.commit()
 
-    response = await client.get(
+    response = await authenticated_client.get(
         "/api/v1/goals",
-        params={"user_id": test_user_id}
+        params={"user_id": test_user.id}
     )
 
     assert response.status_code == 200
@@ -84,12 +84,12 @@ async def test_list_goals(client: AsyncClient, test_user_id: str, db: AsyncSessi
 
 
 @pytest.mark.asyncio
-async def test_filter_goals_by_category(client: AsyncClient, test_user_id: str, db: AsyncSession):
+async def test_filter_goals_by_category(authenticated_client: AsyncClient, test_user, db: AsyncSession):
     """Test filtering goals by category"""
     # Create goals with different categories
     goals = [
         Goal(
-            user_id=test_user_id,
+            user_id=test_user.id,
             title="Retirement",
             category=GoalCategory.RETIREMENT,
             priority=GoalPriority.ESSENTIAL,
@@ -98,7 +98,7 @@ async def test_filter_goals_by_category(client: AsyncClient, test_user_id: str, 
             target_date="2050-12-31"
         ),
         Goal(
-            user_id=test_user_id,
+            user_id=test_user.id,
             title="Education",
             category=GoalCategory.EDUCATION,
             priority=GoalPriority.IMPORTANT,
@@ -112,9 +112,9 @@ async def test_filter_goals_by_category(client: AsyncClient, test_user_id: str, 
         db.add(goal)
     await db.commit()
 
-    response = await client.get(
+    response = await authenticated_client.get(
         "/api/v1/goals",
-        params={"user_id": test_user_id, "category": "retirement"}
+        params={"user_id": test_user.id, "category": "retirement"}
     )
 
     assert response.status_code == 200
@@ -123,10 +123,10 @@ async def test_filter_goals_by_category(client: AsyncClient, test_user_id: str, 
 
 
 @pytest.mark.asyncio
-async def test_get_goal_by_id(client: AsyncClient, test_user_id: str, db: AsyncSession):
+async def test_get_goal_by_id(authenticated_client: AsyncClient, test_user, db: AsyncSession):
     """Test retrieving a specific goal"""
     goal = Goal(
-        user_id=test_user_id,
+        user_id=test_user.id,
         title="Test Goal",
         category=GoalCategory.HOME,
         priority=GoalPriority.ESSENTIAL,
@@ -139,9 +139,9 @@ async def test_get_goal_by_id(client: AsyncClient, test_user_id: str, db: AsyncS
     await db.commit()
     await db.refresh(goal)
 
-    response = await client.get(
+    response = await authenticated_client.get(
         f"/api/v1/goals/{goal.id}",
-        params={"user_id": test_user_id}
+        params={"user_id": test_user.id}
     )
 
     assert response.status_code == 200
@@ -151,21 +151,21 @@ async def test_get_goal_by_id(client: AsyncClient, test_user_id: str, db: AsyncS
 
 
 @pytest.mark.asyncio
-async def test_get_goal_not_found(client: AsyncClient, test_user_id: str):
+async def test_get_goal_not_found(authenticated_client: AsyncClient, test_user):
     """Test retrieving a non-existent goal"""
-    response = await client.get(
+    response = await authenticated_client.get(
         "/api/v1/goals/nonexistent-id",
-        params={"user_id": test_user_id}
+        params={"user_id": test_user.id}
     )
 
     assert response.status_code == 404
 
 
 @pytest.mark.asyncio
-async def test_update_goal(client: AsyncClient, test_user_id: str, db: AsyncSession):
+async def test_update_goal(authenticated_client: AsyncClient, test_user, db: AsyncSession):
     """Test updating a goal"""
     goal = Goal(
-        user_id=test_user_id,
+        user_id=test_user.id,
         title="Original Title",
         category=GoalCategory.EMERGENCY,
         priority=GoalPriority.IMPORTANT,
@@ -184,10 +184,10 @@ async def test_update_goal(client: AsyncClient, test_user_id: str, db: AsyncSess
         "monthly_contribution": 500
     }
 
-    response = await client.patch(
+    response = await authenticated_client.patch(
         f"/api/v1/goals/{goal.id}",
         json=update_data,
-        params={"user_id": test_user_id}
+        params={"user_id": test_user.id}
     )
 
     assert response.status_code == 200
@@ -198,10 +198,10 @@ async def test_update_goal(client: AsyncClient, test_user_id: str, db: AsyncSess
 
 
 @pytest.mark.asyncio
-async def test_delete_goal(client: AsyncClient, test_user_id: str, db: AsyncSession):
+async def test_delete_goal(authenticated_client: AsyncClient, test_user, db: AsyncSession):
     """Test deleting a goal"""
     goal = Goal(
-        user_id=test_user_id,
+        user_id=test_user.id,
         title="To Be Deleted",
         category=GoalCategory.MAJOR_EXPENSE,
         priority=GoalPriority.ASPIRATIONAL,
@@ -214,23 +214,23 @@ async def test_delete_goal(client: AsyncClient, test_user_id: str, db: AsyncSess
     await db.commit()
     await db.refresh(goal)
 
-    response = await client.delete(
+    response = await authenticated_client.delete(
         f"/api/v1/goals/{goal.id}",
-        params={"user_id": test_user_id}
+        params={"user_id": test_user.id}
     )
 
     assert response.status_code == 204
 
     # Verify deletion
-    get_response = await client.get(
+    get_response = await authenticated_client.get(
         f"/api/v1/goals/{goal.id}",
-        params={"user_id": test_user_id}
+        params={"user_id": test_user.id}
     )
     assert get_response.status_code == 404
 
 
 @pytest.mark.asyncio
-async def test_goal_status_calculation(client: AsyncClient, test_user_id: str):
+async def test_goal_status_calculation(authenticated_client: AsyncClient, test_user):
     """Test that goal status is calculated correctly"""
     # Create goal with high progress
     goal_data = {
@@ -242,10 +242,10 @@ async def test_goal_status_calculation(client: AsyncClient, test_user_id: str):
         "current_amount": 85000  # 85% progress
     }
 
-    response = await client.post(
+    response = await authenticated_client.post(
         "/api/v1/goals",
         json=goal_data,
-        params={"user_id": test_user_id}
+        params={"user_id": test_user.id}
     )
 
     assert response.status_code == 201
@@ -255,7 +255,7 @@ async def test_goal_status_calculation(client: AsyncClient, test_user_id: str):
 
 
 @pytest.mark.asyncio
-async def test_create_goal_validation(client: AsyncClient, test_user_id: str):
+async def test_create_goal_validation(authenticated_client: AsyncClient, test_user):
     """Test goal creation with invalid data"""
     # Missing required fields
     invalid_data = {
@@ -263,17 +263,17 @@ async def test_create_goal_validation(client: AsyncClient, test_user_id: str):
         # missing category, target_amount, target_date
     }
 
-    response = await client.post(
+    response = await authenticated_client.post(
         "/api/v1/goals",
         json=invalid_data,
-        params={"user_id": test_user_id}
+        params={"user_id": test_user.id}
     )
 
     assert response.status_code == 422  # Validation error
 
 
 @pytest.mark.asyncio
-async def test_create_goal_with_negative_amount(client: AsyncClient, test_user_id: str):
+async def test_create_goal_with_negative_amount(authenticated_client: AsyncClient, test_user):
     """Test that negative amounts are rejected"""
     invalid_data = {
         "title": "Test Goal",
@@ -283,21 +283,21 @@ async def test_create_goal_with_negative_amount(client: AsyncClient, test_user_i
         "target_date": "2030-12-31"
     }
 
-    response = await client.post(
+    response = await authenticated_client.post(
         "/api/v1/goals",
         json=invalid_data,
-        params={"user_id": test_user_id}
+        params={"user_id": test_user.id}
     )
 
     assert response.status_code == 422
 
 
 @pytest.mark.asyncio
-async def test_list_goals_empty(client: AsyncClient, test_user_id: str):
+async def test_list_goals_empty(authenticated_client: AsyncClient, test_user):
     """Test listing goals when user has none"""
-    response = await client.get(
+    response = await authenticated_client.get(
         "/api/v1/goals",
-        params={"user_id": test_user_id}
+        params={"user_id": test_user.id}
     )
 
     assert response.status_code == 200

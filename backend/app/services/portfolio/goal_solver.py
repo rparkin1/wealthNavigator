@@ -80,7 +80,7 @@ class GoalSolver:
         min_years: Optional[int] = None,
         max_years: Optional[int] = None,
     ) -> Dict[str, Any]:
-        current_age = getattr(goal, "current_age", None) or 40
+        current_age = int(_safe_float(getattr(goal, "current_age", None), 40))
         resolved_min_age = (
             current_age + min_years if min_years is not None else min_retirement_age
         )
@@ -130,38 +130,48 @@ class GoalSolver:
         """Compute a safe withdrawal rate using optional goal context."""
 
         if goal is not None:
-            portfolio_value = portfolio_value or float(
-                getattr(goal, "retirement_portfolio_value", None)
-                or getattr(goal, "target_amount", None)
-                or getattr(goal, "current_amount", 0.0)
-            )
-            years_in_retirement = years_in_retirement or int(
-                getattr(goal, "years_in_retirement", None)
-                or (
-                    getattr(goal, "life_expectancy", 90)
-                    - getattr(goal, "retirement_age", 65)
+            if portfolio_value is None:
+                candidate = getattr(goal, "retirement_portfolio_value", None)
+                if candidate is None:
+                    candidate = getattr(goal, "target_amount", None)
+                if candidate is None:
+                    candidate = getattr(goal, "current_amount", 0.0)
+                portfolio_value = _safe_float(candidate, 0.0)
+            current_age = int(_safe_float(getattr(goal, "current_age", None), 40))
+            retirement_age = int(_safe_float(getattr(goal, "retirement_age", None), 65))
+            life_expectancy = int(
+                _safe_float(
+                    getattr(goal, "life_expectancy", None),
+                    max(retirement_age + 25, 80),
                 )
-                or 30
             )
-            annual_expenses = annual_expenses or float(
-                getattr(goal, "retirement_expenses", None)
-                or getattr(goal, "annual_expenses", None)
-                or getattr(goal, "annual_withdrawal_needed", 0.0)
-            )
+            if years_in_retirement is None:
+                years_in_retirement = int(
+                    _safe_float(getattr(goal, "years_in_retirement", None), 0.0)
+                )
+                if years_in_retirement <= 0:
+                    years_in_retirement = max(life_expectancy - retirement_age, 1)
+            if annual_expenses is None:
+                candidate_expenses = getattr(goal, "retirement_expenses", None)
+                if candidate_expenses is None:
+                    candidate_expenses = getattr(goal, "annual_expenses", None)
+                if candidate_expenses is None:
+                    candidate_expenses = getattr(goal, "annual_withdrawal_needed", 0.0)
+                annual_expenses = _safe_float(candidate_expenses, 0.0)
             expected_return = (
                 expected_return
                 if expected_return is not None
-                else float(getattr(goal, "expected_return_annual", 0.06) or 0.06)
+                else _safe_float(getattr(goal, "expected_return_annual", None), 0.06)
             )
             volatility = (
                 volatility
                 if volatility is not None
-                else float(getattr(goal, "volatility", 0.12) or 0.12)
+                else _safe_float(getattr(goal, "volatility", None), 0.12)
             )
             inflation = (
                 inflation
                 if inflation is not None
-                else float(getattr(goal, "inflation_rate", 0.025) or 0.025)
+                else _safe_float(getattr(goal, "inflation_rate", None), 0.025)
             )
 
         if portfolio_value is None or portfolio_value <= 0:
@@ -311,8 +321,9 @@ class GoalSolver:
                 - converged: bool
         """
         current_amount = _safe_float(getattr(goal, "current_amount", 0.0), 0.0)
+        # Validate immediately after conversion - don't allow negative amounts
         if current_amount < 0:
-            raise ValueError("Goal current amount must be non-negative.")
+            raise ValueError(f"Goal current amount must be non-negative, got {current_amount}")
 
         current_contribution = _safe_float(
             getattr(goal, "monthly_contribution", 0.0), 0.0
@@ -413,8 +424,8 @@ class GoalSolver:
         tolerance: float = 0.01,
     ) -> Dict[str, Any]:
         """Synchronous implementation of the timeline solver."""
-        current_age = getattr(goal, "current_age", None) or 40
-        current_retirement_age = getattr(goal, "retirement_age", None) or 65
+        current_age = int(_safe_float(getattr(goal, "current_age", None), 40))
+        current_retirement_age = int(_safe_float(getattr(goal, "retirement_age", None), 65))
 
         def objective_function(retirement_age: int) -> float:
             """Calculate success probability for given retirement age"""

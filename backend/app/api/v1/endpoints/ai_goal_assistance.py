@@ -8,7 +8,7 @@ Implements REQ-GOAL-004, REQ-GOAL-005, REQ-GOAL-006.
 from typing import List, Dict, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from app.core.database import get_db
 from app.services.ai_goal_configuration_service import AIGoalConfigurationService
@@ -24,38 +24,14 @@ class NaturalLanguageGoalRequest(BaseModel):
     user_input: str = Field(..., min_length=10, max_length=1000)
     user_context: Optional[Dict] = Field(None, description="Optional user context (age, income, location, etc.)")
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "user_input": "I want to retire at 60 with $80,000 per year in income",
-                "user_context": {
-                    "age": 35,
-                    "annual_income": 120000,
-                    "location": "San Francisco, CA",
-                    "family_status": "married, 2 children"
-                }
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class ClarifyingQuestionsRequest(BaseModel):
     """Request model for generating clarifying questions"""
     partial_goal: Dict = Field(..., description="Partially defined goal")
     user_context: Optional[Dict] = None
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "partial_goal": {
-                    "goal_category": "education",
-                    "priority": "important",
-                    "target_amount": None,
-                    "target_date": None
-                },
-                "user_context": {"age": 35, "children": 2}
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class CostSuggestionsRequest(BaseModel):
     """Request model for cost suggestions"""

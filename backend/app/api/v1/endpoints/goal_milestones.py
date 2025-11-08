@@ -7,7 +7,7 @@ Handles milestone creation, tracking, auto-generation, and progress metrics.
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from app.core.database import get_db
 from app.services.goal_milestone_service import GoalMilestoneService
@@ -25,16 +25,7 @@ class MilestoneCreate(BaseModel):
     target_date: Optional[str] = Field(None, description="ISO format date YYYY-MM-DD")
     description: Optional[str] = Field(None, max_length=500)
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "title": "First Quarter Milestone",
-                "target_amount": 10000,
-                "target_date": "2025-04-01",
-                "description": "Reach $10,000 by end of Q1"
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class MilestoneUpdate(BaseModel):
     """Request model for updating a milestone"""
@@ -44,15 +35,7 @@ class MilestoneUpdate(BaseModel):
     description: Optional[str] = Field(None, max_length=500)
     completed: Optional[bool] = None
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "title": "Updated Milestone Title",
-                "target_amount": 12000,
-                "description": "Updated description"
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class MilestoneResponse(BaseModel):
     """Response model for milestone"""
@@ -66,21 +49,7 @@ class MilestoneResponse(BaseModel):
     created_at: str
     auto_generated: Optional[bool]
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "id": "ms-1",
-                "title": "3 Months Milestone",
-                "target_amount": 5000,
-                "target_date": "2025-04-01",
-                "description": "Reach $5,000 by 3 months",
-                "completed": False,
-                "completed_date": None,
-                "created_at": "2025-01-01T00:00:00",
-                "auto_generated": True
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class ProgressCheckResponse(BaseModel):
     """Response model for progress check"""
@@ -89,22 +58,7 @@ class ProgressCheckResponse(BaseModel):
     progress_percentage: float
     newly_completed: List[dict]
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "total_milestones": 5,
-                "completed_milestones": 2,
-                "progress_percentage": 40.0,
-                "newly_completed": [
-                    {
-                        "id": "ms-2",
-                        "title": "6 Months Milestone",
-                        "completed_date": "2025-07-01T12:00:00"
-                    }
-                ]
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class ProgressMetricsResponse(BaseModel):
     """Response model for comprehensive progress metrics"""
@@ -120,23 +74,7 @@ class ProgressMetricsResponse(BaseModel):
     total_milestones: int
     status: str
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "goal_id": "goal-123",
-                "progress_percentage": 45.2,
-                "time_progress": 52.1,
-                "milestone_progress": 40.0,
-                "on_track": False,
-                "current_velocity": 850.0,
-                "required_velocity": 1200.0,
-                "velocity_gap": 350.0,
-                "completed_milestones": 2,
-                "total_milestones": 5,
-                "status": "active"
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class UpcomingMilestone(BaseModel):
     """Model for upcoming milestone"""

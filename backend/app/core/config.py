@@ -4,8 +4,8 @@ Handles environment variables and settings
 """
 
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict, field_validator
 from typing import Optional, Union, List
-from pydantic import field_validator
 import json
 
 
@@ -15,14 +15,17 @@ class Settings(BaseSettings):
     # Application
     APP_NAME: str = "WealthNavigator AI"
     APP_VERSION: str = "0.1.0"
-    DEBUG: bool = True
+    DEBUG: bool = False  # Default to False for security
+
+    # Authentication
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # API
     API_V1_PREFIX: str = "/api/v1"
     CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://localhost:3000"]
 
     # Database
-    DATABASE_URL: str = "postgresql://postgres:dev@localhost:5432/wealthnav"
+    DATABASE_URL: str
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
@@ -40,11 +43,9 @@ class Settings(BaseSettings):
     PLAID_REDIRECT_URI: Optional[str] = None  # For OAuth flow
 
     # Security
-    SECRET_KEY: str = "dev-secret-key-change-in-production"
+    SECRET_KEY: str
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = ConfigDict(env_file=".env", case_sensitive=True)
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
@@ -75,3 +76,6 @@ class Settings(BaseSettings):
 
 # Global settings instance
 settings = Settings()
+
+def get_settings() -> Settings:
+    return settings

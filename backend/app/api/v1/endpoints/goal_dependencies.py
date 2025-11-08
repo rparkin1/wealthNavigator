@@ -7,7 +7,7 @@ Handles goal dependency relationships, shared resource allocation, and goal tree
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from app.core.database import get_db
 from app.models.goal import GoalDependencyType
@@ -24,14 +24,7 @@ class DependencyCreate(BaseModel):
     depends_on_goal_id: str = Field(..., description="Goal that must be satisfied first")
     dependency_type: GoalDependencyType = Field(..., description="Type of dependency")
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "depends_on_goal_id": "goal-123",
-                "dependency_type": "sequential"
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class DependencyResponse(BaseModel):
     """Response model for dependency information"""
@@ -40,28 +33,13 @@ class DependencyResponse(BaseModel):
     dependency_type: str
     status: str
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "goal_id": "goal-456",
-                "depends_on_goal_id": "goal-123",
-                "dependency_type": "sequential",
-                "status": "blocked"
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class SharedResourceAllocationRequest(BaseModel):
     """Request model for shared resource allocation"""
     total_monthly_savings: float = Field(..., gt=0, description="Total available monthly savings")
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "total_monthly_savings": 5000.0
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class SharedResourceAllocationResponse(BaseModel):
     """Response model for shared resource allocation"""
@@ -69,40 +47,14 @@ class SharedResourceAllocationResponse(BaseModel):
     total_allocated: float
     unallocated: float
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "allocations": {
-                    "goal-123": 2000.0,
-                    "goal-456": 1500.0,
-                    "goal-789": 1000.0
-                },
-                "total_allocated": 4500.0,
-                "unallocated": 500.0
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class ConflictCheckResponse(BaseModel):
     """Response model for conflict checking"""
     conflicts: List[dict]
     has_conflicts: bool
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "conflicts": [
-                    {
-                        "goal1": "goal-123",
-                        "goal2": "goal-456",
-                        "conflict": "mutually_exclusive",
-                        "message": "Goals 'Retire at 50' and 'Retire at 60' are mutually exclusive"
-                    }
-                ],
-                "has_conflicts": True
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 # Endpoints
 

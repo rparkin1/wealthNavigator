@@ -3,7 +3,7 @@ Thread (Conversation) Models
 Pydantic models for thread-based conversations
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List
 from datetime import datetime
 from enum import Enum
@@ -55,8 +55,7 @@ class MessageResponse(MessageBase):
     thread_id: str
     timestamp: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ThreadBase(BaseModel):
@@ -84,8 +83,7 @@ class ThreadResponse(ThreadBase):
     message_count: int = 0
     analysis_count: int = 0
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ThreadDetail(ThreadResponse):

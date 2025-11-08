@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Optional, List
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
 class BudgetEntryBase(BaseModel):
@@ -74,8 +74,7 @@ class BudgetEntryResponse(BudgetEntryBase):
     annual_amount: Optional[float] = None
     monthly_amount: Optional[float] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class BudgetEntriesList(BaseModel):
