@@ -3,9 +3,10 @@
  * Initializes and manages Plaid Link flow for connecting bank accounts
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, memo, useRef } from 'react';
 import { usePlaidLink, type PlaidLinkOptions } from 'react-plaid-link';
 import { plaidApi } from '../../services/plaidApi';
+import { ensurePlaidScript } from '../../utils/plaidSingleton';
 
 interface PlaidLinkButtonProps {
   onSuccess?: () => void;
@@ -14,7 +15,8 @@ interface PlaidLinkButtonProps {
   className?: string;
 }
 
-export function PlaidLinkButton({
+// Export memoized component to prevent duplicate Plaid script loading
+export const PlaidLinkButton = memo(function PlaidLinkButton({
   onSuccess,
   onExit,
   buttonText = 'Connect Bank Account',
@@ -23,13 +25,24 @@ export function PlaidLinkButton({
   const [linkToken, setLinkToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const initializeAttempted = useRef(false);
 
-  // Create link token on mount
+  // Create link token on mount - singleton pattern
   useEffect(() => {
+    // Prevent duplicate initialization
+    if (initializeAttempted.current) {
+      return;
+    }
+    initializeAttempted.current = true;
+
     async function createLinkToken() {
       try {
         setLoading(true);
         setError(null);
+
+        // Ensure Plaid script is loaded only once
+        await ensurePlaidScript();
+
         const response = await plaidApi.createLinkToken({
           country_codes: ['US'],
           language: 'en',
@@ -77,14 +90,15 @@ export function PlaidLinkButton({
     onExit?.();
   }, [onExit]);
 
-  // Configure Plaid Link
+  // Configure Plaid Link with singleton pattern to prevent duplicate script loading
   const config: PlaidLinkOptions = {
     token: linkToken,
     onSuccess: handleSuccess,
     onExit: handleExit,
   };
 
-  const { open, ready } = usePlaidLink(config);
+  // Only initialize Plaid Link if token is available
+  const { open, ready } = usePlaidLink(linkToken ? config : { token: null, onSuccess: handleSuccess });
 
   return (
     <div className="plaid-link-button">
@@ -111,4 +125,4 @@ export function PlaidLinkButton({
       )}
     </div>
   );
-}
+});

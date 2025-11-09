@@ -36,6 +36,10 @@ export default defineConfig(({ mode }) => {
         changeOrigin: true,
       },
     },
+    // Add security headers for Plaid Link integration
+    headers: {
+      'Permissions-Policy': 'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), accelerometer=(self), encrypted-media=(self)',
+    },
   },
   build: {
     // Target modern browsers for smaller bundles

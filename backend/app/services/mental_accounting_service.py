@@ -6,7 +6,7 @@ Shows dedicated assets, funding levels, and success probability.
 """
 
 from typing import Dict, List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import numpy as np
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -51,7 +51,9 @@ class MentalAccountingService:
 
         # Calculate years to goal
         if goal.target_date:
-            years_to_goal = (goal.target_date - datetime.utcnow().date()).days / 365.25
+            # Parse ISO date string to date object
+            target_date_obj = date.fromisoformat(goal.target_date) if isinstance(goal.target_date, str) else goal.target_date
+            years_to_goal = (target_date_obj - datetime.utcnow().date()).days / 365.25
         else:
             years_to_goal = goal.time_horizon_years or 10
 
@@ -104,10 +106,10 @@ class MentalAccountingService:
 
         return {
             "goal_id": goal.id,
-            "goal_name": goal.name,
+            "goal_name": goal.title,
             "goal_category": goal.category,
             "target_amount": goal.target_amount,
-            "target_date": goal.target_date.isoformat() if goal.target_date else None,
+            "target_date": goal.target_date,  # Already a string in ISO format
             "years_to_goal": round(years_to_goal, 2),
 
             # Dedicated assets
@@ -167,14 +169,14 @@ class MentalAccountingService:
 
         REQ-GOAL-009: Complete view of all mental accounts
         """
-        # Get all goals for user
-        # Note: status is a computed property, so we filter after fetching
-        stmt = select(Goal).where(Goal.user_id == user_id)
+        # Get all active/planning goals for user
+        # Use the status column (not the progress_status property) for lifecycle status
+        stmt = select(Goal).where(
+            Goal.user_id == user_id,
+            Goal.status.in_(["active", "planning"])
+        )
         result = await db.execute(stmt)
-        all_goals = result.scalars().all()
-
-        # Filter to active/planning goals using computed status property
-        goals = [g for g in all_goals if g.status in ["active", "planning"]]
+        goals = result.scalars().all()
 
         # Create mental accounts for each goal
         mental_accounts = []
@@ -292,7 +294,7 @@ class MentalAccountingService:
 
         return {
             "allocation": allocation,
-            "message": f"Allocated {allocation_percentage}% of account {account_id} to goal {goal.name}",
+            "message": f"Allocated {allocation_percentage}% of account {account_id} to goal {goal.title}",
             "monthly_contribution": monthly_contribution
         }
 
