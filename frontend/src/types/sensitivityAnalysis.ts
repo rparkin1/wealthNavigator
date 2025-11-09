@@ -270,7 +270,6 @@ export type {
   BreakEvenChartPoint,
   BreakEvenDelta,
   BreakEvenPoint,
-  export type {,
   HeatmapCell,
   OneWaySensitivityRequest,
   OneWaySensitivityResult,

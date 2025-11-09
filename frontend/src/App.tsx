@@ -3,9 +3,15 @@
  * Root component with layout structure and routing
  */
 
-import { useState, Suspense, lazy } from 'react';
+import { useState, Suspense, lazy, useEffect } from 'react';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import Breadcrumbs from './components/common/Breadcrumbs';
+import NotificationSystem from './components/common/NotificationSystem';
+import HelpMenu from './components/help/HelpMenu';
+import OnboardingWizard from './components/onboarding/OnboardingWizard';
+import InAppDocumentation from './components/help/InAppDocumentation';
+import { SkipLink } from './components/common/SkipLink';
+import { useOnboarding } from './hooks/useOnboarding';
 import './index.css';
 
 // Lazy load components for better error isolation
@@ -155,9 +161,52 @@ type View =
 function App() {
   const [currentView, setCurrentView] = useState<View>('home');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showDocumentation, setShowDocumentation] = useState(false);
+  const [currentDocPath, setCurrentDocPath] = useState<string>('');
 
   // Test user ID matching backend database - in production, get from auth
   const userId = 'test-user-123';
+
+  // Onboarding state
+  const {
+    shouldShowOnboarding,
+    completeOnboarding,
+    skipOnboarding,
+    startOnboarding,
+  } = useOnboarding();
+
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Check if onboarding should be shown
+  useEffect(() => {
+    if (shouldShowOnboarding()) {
+      // Delay to allow app to render first
+      setTimeout(() => {
+        setShowOnboarding(true);
+        startOnboarding();
+      }, 500);
+    }
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+    completeOnboarding();
+  };
+
+  const handleOnboardingSkip = () => {
+    setShowOnboarding(false);
+    skipOnboarding();
+  };
+
+  const handleOpenDocumentation = (docPath: string) => {
+    setCurrentDocPath(docPath);
+    setShowDocumentation(true);
+  };
+
+  const handleOpenTutorial = (tutorialId: string) => {
+    setCurrentDocPath(tutorialId);
+    setShowDocumentation(true);
+  };
 
   const renderView = () => {
     switch (currentView) {
@@ -459,23 +508,48 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
+    <>
+      {/* Skip Navigation Link */}
+      <SkipLink targetId="main-content" label="Skip to main content" />
+
+      {/* Onboarding Wizard */}
+      {showOnboarding && (
+        <OnboardingWizard
+          userId={userId}
+          onComplete={handleOnboardingComplete}
+          onSkip={handleOnboardingSkip}
+        />
+      )}
+
+      {/* Documentation Viewer */}
+      {showDocumentation && (
+        <InAppDocumentation
+          docPath={currentDocPath}
+          onClose={() => setShowDocumentation(false)}
+        />
+      )}
+
+      <div className="flex h-screen bg-gray-50">
+      {/* Sidebar Navigation */}
       {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'education' || currentView === '529-calculator' || currentView === 'tax' || currentView === 'estate-planning' || currentView === 'hedging' || currentView === 'insurance' || currentView === 'risk' || currentView === 'reserves' || currentView === 'diversification' || currentView === 'sensitivity' || currentView === 'budget' || currentView === 'recurring' || currentView === 'plaid' || currentView === 'data-entry' || currentView === 'what-if' || currentView === 'life-events' || currentView === 'scenarios') ? (
         sidebarOpen && (
-          <aside className="w-64 transition-all duration-300 bg-white border-r border-gray-200 flex flex-col h-screen">
+          <aside
+            className="w-64 transition-all duration-300 bg-white border-r border-gray-200 flex flex-col h-screen"
+            role="navigation"
+            aria-label="Main navigation"
+          >
           <div className="flex-none p-4">
             <h2 className="text-lg font-semibold text-gray-900">WealthNavigator AI</h2>
             <p className="text-sm text-gray-600 mt-1">Financial Planning Assistant</p>
           </div>
 
-          <nav className="flex-1 overflow-y-auto mt-6">
+          <nav className="flex-1 overflow-y-auto mt-6" aria-label="Main menu">
             <div className="px-4 py-2">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider" id="nav-heading">
                 Navigation
               </h3>
             </div>
-            <div className="mt-2 space-y-1 px-2">
+            <div className="mt-2 space-y-1 px-2" role="list" aria-labelledby="nav-heading">
               <button
                 onClick={() => setCurrentView('home')}
                 className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
@@ -483,8 +557,10 @@ function App() {
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
+                aria-current={currentView === 'home' ? 'page' : undefined}
+                aria-label="Home"
               >
-                🏠 Home
+                <span aria-hidden="true">🏠</span> Home
               </button>
               <button
                 onClick={() => setCurrentView('data-entry')}
@@ -493,23 +569,26 @@ function App() {
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
+                aria-current={currentView === 'data-entry' ? 'page' : undefined}
+                aria-label="Data Entry"
               >
-                📝 Data Entry
+                <span aria-hidden="true">📝</span> Data Entry
               </button>
               <button
                 onClick={() => setCurrentView('chat')}
                 className="w-full px-3 py-2 text-left text-sm rounded-lg transition-colors text-gray-700 hover:bg-gray-100"
+                aria-label="Chat with AI Assistant"
               >
-                💬 Chat
+                <span aria-hidden="true">💬</span> Chat
               </button>
             </div>
 
             <div className="px-4 py-2 mt-6">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider" id="planning-heading">
                 Planning
               </h3>
             </div>
-            <div className="mt-2 space-y-1 px-2">
+            <div className="mt-2 space-y-1 px-2" role="list" aria-labelledby="planning-heading">
               <button
                 onClick={() => setCurrentView('goals')}
                 className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
@@ -517,8 +596,10 @@ function App() {
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
+                aria-current={currentView === 'goals' ? 'page' : undefined}
+                aria-label="Financial Goals"
               >
-                🎯 Goals
+                <span aria-hidden="true">🎯</span> Goals
               </button>
               <button
                 onClick={() => setCurrentView('budget')}
@@ -623,11 +704,11 @@ function App() {
             </div>
 
             <div className="px-4 py-2 mt-6">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider" id="analysis-heading">
                 Analysis & Scenarios
               </h3>
             </div>
-            <div className="mt-2 space-y-1 px-2">
+            <div className="mt-2 space-y-1 px-2" role="list" aria-labelledby="analysis-heading">
               <button
                 onClick={() => setCurrentView('risk')}
                 className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
@@ -635,8 +716,10 @@ function App() {
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
+                aria-current={currentView === 'risk' ? 'page' : undefined}
+                aria-label="Risk Management"
               >
-                ⚠️ Risk Management
+                <span aria-hidden="true">⚠️</span> Risk Management
               </button>
               <button
                 onClick={() => setCurrentView('reserves')}
@@ -707,12 +790,15 @@ function App() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'tax' || currentView === 'estate-planning' || currentView === 'hedging' || currentView === 'insurance' || currentView === 'risk' || currentView === 'reserves' || currentView === 'diversification' || currentView === 'sensitivity' || currentView === 'what-if' || currentView === 'life-events' || currentView === 'scenarios') && (
-          <header className="flex-none bg-white border-b border-gray-200 px-6 py-4">
+          <header className="flex-none bg-white border-b border-gray-200 px-6 py-4" role="banner">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <button
                   onClick={() => setSidebarOpen(!sidebarOpen)}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+                  aria-expanded={sidebarOpen}
+                  aria-controls="sidebar-navigation"
                 >
                   <svg
                     className="w-5 h-5 text-gray-600"
@@ -722,9 +808,11 @@ function App() {
                     strokeWidth="2"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
+                    aria-hidden="true"
                   >
                     <path d="M4 6h16M4 12h16M4 18h16"></path>
                   </svg>
+                  <span className="sr-only">{sidebarOpen ? 'Close' : 'Open'} navigation menu</span>
                 </button>
                 <h1 className="text-xl font-semibold text-gray-900">
                   Financial Planning
@@ -732,22 +820,35 @@ function App() {
               </div>
 
               <div className="flex items-center space-x-4">
+                <NotificationSystem maxNotifications={10} autoHideDuration={5000} />
+                <HelpMenu
+                  onOpenDocumentation={handleOpenDocumentation}
+                  onOpenTutorial={handleOpenTutorial}
+                />
                 <button
                   onClick={() => setCurrentView('settings')}
                   className="btn-secondary"
+                  aria-label="Open settings"
                 >
-                  ⚙️ Settings
+                  <span aria-hidden="true">⚙️</span> Settings
                 </button>
               </div>
             </div>
           </header>
         )}
 
-        <main className="flex-1 overflow-hidden">
+        <main
+          id="main-content"
+          className="flex-1 overflow-hidden"
+          role="main"
+          aria-label="Main content"
+          tabIndex={-1}
+        >
           {renderView()}
         </main>
       </div>
     </div>
+    </>
   );
 }
 

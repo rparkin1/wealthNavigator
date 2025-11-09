@@ -10,11 +10,12 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { NetWorthTrendChart, NetWorthDataPoint } from './NetWorthTrendChart';
+import { NetWorthTrendChart } from './NetWorthTrendChart';
 import { NetWorthGrowthMetrics } from './NetWorthGrowthMetrics';
 import { NetWorthProjection } from './NetWorthProjection';
 import { NetWorthExport } from './NetWorthExport';
 import { useNetWorthData } from '../../hooks/useNetWorthData';
+import type { NetWorthDataPoint } from '../../types/netWorth';
 
 interface NetWorthDashboardProps {
   userId: string;

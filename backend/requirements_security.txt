@@ -1,0 +1,23 @@
+# Security-related dependencies for WealthNavigator AI
+
+# Multi-Factor Authentication
+pyotp==2.9.0  # Time-based One-Time Password (TOTP)
+qrcode[pil]==7.4.2  # QR code generation for MFA setup
+
+# Cryptography
+cryptography==42.0.0  # AES encryption for MFA secrets
+
+# Password Hashing (already in main requirements, listed here for reference)
+# passlib[bcrypt]==1.7.4
+# bcrypt==4.1.2
+
+# JWT & Security (already in main requirements, listed here for reference)
+# python-jose[cryptography]==3.3.0
+
+# Input Validation & Sanitization
+bleach==6.1.0  # HTML sanitization (optional upgrade from basic sanitization)
+html-sanitizer==2.4.1  # Advanced HTML sanitization
+
+# Additional security tools
+pip-audit==2.6.3  # Vulnerability scanning for Python packages
+safety==3.0.1  # Dependency vulnerability checking

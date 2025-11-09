@@ -21,6 +21,9 @@ numpy==2.2.1
 scipy==1.15.1
 pandas==2.2.3
 
+# Report Export
+openpyxl==3.1.2  # Excel export functionality
+
 # API & Streaming
 sse-starlette==2.2.1
 python-multipart==0.0.20
@@ -34,6 +37,9 @@ aiohttp==3.11.11
 # Utilities
 python-dotenv==1.0.1
 orjson==3.10.13
+
+# Load Testing
+locust==2.32.6
 
 # Development
 pytest==8.3.4

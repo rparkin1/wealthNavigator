@@ -8,6 +8,7 @@ import { TLHReporting } from './TLHReporting';
 import { TaxExport } from './TaxExport';
 import { MunicipalBondOptimizer } from './MunicipalBondOptimizer';
 import { RothConversionAnalysis } from './RothConversionAnalysis';
+import { TaxProjection } from './TaxProjection';
 import { useTaxManagement } from '@/hooks/useTaxManagement';
 import { formatCurrency } from '@/services/taxManagementApi';
 
@@ -22,7 +23,7 @@ interface TaxDashboardProps {
   annualIncome?: number;
 }
 
-type TabType = 'overview' | 'tlh' | 'export' | 'muni' | 'roth';
+type TabType = 'overview' | 'tlh' | 'export' | 'muni' | 'roth' | 'projection';
 
 // ==================== Component ====================
 
@@ -39,6 +40,7 @@ export const TaxDashboard: React.FC<TaxDashboardProps> = ({
 
   const tabs = [
     { id: 'overview' as TabType, label: 'Overview', icon: '📊' },
+    { id: 'projection' as TabType, label: 'Tax Projection', icon: '📈' },
     { id: 'tlh' as TabType, label: 'Tax-Loss Harvesting', icon: '📉' },
     { id: 'export' as TabType, label: 'Tax Export', icon: '📄' },
     { id: 'muni' as TabType, label: 'Municipal Bonds', icon: '🏛️' },
@@ -143,6 +145,26 @@ export const TaxDashboard: React.FC<TaxDashboardProps> = ({
           <div className="space-y-6">
             {/* Strategy Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Tax Projection */}
+              <div
+                className="bg-white border rounded-lg p-6 cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => setSelectedTab('projection')}
+              >
+                <h3 className="text-lg font-semibold mb-3">📈 Tax Projection</h3>
+                <p className="text-gray-600 mb-4">
+                  Multi-year tax liability estimates with federal, state, and NIIT calculations
+                </p>
+                <div className="bg-green-50 p-4 rounded">
+                  <div className="text-sm text-gray-600">Features</div>
+                  <div className="text-sm font-medium text-green-700">
+                    30-year projections with inflation adjustments
+                  </div>
+                </div>
+                <div className="mt-3 text-sm text-blue-600 font-medium">
+                  Calculate Projection →
+                </div>
+              </div>
+
               {/* Asset Location */}
               <div className="bg-white border rounded-lg p-6">
                 <h3 className="text-lg font-semibold mb-3">Asset Location</h3>
@@ -243,7 +265,16 @@ export const TaxDashboard: React.FC<TaxDashboardProps> = ({
             {/* Quick Actions */}
             <div className="bg-white border rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <button
+                  onClick={() => setSelectedTab('projection')}
+                  className="p-4 border rounded hover:border-green-500 hover:bg-green-50 transition-colors text-left"
+                >
+                  <div className="font-medium">📈 Calculate Tax Projection</div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    Multi-year liability estimates
+                  </div>
+                </button>
                 <button
                   onClick={() => setSelectedTab('tlh')}
                   className="p-4 border rounded hover:border-blue-500 hover:bg-blue-50 transition-colors text-left"
@@ -310,6 +341,14 @@ export const TaxDashboard: React.FC<TaxDashboardProps> = ({
               </ul>
             </div>
           </div>
+        )}
+
+        {selectedTab === 'projection' && (
+          <TaxProjection
+            defaultIncome={annualIncome}
+            defaultState={state}
+            defaultFilingStatus="married_joint"
+          />
         )}
 
         {selectedTab === 'tlh' && (

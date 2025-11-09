@@ -7,20 +7,24 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 
-export enum NotificationType {
-  SUCCESS = 'success',
-  INFO = 'info',
-  WARNING = 'warning',
-  ERROR = 'error',
-}
+export type NotificationType = 'success' | 'info' | 'warning' | 'error';
 
-export enum NotificationCategory {
-  BUDGET = 'budget',
-  GOAL = 'goal',
-  PORTFOLIO = 'portfolio',
-  TAX = 'tax',
-  SYSTEM = 'system',
-}
+export const NotificationType = {
+  SUCCESS: 'success' as const,
+  INFO: 'info' as const,
+  WARNING: 'warning' as const,
+  ERROR: 'error' as const,
+};
+
+export type NotificationCategory = 'budget' | 'goal' | 'portfolio' | 'tax' | 'system';
+
+export const NotificationCategory = {
+  BUDGET: 'budget' as const,
+  GOAL: 'goal' as const,
+  PORTFOLIO: 'portfolio' as const,
+  TAX: 'tax' as const,
+  SYSTEM: 'system' as const,
+};
 
 export interface Notification {
   id: string;

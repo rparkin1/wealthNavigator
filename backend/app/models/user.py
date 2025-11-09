@@ -106,5 +106,18 @@ class User(Base, TimestampMixin):
         cascade="all, delete-orphan"
     )
 
+    audit_logs: Mapped[List["AuditLog"]] = relationship(
+        "AuditLog",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
+    mfa_secret: Mapped[Optional["MFASecret"]] = relationship(
+        "MFASecret",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        uselist=False  # One-to-one relationship
+    )
+
     def __repr__(self) -> str:
         return f"<User(id={self.id}, email={self.email})>"
