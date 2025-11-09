@@ -16,19 +16,19 @@ describe('BudgetForm', () => {
     render(<BudgetForm onSubmit={onSubmit} onCancel={onCancel} />);
 
     // Income is selected by default
-    expect(screen.getByRole('button', { name: /income/i })).toHaveClass('border-green-600');
+    expect(screen.getByRole('button', { name: /💰 Income/ })).toHaveClass('border-green-600');
     expect(screen.getByRole('button', { name: /salary\/wages/i })).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /expense/i }));
+    await user.click(screen.getByRole('button', { name: /💳 Expense/ }));
 
     // Expense type is highlighted and expense categories render
-    expect(screen.getByRole('button', { name: /expense/i })).toHaveClass('border-red-600');
+    expect(screen.getByRole('button', { name: /💳 Expense/ })).toHaveClass('border-red-600');
     expect(screen.getByRole('button', { name: /housing \(rent\/mortgage\)/i })).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/e\.g\., rent payment/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /savings/i }));
+    await user.click(screen.getByRole('button', { name: /🎯 Savings/ }));
 
-    expect(screen.getByRole('button', { name: /savings/i })).toHaveClass('border-blue-600');
+    expect(screen.getByRole('button', { name: /🎯 Savings/ })).toHaveClass('border-blue-600');
     expect(screen.getByRole('button', { name: /retirement contribution/i })).toBeInTheDocument();
   });
 
@@ -47,15 +47,15 @@ describe('BudgetForm', () => {
     const user = userEvent.setup();
     render(<BudgetForm onSubmit={onSubmit} onCancel={onCancel} />);
 
-    const nameInput = screen.getByLabelText(/name/i);
+    const nameInput = screen.getByPlaceholderText(/monthly salary/i);
     await user.clear(nameInput);
     await user.type(nameInput, '  Salary Income  ');
 
-    const amountInput = screen.getByLabelText(/amount/i);
+    const amountInput = screen.getByPlaceholderText('0.00');
     await user.clear(amountInput);
     await user.type(amountInput, '5000');
 
-    const notesInput = screen.getByLabelText(/notes/i);
+    const notesInput = screen.getByPlaceholderText(/additional notes/i);
     await user.type(notesInput, '  important note  ');
 
     await user.click(screen.getByRole('button', { name: /add entry/i }));

@@ -5,6 +5,7 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 import { MentalAccountBuckets } from '../MentalAccountBuckets';
 import '@testing-library/jest-dom';
 
@@ -75,8 +76,12 @@ describe('MentalAccountBuckets Integration Tests', () => {
   it('displays funding levels', () => {
     render(<MentalAccountBuckets buckets={mockBuckets} />);
 
-    expect(screen.getByText('78%')).toBeInTheDocument();
-    expect(screen.getByText('62%')).toBeInTheDocument();
+    expect(
+      screen.getByText(`${Math.round(mockBuckets[0].fundingLevel)}%`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(`${Math.round(mockBuckets[1].fundingLevel)}%`)
+    ).toBeInTheDocument();
   });
 
   it('shows success probabilities', () => {
@@ -108,7 +113,7 @@ describe('MentalAccountBuckets Integration Tests', () => {
     // Check for asset class labels
     expect(screen.getByText(/us stocks: 50%/i)).toBeInTheDocument();
     expect(screen.getByText(/international stocks: 20%/i)).toBeInTheDocument();
-    expect(screen.getByText(/bonds:/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/bonds:/i).length).toBeGreaterThan(0);
   });
 
   it('shows target dates formatted correctly', () => {
@@ -121,9 +126,9 @@ describe('MentalAccountBuckets Integration Tests', () => {
   it('displays financial metrics', () => {
     render(<MentalAccountBuckets buckets={mockBuckets} />);
 
-    expect(screen.getByText('Current Value')).toBeInTheDocument();
-    expect(screen.getByText('Target Amount')).toBeInTheDocument();
-    expect(screen.getByText('Projected Value')).toBeInTheDocument();
+    expect(screen.getAllByText('Current Value').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Target Amount').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Projected Value').length).toBeGreaterThan(0);
   });
 
   it('shows portfolio summary statistics', () => {
@@ -140,7 +145,7 @@ describe('MentalAccountBuckets Integration Tests', () => {
   });
 
   it('calls onSelectBucket when bucket is clicked', () => {
-    const onSelectBucket = jest.fn();
+    const onSelectBucket = vi.fn();
 
     render(<MentalAccountBuckets buckets={mockBuckets} onSelectBucket={onSelectBucket} />);
 

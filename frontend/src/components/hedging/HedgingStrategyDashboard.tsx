@@ -349,6 +349,7 @@ export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> =
                 <div style={{ marginTop: '16px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {Object.entries(recommendation.objectives_met).map(([key, met]) => (
                     <span
+                      data-testid={`objective-status-${key}`}
                       key={key}
                       style={{
                         padding: '4px 12px',
@@ -387,7 +388,10 @@ export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> =
                         <div style={{ fontSize: '12px', color: '#059669', fontWeight: 600 }}>
                           ⭐ OPTIMAL STRATEGY
                         </div>
-                        <div style={{ fontSize: '24px', fontWeight: 700, color: '#065f46' }}>
+                        <div
+                          data-testid="optimal-strategy-name"
+                          style={{ fontSize: '24px', fontWeight: 700, color: '#065f46' }}
+                        >
                           {recommendation.optimal_strategy.name}
                         </div>
                       </div>

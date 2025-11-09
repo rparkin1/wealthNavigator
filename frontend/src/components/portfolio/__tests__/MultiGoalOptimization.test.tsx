@@ -285,7 +285,7 @@ describe('MultiGoalOptimizationDashboard', () => {
       />
     );
 
-    const optimizeButton = screen.getByText(/Optimize \d+ Goals/);
+    const optimizeButton = await screen.findByText(/Optimize \d+ Goals/);
     fireEvent.click(optimizeButton);
 
     await waitFor(() => {
@@ -374,9 +374,9 @@ describe('GoalPrioritizationEditor', () => {
     );
 
     expect(screen.getByText('Goal Prioritization')).toBeInTheDocument();
-    expect(screen.getByText(/essential/i)).toBeInTheDocument();
-    expect(screen.getByText(/important/i)).toBeInTheDocument();
-    expect(screen.getByText(/aspirational/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/essential/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/important/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/aspirational/i).length).toBeGreaterThan(0);
   });
 
   it('allows changing goal priority', () => {

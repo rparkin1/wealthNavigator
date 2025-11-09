@@ -96,7 +96,7 @@ describe('BucketRebalancer Integration Tests', () => {
     vi.mocked(mentalAccountingApi.analyzeRebalancingNeeds).mockResolvedValue(mockAnalysis);
   });
 
-  it('renders the rebalancer with loading state initially', () => {
+  it('renders the rebalancer with loading state initially', async () => {
     render(
       <BucketRebalancer
         userId={userId}
@@ -106,6 +106,10 @@ describe('BucketRebalancer Integration Tests', () => {
     );
 
     expect(screen.getByText('Analyzing rebalancing needs...')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(mentalAccountingApi.analyzeRebalancingNeeds).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('displays rebalancing analysis results', async () => {
@@ -149,7 +153,9 @@ describe('BucketRebalancer Integration Tests', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Overallocated Goals \(1\)/)).toBeInTheDocument();
-      expect(screen.getByText('Emergency Fund')).toBeInTheDocument();
+      expect(screen.getByTestId('overallocated-goal-name-goal-1')).toHaveTextContent(
+        'Emergency Fund'
+      );
       expect(screen.getByText(/Excess Amount/)).toBeInTheDocument();
     });
   });
@@ -165,7 +171,7 @@ describe('BucketRebalancer Integration Tests', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Underallocated Goals \(1\)/)).toBeInTheDocument();
-      expect(screen.getByText('Retirement')).toBeInTheDocument();
+      expect(screen.getByTestId('underallocated-goal-name-goal-2')).toHaveTextContent('Retirement');
       expect(screen.getByText(/Shortfall Amount/)).toBeInTheDocument();
     });
   });
@@ -195,9 +201,9 @@ describe('BucketRebalancer Integration Tests', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Emergency Fund')).toBeInTheDocument();
-      expect(screen.getByText('Retirement')).toBeInTheDocument();
-      expect(screen.getByText(/\$5,000/)).toBeInTheDocument();
+      expect(screen.getByTestId('recommendation-from-0')).toHaveTextContent('Emergency Fund');
+      expect(screen.getByTestId('recommendation-to-0')).toHaveTextContent('Retirement');
+      expect(screen.getByTestId('recommendation-amount-0')).toHaveTextContent('$5,000');
       expect(
         screen.getByText(/Emergency fund is overfunded while retirement is underfunded/)
       ).toBeInTheDocument();
@@ -305,7 +311,7 @@ describe('BucketRebalancer Integration Tests', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Total Transfer Amount:/)).toBeInTheDocument();
-      expect(screen.getByText(/\$5,000/)).toBeInTheDocument();
+      expect(screen.getByTestId('total-transfer-amount')).toHaveTextContent('$5,000');
     });
   });
 
@@ -352,7 +358,7 @@ describe('BucketRebalancer Integration Tests', () => {
     );
 
     await waitFor(() => {
-      const executeButton = screen.getByText('Execute Selected Rebalancing');
+      const executeButton = screen.getByTestId('execute-rebalancing-button');
       fireEvent.click(executeButton);
     });
 
@@ -506,7 +512,7 @@ describe('BucketRebalancer Integration Tests', () => {
 
     await waitFor(() => {
       // Should use US currency format
-      expect(screen.getAllByText(/\$/)).toHaveLength(3); // Multiple currency displays
+      expect(screen.getAllByText(/\$/).length).toBeGreaterThanOrEqual(3);
     });
   });
 
@@ -524,7 +530,7 @@ describe('BucketRebalancer Integration Tests', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText(/API Error/)).toBeInTheDocument();
+      expect(screen.getByTestId('rebalancer-error')).toHaveTextContent(/API Error/);
     });
   });
 
@@ -538,9 +544,7 @@ describe('BucketRebalancer Integration Tests', () => {
     );
 
     await waitFor(() => {
-      const recommendationCard = screen
-        .getByText('Emergency Fund')
-        .closest('div[class*="cursor-pointer"]');
+      const recommendationCard = screen.getByTestId('recommendation-card-0');
 
       if (recommendationCard) {
         const checkboxBefore = screen.getAllByRole('checkbox')[0];

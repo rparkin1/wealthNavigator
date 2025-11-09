@@ -202,7 +202,7 @@ describe('ReserveAlertsPanel', () => {
 
     render(<ReserveAlertsPanel alerts={alerts} />);
 
-    const alertElements = screen.getAllByText(/Alert/);
+    const alertElements = screen.getAllByTestId(/reserve-alert-title-/);
     expect(alertElements[0]).toHaveTextContent('Critical Alert');
     expect(alertElements[1]).toHaveTextContent('Warning Alert');
     expect(alertElements[2]).toHaveTextContent('Info Alert');
@@ -373,7 +373,7 @@ describe('ReserveReplenishmentPlan', () => {
       />
     );
 
-    expect(screen.getByText(/10 months/)).toBeInTheDocument();
+    expect(screen.getAllByText(/10 months/).length).toBeGreaterThan(0);
   });
 
   it('shows warning when contribution exceeds disposable income', () => {

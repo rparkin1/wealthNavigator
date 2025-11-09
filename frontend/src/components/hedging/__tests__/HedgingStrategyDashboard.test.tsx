@@ -137,7 +137,7 @@ describe('HedgingStrategyDashboard', () => {
 
     await waitFor(() => {
       expect(screen.getByText('⭐ OPTIMAL STRATEGY')).toBeInTheDocument();
-      expect(screen.getByText('Collar Strategy')).toBeInTheDocument();
+      expect(screen.getByTestId('optimal-strategy-name')).toHaveTextContent('Collar Strategy');
     });
   });
 
@@ -214,7 +214,9 @@ describe('HedgingStrategyDashboard', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText(/✅/)).toBeInTheDocument();
+      expect(screen.getByTestId('objective-status-cost_tolerance')).toHaveTextContent('✅ cost tolerance');
+      expect(screen.getByTestId('objective-status-protection_level')).toHaveTextContent('✅ protection level');
+      expect(screen.getByTestId('objective-status-hedge_percentage')).toHaveTextContent('✅ hedge percentage');
     });
   });
 

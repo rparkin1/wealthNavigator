@@ -66,13 +66,25 @@ describe('AtRiskGoalsPanel Integration Tests', () => {
     });
   });
 
-  it('shows loading state', () => {
-    vi.mocked(global.fetch).mockImplementation(
-      () => new Promise(() => {}) // Never resolves
-    );
+  it('shows loading state', async () => {
+    // Mock fetch to simulate a loading state
+    let resolvePromise: (value: any) => void;
+    const promise = new Promise<any>((resolve) => {
+      resolvePromise = resolve;
+    });
+
+    vi.mocked(global.fetch).mockImplementation(() => promise);
 
     render(<AtRiskGoalsPanel userId={mockUserId} />);
+
+    // Verify loading state appears
     expect(screen.getByText('Analyzing goals...')).toBeInTheDocument();
+
+    // Clean up by resolving the promise to avoid hanging
+    resolvePromise!({
+      ok: true,
+      json: async () => ({ at_risk_goals: [], total_goals: 0, at_risk_count: 0 }),
+    });
   });
 
   it('shows success message when no at-risk goals', async () => {

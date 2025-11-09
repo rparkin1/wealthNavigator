@@ -65,6 +65,24 @@ export function DependencyValidator({
   };
 
   if (!validation && !isValidating) {
+    if (!autoValidate) {
+      return (
+        <div className="bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between">
+          <div>
+            <div className="font-medium text-gray-900">Validation not run yet</div>
+            <div className="text-sm text-gray-600">
+              Run the validator to check for circular dependencies and conflicts.
+            </div>
+          </div>
+          <button
+            onClick={validateDependencies}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Validate Dependencies
+          </button>
+        </div>
+      );
+    }
     return null;
   }
 
@@ -83,33 +101,16 @@ export function DependencyValidator({
 
   const hasErrors = validation.errors.length > 0 || validation.cycles_detected.length > 0;
   const hasWarnings = validation.warnings.length > 0;
-
-  if (validation.is_valid && !hasWarnings) {
-    return (
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-        <div className="flex items-center">
-          <span className="text-green-600 text-xl mr-3">✅</span>
-          <div>
-            <div className="font-medium text-green-900">All dependencies are valid</div>
-            <div className="text-sm text-green-700">No circular dependencies or conflicts detected</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const summaryClasses = hasErrors
+    ? 'bg-red-50 border-red-300'
+    : hasWarnings
+    ? 'bg-yellow-50 border-yellow-300'
+    : 'bg-green-50 border-green-300';
 
   return (
     <div className="space-y-4">
       {/* Validation Summary */}
-      <div
-        className={`border rounded-lg p-4 ${
-          hasErrors
-            ? 'bg-red-50 border-red-300'
-            : hasWarnings
-            ? 'bg-yellow-50 border-yellow-300'
-            : 'bg-green-50 border-green-300'
-        }`}
-      >
+      <div className={`border rounded-lg p-4 ${summaryClasses}`}>
         <div className="flex items-start justify-between">
           <div className="flex items-start">
             <span className="text-2xl mr-3">
@@ -129,7 +130,7 @@ export function DependencyValidator({
                   ? 'Dependency Errors Detected'
                   : hasWarnings
                   ? 'Dependency Warnings'
-                  : 'Dependencies Valid'}
+                  : 'All dependencies are valid'}
               </div>
               <div
                 className={`text-sm mt-1 ${
@@ -145,6 +146,7 @@ export function DependencyValidator({
                 {hasWarnings && `${validation.warnings.length} warnings`}
                 {validation.cycles_detected.length > 0 &&
                   `, ${validation.cycles_detected.length} circular dependencies`}
+                {!hasErrors && !hasWarnings && 'No circular dependencies or conflicts detected'}
               </div>
             </div>
           </div>
@@ -237,27 +239,29 @@ export function DependencyValidator({
           )}
 
           {/* Suggestions */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="font-semibold text-blue-900 mb-3">💡 Suggestions</h4>
-            <ul className="space-y-2 text-sm text-blue-700">
-              <li className="flex items-start">
-                <span className="mr-2">•</span>
-                <span>Review the dependency graph visualization to identify problematic relationships</span>
-              </li>
-              <li className="flex items-start">
-                <span className="mr-2">•</span>
-                <span>Consider changing dependency types from 'blocking' to 'conditional' where appropriate</span>
-              </li>
-              <li className="flex items-start">
-                <span className="mr-2">•</span>
-                <span>Break complex dependencies into smaller, more manageable sub-goals</span>
-              </li>
-              <li className="flex items-start">
-                <span className="mr-2">•</span>
-                <span>Ensure that goals with dependencies have realistic timelines</span>
-              </li>
-            </ul>
-          </div>
+          {(hasErrors || hasWarnings) && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-semibold text-blue-900 mb-3">💡 Suggestions</h4>
+              <ul className="space-y-2 text-sm text-blue-700">
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Review the dependency graph visualization to identify problematic relationships</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Consider changing dependency types from 'blocking' to 'conditional' where appropriate</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Break complex dependencies into smaller, more manageable sub-goals</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Ensure that goals with dependencies have realistic timelines</span>
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
       )}
 

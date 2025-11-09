@@ -5,7 +5,7 @@
  * Allows users to modify key variables and see immediate impact on success probability.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useId } from 'react';
 import { debounce } from '../../utils/debounce';
 
 export interface WhatIfAdjustments {
@@ -16,6 +16,15 @@ export interface WhatIfAdjustments {
   retirementAge?: number;
   lifeExpectancy?: number;
 }
+
+const DEFAULT_BASE_VALUES = {
+  monthlyContribution: 0,
+  expectedReturnStocks: 0.07,
+  expectedReturnBonds: 0.03,
+  inflationRate: 0.02,
+  retirementAge: 65,
+  lifeExpectancy: 90,
+} as const;
 
 export interface WhatIfSlidersProps {
   goalId: string;
@@ -40,6 +49,14 @@ export function WhatIfSliders({
   const [adjustments, setAdjustments] = useState<WhatIfAdjustments>({});
   const [showAdvanced, setShowAdvanced] = useState(false);
 
+  const safeBaseValues = useMemo(
+    () => ({
+      ...DEFAULT_BASE_VALUES,
+      ...baseValues,
+    }),
+    [baseValues]
+  );
+
   // Debounced callback to parent
   useEffect(() => {
     const debouncedCallback = debounce(() => {
@@ -61,8 +78,12 @@ export function WhatIfSliders({
     }));
   };
 
-  const getCurrentValue = (key: keyof typeof baseValues): number => {
-    return (adjustments[key] as number) ?? baseValues[key];
+  const getCurrentValue = (key: keyof typeof DEFAULT_BASE_VALUES): number => {
+    const adjustment = adjustments[key];
+    if (typeof adjustment === 'number' && !Number.isNaN(adjustment)) {
+      return adjustment;
+    }
+    return safeBaseValues[key];
   };
 
   const hasChanges = Object.keys(adjustments).length > 0;
@@ -98,26 +119,28 @@ export function WhatIfSliders({
         <SliderControl
           label="Monthly Contribution"
           value={getCurrentValue('monthlyContribution')}
-          baseValue={baseValues.monthlyContribution}
+          baseValue={safeBaseValues.monthlyContribution}
           min={0}
-          max={baseValues.monthlyContribution * 3}
+          max={Math.max(safeBaseValues.monthlyContribution * 3, 1000)}
           step={50}
           format="currency"
           onChange={value => updateAdjustment('monthlyContribution', value)}
           description="Adjust your monthly savings amount"
+          disabled={loading}
         />
 
         {/* Retirement Age Slider */}
         <SliderControl
           label="Retirement Age"
           value={getCurrentValue('retirementAge')}
-          baseValue={baseValues.retirementAge}
+          baseValue={safeBaseValues.retirementAge}
           min={50}
           max={75}
           step={1}
           format="years"
           onChange={value => updateAdjustment('retirementAge', value)}
           description="When do you plan to retire?"
+          disabled={loading}
         />
 
         {/* Advanced Options Toggle */}
@@ -142,49 +165,53 @@ export function WhatIfSliders({
             <SliderControl
               label="Expected Stock Returns"
               value={getCurrentValue('expectedReturnStocks')}
-              baseValue={baseValues.expectedReturnStocks}
+              baseValue={safeBaseValues.expectedReturnStocks}
               min={0}
               max={0.15}
               step={0.005}
               format="percentage"
               onChange={value => updateAdjustment('expectedReturnStocks', value)}
               description="Annual return assumption for stocks"
+              disabled={loading}
             />
 
             <SliderControl
               label="Expected Bond Returns"
               value={getCurrentValue('expectedReturnBonds')}
-              baseValue={baseValues.expectedReturnBonds}
+              baseValue={safeBaseValues.expectedReturnBonds}
               min={0}
               max={0.08}
               step={0.0025}
               format="percentage"
               onChange={value => updateAdjustment('expectedReturnBonds', value)}
               description="Annual return assumption for bonds"
+              disabled={loading}
             />
 
             <SliderControl
               label="Inflation Rate"
               value={getCurrentValue('inflationRate')}
-              baseValue={baseValues.inflationRate}
+              baseValue={safeBaseValues.inflationRate}
               min={0}
               max={0.06}
               step={0.0025}
               format="percentage"
               onChange={value => updateAdjustment('inflationRate', value)}
               description="Expected annual inflation"
+              disabled={loading}
             />
 
             <SliderControl
               label="Life Expectancy"
               value={getCurrentValue('lifeExpectancy')}
-              baseValue={baseValues.lifeExpectancy}
+              baseValue={safeBaseValues.lifeExpectancy}
               min={75}
               max={100}
               step={1}
               format="years"
               onChange={value => updateAdjustment('lifeExpectancy', value)}
               description="Planning horizon"
+              disabled={loading}
             />
           </div>
         )}
@@ -219,6 +246,7 @@ interface SliderControlProps {
   format: 'currency' | 'percentage' | 'years';
   onChange: (value: number) => void;
   description?: string;
+  disabled?: boolean;
 }
 
 function SliderControl({
@@ -231,7 +259,10 @@ function SliderControl({
   format,
   onChange,
   description,
+  disabled = false,
 }: SliderControlProps) {
+  const sliderId = useId();
+
   const formatValue = (val: number): string => {
     if (format === 'currency') {
       return new Intl.NumberFormat('en-US', {
@@ -250,7 +281,7 @@ function SliderControl({
   const getDeltaDisplay = (): string | null => {
     if (value === baseValue) return null;
     const delta = value - baseValue;
-    const sign = delta > 0 ? '+' : '';
+    const sign = delta > 0 ? '+' : delta < 0 ? '-' : '';
 
     if (format === 'currency') {
       return `${sign}${formatValue(Math.abs(delta))}`;
@@ -267,7 +298,9 @@ function SliderControl({
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <label className="text-sm font-medium text-gray-700">{label}</label>
+        <label className="text-sm font-medium text-gray-700" htmlFor={sliderId}>
+          {label}
+        </label>
         <div className="flex items-center space-x-2">
           {hasChanged && delta && (
             <span className={`text-xs font-medium ${
@@ -276,7 +309,7 @@ function SliderControl({
               ({delta})
             </span>
           )}
-          <span className="text-sm font-semibold text-gray-900">
+          <span className="text-sm font-semibold text-gray-900" role="status" aria-live="polite">
             {formatValue(value)}
           </span>
         </div>
@@ -285,11 +318,14 @@ function SliderControl({
       {/* Slider */}
       <input
         type="range"
+        id={sliderId}
         min={min}
         max={max}
         step={step}
         value={value}
         onChange={e => onChange(parseFloat(e.target.value))}
+        aria-label={label}
+        disabled={disabled}
         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
       />
 

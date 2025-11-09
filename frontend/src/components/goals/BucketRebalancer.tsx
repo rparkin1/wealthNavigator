@@ -84,7 +84,7 @@ export function BucketRebalancer({
 
       // In a real implementation, this would call a backend endpoint to execute transfers
       // For now, we'll simulate success
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       if (onRebalanceComplete) {
         onRebalanceComplete();
@@ -156,7 +156,13 @@ export function BucketRebalancer({
   if (!analysis) {
     return (
       <div className="bg-white rounded-lg p-6">
-        <p className="text-gray-500 text-center py-8">No rebalancing analysis available</p>
+        {error ? (
+          <p className="text-red-600 text-center py-8" data-testid="rebalancer-error">
+            Error: {error}
+          </p>
+        ) : (
+          <p className="text-gray-500 text-center py-8">No rebalancing analysis available</p>
+        )}
       </div>
     );
   }
@@ -221,11 +227,17 @@ export function BucketRebalancer({
                 {analysis.overallocated_goals.map((goal) => (
                   <div
                     key={goal.goal_id}
+                    data-testid={`overallocated-goal-${goal.goal_id}`}
                     className="border border-yellow-200 bg-yellow-50 rounded-lg p-4"
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="font-semibold text-gray-900">{goal.goal_name}</h4>
+                        <h4
+                          className="font-semibold text-gray-900"
+                          data-testid={`overallocated-goal-name-${goal.goal_id}`}
+                        >
+                          {goal.goal_name}
+                        </h4>
                         <p className="text-sm text-gray-600">
                           Current: {goal.current_allocation.toFixed(1)}% •
                           Target: {goal.target_allocation.toFixed(1)}%
@@ -233,7 +245,10 @@ export function BucketRebalancer({
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-600">Excess Amount</p>
-                        <p className="text-lg font-bold text-yellow-900">
+                        <p
+                          className="text-lg font-bold text-yellow-900"
+                          data-testid={`overallocated-goal-excess-${goal.goal_id}`}
+                        >
                           {formatCurrency(goal.excess_amount)}
                         </p>
                       </div>
@@ -260,11 +275,17 @@ export function BucketRebalancer({
                 {analysis.underallocated_goals.map((goal) => (
                   <div
                     key={goal.goal_id}
+                    data-testid={`underallocated-goal-${goal.goal_id}`}
                     className="border border-blue-200 bg-blue-50 rounded-lg p-4"
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="font-semibold text-gray-900">{goal.goal_name}</h4>
+                        <h4
+                          className="font-semibold text-gray-900"
+                          data-testid={`underallocated-goal-name-${goal.goal_id}`}
+                        >
+                          {goal.goal_name}
+                        </h4>
                         <p className="text-sm text-gray-600">
                           Current: {goal.current_allocation.toFixed(1)}% •
                           Target: {goal.target_allocation.toFixed(1)}%
@@ -272,7 +293,10 @@ export function BucketRebalancer({
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-600">Shortfall Amount</p>
-                        <p className="text-lg font-bold text-blue-900">
+                        <p
+                          className="text-lg font-bold text-blue-900"
+                          data-testid={`underallocated-goal-shortfall-${goal.goal_id}`}
+                        >
                           {formatCurrency(goal.shortfall_amount)}
                         </p>
                       </div>
@@ -321,6 +345,7 @@ export function BucketRebalancer({
                   return (
                     <div
                       key={`${rec.from_goal_id}-${rec.to_goal_id}`}
+                      data-testid={`recommendation-card-${index}`}
                       className={`border rounded-lg p-4 transition-all cursor-pointer ${
                         isSelected
                           ? 'border-blue-500 bg-blue-50'
@@ -354,15 +379,24 @@ export function BucketRebalancer({
                           {/* Transfer Details */}
                           <div className="mb-2">
                             <div className="flex items-center gap-2 text-sm">
-                              <span className="font-semibold text-gray-900">
+                              <span
+                                className="font-semibold text-gray-900"
+                                data-testid={`recommendation-from-${index}`}
+                              >
                                 {rec.from_goal_name}
                               </span>
                               <span className="text-gray-400">→</span>
-                              <span className="font-semibold text-gray-900">
+                              <span
+                                className="font-semibold text-gray-900"
+                                data-testid={`recommendation-to-${index}`}
+                              >
                                 {rec.to_goal_name}
                               </span>
                             </div>
-                            <p className="text-lg font-bold text-blue-600 mt-1">
+                            <p
+                              className="text-lg font-bold text-blue-600 mt-1"
+                              data-testid={`recommendation-amount-${index}`}
+                            >
                               {formatCurrency(rec.amount)}
                             </p>
                           </div>
@@ -385,15 +419,16 @@ export function BucketRebalancer({
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600" data-testid="selected-recommendation-count">
                     Selected Recommendations: {selectedRecommendations.size} of{' '}
                     {analysis.recommendations.length}
                   </p>
-                  <p className="text-lg font-bold text-gray-900">
+                  <p className="text-lg font-bold text-gray-900" data-testid="total-transfer-amount">
                     Total Transfer Amount: {formatCurrency(getTotalSelectedAmount())}
                   </p>
                 </div>
                 <button
+                  data-testid="execute-rebalancing-button"
                   onClick={executeRebalancing}
                   disabled={selectedRecommendations.size === 0 || executing}
                   className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"

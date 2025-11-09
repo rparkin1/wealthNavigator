@@ -9,13 +9,14 @@ import { TaxLossHarvestingPanel } from './TaxLossHarvestingPanel';
 import { RebalancingDashboard } from './RebalancingDashboard';
 import { PerformanceDashboard } from './PerformanceDashboard';
 import { ComprehensiveAnalysis } from './ComprehensiveAnalysis';
+import { NetWorthDashboard } from './NetWorthDashboard';
 
 interface PortfolioViewProps {
   userId: string;
   portfolioId?: string;
 }
 
-type TabView = 'overview' | 'tax-loss' | 'rebalancing' | 'performance';
+type TabView = 'overview' | 'net-worth' | 'tax-loss' | 'rebalancing' | 'performance';
 
 export const PortfolioView: React.FC<PortfolioViewProps> = ({
   userId,
@@ -25,7 +26,8 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
 
   const tabs = [
     { id: 'overview' as TabView, label: 'Overview', icon: '📊' },
-    { id: 'tax-loss' as TabView, label: 'Tax-Loss Harvesting', icon: '💰' },
+    { id: 'net-worth' as TabView, label: 'Net Worth', icon: '💰' },
+    { id: 'tax-loss' as TabView, label: 'Tax-Loss Harvesting', icon: '💵' },
     { id: 'rebalancing' as TabView, label: 'Rebalancing', icon: '⚖️' },
     { id: 'performance' as TabView, label: 'Performance', icon: '📈' },
   ];
@@ -34,6 +36,8 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
     switch (activeTab) {
       case 'overview':
         return <ComprehensiveAnalysis userId={userId} portfolioId={portfolioId} />;
+      case 'net-worth':
+        return <NetWorthDashboard userId={userId} />;
       case 'tax-loss':
         return <TaxLossHarvestingPanel userId={userId} portfolioId={portfolioId} />;
       case 'rebalancing':

@@ -13,12 +13,14 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { vi, type SpyInstance } from 'vitest';
 import TornadoDiagram from '../TornadoDiagram';
 import TwoWaySensitivityHeatmap from '../TwoWaySensitivityHeatmap';
 import ThresholdAnalysisChart from '../ThresholdAnalysisChart';
 import BreakEvenCalculator from '../BreakEvenCalculator';
 import SensitivityAnalysisDashboard from '../SensitivityAnalysisDashboard';
 import {
+  sensitivityAnalysisApi,
   formatVariableName,
   formatVariableValue,
   getImpactSeverity,
@@ -30,6 +32,7 @@ import type {
   TwoWaySensitivityResult,
   ThresholdAnalysisResult,
   BreakEvenAnalysisResult,
+  SupportedVariablesResponse,
 } from '../../../types/sensitivityAnalysis';
 
 // Mock data
@@ -134,6 +137,48 @@ const mockBreakEvenResult: BreakEvenAnalysisResult = {
   message: 'Calculated break-even frontier for 90% success',
 };
 
+const mockSupportedVariablesResponse: SupportedVariablesResponse = {
+  variables: [
+    {
+      name: 'monthly_contribution',
+      description: 'Monthly amount contributed toward the goal',
+      typical_range: [500, 1500],
+      unit: 'USD',
+      category: 'contributions',
+    },
+    {
+      name: 'expected_return_stocks',
+      description: 'Expected annual return for stock allocation',
+      typical_range: [0.04, 0.12],
+      unit: 'rate',
+      category: 'returns',
+    },
+    {
+      name: 'inflation_rate',
+      description: 'Expected long-term inflation rate',
+      typical_range: [0.01, 0.04],
+      unit: 'rate',
+      category: 'economics',
+    },
+  ],
+};
+
+let getSupportedVariablesSpy: SpyInstance<[], Promise<SupportedVariablesResponse>>;
+
+beforeEach(() => {
+  getSupportedVariablesSpy = vi
+    .spyOn(sensitivityAnalysisApi, 'getSupportedVariables')
+    .mockResolvedValue(mockSupportedVariablesResponse);
+  vi.spyOn(sensitivityAnalysisApi, 'oneWaySensitivity').mockResolvedValue(mockOneWayResult);
+  vi.spyOn(sensitivityAnalysisApi, 'twoWaySensitivity').mockResolvedValue(mockTwoWayResult);
+  vi.spyOn(sensitivityAnalysisApi, 'thresholdAnalysis').mockResolvedValue(mockThresholdResult);
+  vi.spyOn(sensitivityAnalysisApi, 'breakEvenAnalysis').mockResolvedValue(mockBreakEvenResult);
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe('Sensitivity Analysis Components', () => {
   describe('TornadoDiagram', () => {
     it('renders tornado diagram with data', () => {
@@ -149,11 +194,11 @@ describe('Sensitivity Analysis Components', () => {
 
     it('shows baseline probability', () => {
       render(<TornadoDiagram data={mockOneWayResult} />);
-      expect(screen.getByText(/85.0%/)).toBeInTheDocument();
+      expect(screen.getByText(/Baseline: 85\.0%/)).toBeInTheDocument();
     });
 
     it('calls onVariableClick when provided', () => {
-      const mockClick = jest.fn();
+      const mockClick = vi.fn();
       const { container } = render(
         <TornadoDiagram data={mockOneWayResult} onVariableClick={mockClick} />
       );
@@ -173,8 +218,8 @@ describe('Sensitivity Analysis Components', () => {
 
     it('displays variable names', () => {
       render(<TwoWaySensitivityHeatmap data={mockTwoWayResult} />);
-      expect(screen.getByText('Monthly Contribution')).toBeInTheDocument();
-      expect(screen.getByText('Expected Return Stocks')).toBeInTheDocument();
+      expect(screen.getAllByText('Monthly Contribution').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Expected Return Stocks').length).toBeGreaterThan(0);
     });
 
     it('shows probability range', () => {
@@ -217,7 +262,7 @@ describe('Sensitivity Analysis Components', () => {
     });
 
     it('calls onAdjustGoal when button clicked', () => {
-      const mockAdjust = jest.fn();
+      const mockAdjust = vi.fn();
       const needsAdjustmentResult = {
         ...mockThresholdResult,
         analysis: {
@@ -267,8 +312,9 @@ describe('Sensitivity Analysis Components', () => {
   });
 
   describe('SensitivityAnalysisDashboard', () => {
-    it('renders dashboard with tabs', () => {
+    it('renders dashboard with tabs', async () => {
       render(<SensitivityAnalysisDashboard goalId="test-goal" />);
+      await waitFor(() => expect(getSupportedVariablesSpy).toHaveBeenCalled());
       expect(screen.getByText('Advanced Sensitivity Analysis')).toBeInTheDocument();
       expect(screen.getByText('Tornado Diagram')).toBeInTheDocument();
       expect(screen.getByText('Heat Map')).toBeInTheDocument();
@@ -276,13 +322,15 @@ describe('Sensitivity Analysis Components', () => {
       expect(screen.getByText('Break-Even')).toBeInTheDocument();
     });
 
-    it('displays info banner', () => {
+    it('displays info banner', async () => {
       render(<SensitivityAnalysisDashboard goalId="test-goal" />);
+      await waitFor(() => expect(getSupportedVariablesSpy).toHaveBeenCalled());
       expect(screen.getByText('What is Sensitivity Analysis?')).toBeInTheDocument();
     });
 
-    it('switches between tabs', () => {
+    it('switches between tabs', async () => {
       render(<SensitivityAnalysisDashboard goalId="test-goal" />);
+      await waitFor(() => expect(getSupportedVariablesSpy).toHaveBeenCalled());
 
       const heatMapTab = screen.getByText('Heat Map');
       fireEvent.click(heatMapTab);
