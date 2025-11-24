@@ -79,8 +79,9 @@ const LegacyGoalPlanner: React.FC = () => {
       <div className="input-form">
         <div className="form-row">
           <div className="form-group">
-            <label>Desired Legacy Amount</label>
+            <label htmlFor="desiredLegacyAmount">Desired Legacy Amount</label>
             <input
+              id="desiredLegacyAmount"
               type="number"
               name="desiredLegacyAmount"
               value={form.desiredLegacyAmount}
@@ -91,8 +92,9 @@ const LegacyGoalPlanner: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label>Current Estate Value</label>
+            <label htmlFor="currentEstateValue">Current Estate Value</label>
             <input
+              id="currentEstateValue"
               type="number"
               name="currentEstateValue"
               value={form.currentEstateValue}
@@ -105,8 +107,9 @@ const LegacyGoalPlanner: React.FC = () => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Years to Legacy Event</label>
+            <label htmlFor="yearsToLegacy">Years to Legacy Event</label>
             <input
+              id="yearsToLegacy"
               type="number"
               name="yearsToLegacy"
               value={form.yearsToLegacy}
@@ -117,8 +120,9 @@ const LegacyGoalPlanner: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label>Expected Annual Return</label>
+            <label htmlFor="expectedReturn">Expected Annual Return</label>
             <input
+              id="expectedReturn"
               type="number"
               name="expectedReturn"
               value={form.expectedReturn}
@@ -131,8 +135,13 @@ const LegacyGoalPlanner: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label>State</label>
-            <select name="state" value={form.state} onChange={handleInputChange}>
+            <label htmlFor="legacyState">State</label>
+            <select
+              id="legacyState"
+              name="state"
+              value={form.state}
+              onChange={handleInputChange}
+            >
               <option value="">No State Tax</option>
               <option value="MA">Massachusetts</option>
               <option value="NY">New York</option>

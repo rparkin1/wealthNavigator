@@ -102,8 +102,9 @@ const TrustStructureBuilder: React.FC = () => {
       <div className="input-form">
         <div className="form-row">
           <div className="form-group">
-            <label>Estate Value</label>
+            <label htmlFor="trustEstateValue">Estate Value</label>
             <input
+              id="trustEstateValue"
               type="number"
               name="estateValue"
               value={form.estateValue}
@@ -114,8 +115,9 @@ const TrustStructureBuilder: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label>Age</label>
+            <label htmlFor="trustAge">Age</label>
             <input
+              id="trustAge"
               type="number"
               name="age"
               value={form.age}
@@ -126,8 +128,9 @@ const TrustStructureBuilder: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label>Marital Status</label>
+            <label htmlFor="trustMaritalStatus">Marital Status</label>
             <select
+              id="trustMaritalStatus"
               name="maritalStatus"
               value={form.maritalStatus}
               onChange={handleInputChange}
