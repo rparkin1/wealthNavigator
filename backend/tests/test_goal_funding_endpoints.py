@@ -5,7 +5,6 @@ REQ-GOAL-007: Goal funding endpoint integration tests
 """
 
 import pytest
-import pytest
 from httpx import AsyncClient
 
 
@@ -41,8 +40,9 @@ class TestGoalFundingEndpoints:
             "iterations": 5000,
         }
 
-    def test_calculate_funding_requirements_success(
-        self, auth_headers, funding_requirements_request
+    @pytest.mark.asyncio
+    async def test_calculate_funding_requirements_success(
+        self, authenticated_client: AsyncClient, funding_requirements_request
     ):
         """Test successful funding requirements calculation"""
         response = await authenticated_client.post(
@@ -90,8 +90,9 @@ class TestGoalFundingEndpoints:
         )
         assert response.status_code == 422
 
-    def test_calculate_success_probability_success(
-        self, auth_headers, success_probability_request
+    @pytest.mark.asyncio
+    async def test_calculate_success_probability_success(
+        self, authenticated_client: AsyncClient, success_probability_request
     ):
         """Test successful success probability calculation"""
         response = await authenticated_client.post(
@@ -266,9 +267,12 @@ class TestGoalFundingEndpoints:
         assert "current_trajectory" in data["recommendations"]
         assert "alternative_strategies" in data["recommendations"]
 
-    def test_get_calculator_info(self):
+    @pytest.mark.asyncio
+    async def test_get_calculator_info(self, authenticated_client: AsyncClient):
         """Test calculator information endpoint"""
-        response = await authenticated_client.get("/api/v1/goal-planning/funding/funding-calculator-info")
+        response = await authenticated_client.get(
+            "/api/v1/goal-planning/funding/funding-calculator-info"
+        )
 
         assert response.status_code == 200
         data = response.json()

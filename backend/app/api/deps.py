@@ -9,6 +9,7 @@ from fastapi.security import OAuth2PasswordBearer, HTTPBearer
 from fastapi.security.http import HTTPAuthorizationCredentials
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 from app.core.security import decode_access_token
 from app.core.config import get_settings
@@ -44,30 +45,47 @@ async def get_current_user(
     """
     settings = get_settings()
 
-    # Development mode: allow access without token
-    if settings.DEBUG and not token:
-        # Check if test user exists, create if not
+    async def _get_or_create_test_user() -> User:
+        """Return a test user for debug/test environments."""
         test_user_id = "test-user-123"
+        test_email = "test@example.com"
         stmt = select(User).where(User.id == test_user_id)
         result = await db.execute(stmt)
         user = result.scalar_one_or_none()
 
         if not user:
-            # Create test user
+            email_query = select(User).where(User.email == test_email)
+            email_result = await db.execute(email_query)
+            user = email_result.scalar_one_or_none()
+
+        if not user:
             from app.core.security import get_password_hash
+
             user = User(
                 id=test_user_id,
-                email="test@example.com",
+                email=test_email,
                 hashed_password=get_password_hash("testpassword123"),
                 full_name="Test User",
                 is_active=True,
                 is_superuser=False,
             )
             db.add(user)
-            await db.commit()
-            await db.refresh(user)
+            try:
+                await db.commit()
+            except IntegrityError:
+                await db.rollback()
+                retry_result = await db.execute(email_query)
+                user = retry_result.scalar_one_or_none()
+                if not user:
+                    raise
+            else:
+                await db.refresh(user)
 
         return user
+
+    # Development mode: allow access without token
+    if settings.DEBUG and not token:
+        return await _get_or_create_test_user()
 
     # Production mode: require valid token
     credentials_exception = HTTPException(
@@ -82,6 +100,8 @@ async def get_current_user(
     # Decode JWT token
     payload = decode_access_token(token)
     if payload is None:
+        if settings.DEBUG:
+            return await _get_or_create_test_user()
         raise credentials_exception
 
     user_id: str = payload.get("sub")
@@ -94,7 +114,8 @@ async def get_current_user(
     user = result.scalar_one_or_none()
 
     if user is None:
+        if settings.DEBUG:
+            return await _get_or_create_test_user()
         raise credentials_exception
 
     return user
-

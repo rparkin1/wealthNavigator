@@ -164,6 +164,15 @@ def test_user_id() -> str:
 async def test_user(async_session):
     """Create a test user in the database."""
     from tests.utils.auth_helpers import create_test_user
+    from sqlalchemy import select
+    from app.models.user import User
+
+    result = await async_session.execute(
+        select(User).where(User.email == "test@example.com")
+    )
+    existing = result.scalar_one_or_none()
+    if existing:
+        return existing
 
     user = await create_test_user(
         async_session,
@@ -175,11 +184,26 @@ async def test_user(async_session):
 
 
 @pytest.fixture
-async def auth_headers(async_session, test_user):
-    """Get authentication headers for API requests."""
-    from tests.utils.auth_helpers import create_test_token
+async def auth_headers(async_session):
+    """Create a real JWT for a test user so auth-dependent endpoints return 200."""
+    from tests.utils.auth_helpers import create_test_user, create_test_token
+    from sqlalchemy import select
+    from app.models.user import User
 
-    token = create_test_token(test_user.id)
+    result = await async_session.execute(
+        select(User).where(User.email == "test@example.com")
+    )
+    user = result.scalar_one_or_none()
+
+    if not user:
+        user = await create_test_user(
+            async_session,
+            email="test@example.com",
+            password="testpass123",
+            user_id="test-user-123",
+        )
+
+    token = create_test_token(user.id)
     return {"Authorization": f"Bearer {token}"}
 
 
