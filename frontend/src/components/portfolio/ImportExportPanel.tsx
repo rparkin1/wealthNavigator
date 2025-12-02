@@ -37,11 +37,11 @@ const TEMPLATES = {
   },
   accounts: {
     filename: 'accounts_template.csv',
-    headers: ['name', 'account_type', 'institution', 'account_number', 'balance', 'opened', 'notes'],
+    headers: ['id', 'name', 'account_type', 'institution', 'account_number', 'balance', 'opened', 'notes'],
     example: [
-      'My 401(k),tax_deferred,Vanguard,1234,150000,2018-03-15,Employer matches 6%',
-      'Roth IRA,tax_exempt,Fidelity,5678,45000,2020-01-01,',
-      'Brokerage Account,taxable,Charles Schwab,9012,75000,2019-06-15,General investing'
+      'account-123,My 401(k),tax_deferred,Vanguard,1234,150000,2018-03-15,Employer matches 6%',
+      'account-456,Roth IRA,tax_exempt,Fidelity,5678,45000,2020-01-01,',
+      'account-789,Brokerage Account,taxable,Charles Schwab,9012,75000,2019-06-15,General investing'
     ]
   },
   budget: {
@@ -62,6 +62,8 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
   const [showPreview, setShowPreview] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  console.log(`[ImportExportPanel] Component mounted with dataType: "${dataType}"`);
 
   const template = TEMPLATES[dataType];
 
@@ -117,21 +119,43 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
     const invalid: Array<{ row: number; data: ImportData; errors: string[] }> = [];
     const duplicates: Array<{ row: number; data: ImportData; existing: ImportData }> = [];
 
+    console.log(`[ImportExportPanel] ========================================`);
+    console.log(`[ImportExportPanel] Starting validation`);
+    console.log(`[ImportExportPanel] dataType = "${dataType}"`);
+    console.log(`[ImportExportPanel] data rows = ${data.length}`);
+    console.log(`[ImportExportPanel] First row:`, data[0]);
+    console.log(`[ImportExportPanel] ========================================`);
+
     data.forEach((item, index) => {
       const errors: string[] = [];
 
+      // Sanity check - detect if CSV has fields from wrong template
+      if (dataType === 'holdings' && (item.account_type || item.institution)) {
+        console.error(`[ImportExportPanel] ⚠️ WARNING: Holdings CSV contains account fields!`, item);
+        errors.push('⚠️ This CSV contains account fields (account_type, institution). Please use the HOLDINGS template, not the ACCOUNTS template.');
+      }
+      if (dataType === 'accounts' && (item.ticker || item.shares)) {
+        console.error(`[ImportExportPanel] ⚠️ WARNING: Accounts CSV contains holding fields!`, item);
+        errors.push('⚠️ This CSV contains holding fields (ticker, shares). Please use the ACCOUNTS template, not the HOLDINGS template.');
+      }
+
       // Type-specific validation
       if (dataType === 'holdings') {
+        console.log(`[ImportExportPanel] ✓ In HOLDINGS validation branch for row ${index + 2}:`, item);
+
         if (!item.ticker || typeof item.ticker !== 'string') {
           errors.push('Ticker is required');
+        }
+        if (!item.account_id || typeof item.account_id !== 'string') {
+          errors.push('Account ID (account_id) is required');
         }
         if (!item.shares || item.shares <= 0) {
           errors.push('Shares must be greater than 0');
         }
-        if (item.cost_basis < 0) {
+        if (item.cost_basis !== undefined && item.cost_basis < 0) {
           errors.push('Cost basis cannot be negative');
         }
-        if (item.current_value < 0) {
+        if (item.current_value !== undefined && item.current_value < 0) {
           errors.push('Current value cannot be negative');
         }
 
@@ -145,11 +169,13 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
           duplicates.push({ row: index + 2, data: item, existing: duplicate });
         }
       } else if (dataType === 'accounts') {
+        console.log(`[ImportExportPanel] ✓ In ACCOUNTS validation branch for row ${index + 2}:`, item);
+
         if (!item.name || typeof item.name !== 'string') {
           errors.push('Account name is required');
         }
         if (!item.account_type) {
-          errors.push('Account type is required');
+          errors.push('Account type (account_type) is required');
         }
         if (!item.institution) {
           errors.push('Institution is required');
@@ -214,7 +240,12 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
   // Handle file selection
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      console.log('[ImportExportPanel] No file selected');
+      return;
+    }
+
+    console.log('[ImportExportPanel] File selected:', file.name, 'Type:', file.type, 'Size:', file.size);
 
     if (!file.name.endsWith('.csv')) {
       alert('Please select a CSV file');
@@ -222,16 +253,29 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
     }
 
     setImporting(true);
+    console.log('[ImportExportPanel] Starting import process...');
+
     try {
       const content = await file.text();
+      console.log('[ImportExportPanel] File content length:', content.length);
+      console.log('[ImportExportPanel] First 200 chars:', content.substring(0, 200));
+
       const data = parseCSV(content);
+      console.log('[ImportExportPanel] Parsed data:', data.length, 'rows');
+
       const validated = validateData(data);
+      console.log('[ImportExportPanel] Validation complete:', {
+        valid: validated.valid.length,
+        invalid: validated.invalid.length,
+        duplicates: validated.duplicates.length
+      });
 
       setPreview(validated);
       setShowPreview(true);
+      console.log('[ImportExportPanel] Preview modal should now be visible');
     } catch (error) {
-      console.error('Import error:', error);
-      alert('Failed to read file. Please check the CSV format.');
+      console.error('[ImportExportPanel] Import error:', error);
+      alert(`Failed to read file: ${error instanceof Error ? error.message : 'Unknown error'}\n\nPlease check the CSV format.`);
     } finally {
       setImporting(false);
     }
@@ -285,8 +329,29 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Import/Export {dataType}</h2>
+    <div className={`rounded-lg border-2 p-6 ${
+      dataType === 'accounts' ? 'border-blue-300 bg-blue-50' :
+      dataType === 'holdings' ? 'border-green-300 bg-green-50' :
+      'border-gray-200 bg-white'
+    }`}>
+      <div className="mb-4">
+        <h2 className={`text-xl font-bold ${
+          dataType === 'accounts' ? 'text-blue-900' :
+          dataType === 'holdings' ? 'text-green-900' :
+          'text-gray-900'
+        }`}>
+          {dataType === 'accounts' && '🏦 '}
+          {dataType === 'holdings' && '📈 '}
+          Import/Export {dataType.toUpperCase()}
+        </h2>
+        <p className="text-sm text-gray-700 mt-1 font-medium">
+          Template: <code className="bg-white px-2 py-1 rounded text-xs border">{template.filename}</code>
+        </p>
+        <details className="text-xs text-gray-600 mt-2">
+          <summary className="cursor-pointer hover:text-gray-900">Show required fields</summary>
+          <code className="block bg-white px-2 py-1 rounded mt-1 border">{template.headers.join(', ')}</code>
+        </details>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         {/* Import Section */}
@@ -315,17 +380,39 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
                 accept=".csv"
                 onChange={handleFileSelect}
                 className="hidden"
-                id="file-upload"
+                id={`file-upload-${dataType}`}
               />
               <label
-                htmlFor="file-upload"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                htmlFor={`file-upload-${dataType}`}
+                className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium ${
+                  importing
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'text-gray-700 bg-white hover:bg-gray-50 cursor-pointer'
+                }`}
               >
-                <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-                Choose File
+                {importing ? (
+                  <>
+                    <svg className="animate-spin mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    Choose File
+                  </>
+                )}
               </label>
+
+              {importing && (
+                <p className="text-xs text-blue-600 animate-pulse">
+                  Reading and validating file...
+                </p>
+              )}
 
               <button
                 onClick={handleDownloadTemplate}

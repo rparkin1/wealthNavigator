@@ -159,7 +159,7 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="h-full max-h-screen overflow-y-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -245,9 +245,9 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
                     <div className="flex-1">
                       <h4 className="text-lg font-medium text-gray-900">{account.name}</h4>
                       <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
-                        <span className="capitalize">{account.accountType.replace(/_/g, ' ')}</span>
+                        <span className="capitalize">{account.accountType?.replace(/_/g, ' ') || 'Unknown Type'}</span>
                         <span>•</span>
-                        <span>{account.institution}</span>
+                        <span>{account.institution || 'Unknown Institution'}</span>
                         <span>•</span>
                         <span className="font-medium text-gray-900">{formatCurrency(account.balance)}</span>
                       </div>
@@ -316,9 +316,9 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-1">
-                        <h4 className="text-lg font-medium text-gray-900">{holding.ticker}</h4>
+                        <h4 className="text-lg font-medium text-gray-900">{holding.ticker || 'N/A'}</h4>
                         <span className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded">
-                          {holding.securityType.toUpperCase()}
+                          {holding.securityType?.toUpperCase() || 'N/A'}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 mb-2">{holding.name}</p>
@@ -330,7 +330,9 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
                         <span>Current: {formatCurrency(holding.currentValue)}</span>
                         <span>•</span>
                         <span className={holding.currentValue >= holding.costBasis ? 'text-green-600' : 'text-red-600'}>
-                          {((holding.currentValue - holding.costBasis) / holding.costBasis * 100).toFixed(2)}%
+                          {holding.costBasis && holding.currentValue
+                            ? ((holding.currentValue - holding.costBasis) / holding.costBasis * 100).toFixed(2)
+                            : '0.00'}%
                         </span>
                       </div>
                     </div>
@@ -363,10 +365,10 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
           <ImportExportPanel
             dataType="accounts"
             onImport={async (data) => {
-              // Import accounts
+              // Import accounts - use ID from CSV if provided, otherwise generate new UUID
               const newAccounts = data.map(item => ({
                 ...item,
-                id: crypto.randomUUID(),
+                id: item.id || crypto.randomUUID(),
               } as Account));
               setAccounts(prev => [...prev, ...newAccounts]);
             }}
@@ -378,11 +380,35 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
           <ImportExportPanel
             dataType="holdings"
             onImport={async (data) => {
-              // Import holdings
-              const newHoldings = data.map(item => ({
-                ...item,
-                id: crypto.randomUUID(),
-              } as Holding));
+              // Import holdings and validate account references
+              const accountIds = new Set(accounts.map(a => a.id));
+              const orphanedHoldings: string[] = [];
+
+              const newHoldings = data.map(item => {
+                // Check if account_id exists
+                if (item.account_id && !accountIds.has(item.account_id as string)) {
+                  orphanedHoldings.push(`${item.ticker} (account_id: ${item.account_id})`);
+                }
+
+                return {
+                  ...item,
+                  id: item.id || crypto.randomUUID(),
+                  accountId: item.account_id,
+                } as Holding;
+              });
+
+              // Warn about orphaned holdings
+              if (orphanedHoldings.length > 0) {
+                const proceed = confirm(
+                  `⚠️ Warning: ${orphanedHoldings.length} holding(s) reference non-existent accounts:\n\n` +
+                  `${orphanedHoldings.slice(0, 5).join('\n')}` +
+                  `${orphanedHoldings.length > 5 ? `\n...and ${orphanedHoldings.length - 5} more` : ''}\n\n` +
+                  `These holdings will be imported but won't be linked to any account.\n\n` +
+                  `Import accounts first, then import holdings. Continue anyway?`
+                );
+                if (!proceed) return;
+              }
+
               setHoldings(prev => [...prev, ...newHoldings]);
             }}
             onExport={async () => holdings}
@@ -408,7 +434,7 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
       {(modalState === 'add-holding' || modalState === 'edit-holding') && (
         <HoldingForm
           holding={editingHolding}
-          accounts={accounts.map(a => ({ id: a.id || '', name: a.name, type: a.accountType }))}
+          accounts={accounts.map(a => ({ id: a.id || '', name: a.name || 'Unnamed Account', type: a.accountType || 'taxable' }))}
           onSubmit={handleSaveHolding}
           onCancel={() => {
             setModalState('closed');
