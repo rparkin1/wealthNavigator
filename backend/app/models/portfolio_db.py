@@ -157,6 +157,8 @@ class SecurityType(str, enum.Enum):
     MUTUAL_FUND = "mutual_fund"
     BOND = "bond"
     CASH = "cash"
+    OPTION = "option"
+    FUTURE = "future"
     OTHER = "other"
 
 
@@ -181,7 +183,7 @@ class Holding(Base, TimestampMixin):
     )
 
     # Security details
-    ticker: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
+    ticker: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     security_type: Mapped[SecurityType] = mapped_column(
         SQLEnum(SecurityType),
