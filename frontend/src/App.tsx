@@ -12,6 +12,7 @@ import OnboardingWizard from './components/onboarding/OnboardingWizard';
 import InAppDocumentation from './components/help/InAppDocumentation';
 import { SkipLink } from './components/common/SkipLink';
 import { useOnboarding } from './hooks/useOnboarding';
+import { useGoals } from './hooks/useGoals';
 import './index.css';
 
 // Lazy load components for better error isolation
@@ -166,6 +167,9 @@ function App() {
 
   // Test user ID matching backend database - in production, get from auth
   const userId = 'test-user-123';
+
+  // Fetch goals for sensitivity analysis
+  const { goals } = useGoals({ userId });
 
   // Onboarding state
   const {
@@ -377,7 +381,19 @@ function App() {
             </div>
             <ErrorBoundary fallback={<LoadingView message="Loading sensitivity analysis..." />}>
               <Suspense fallback={<LoadingView message="Loading sensitivity analysis..." />}>
-                <SensitivityAnalysisDashboard goalId="sample-goal-123" />
+                {goals.length > 0 ? (
+                  <SensitivityAnalysisDashboard goalId={goals[0].id} />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-96 text-gray-500">
+                    <p className="text-lg mb-4">No goals found. Please create a goal first.</p>
+                    <button
+                      onClick={() => setCurrentView('goals')}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      Go to Goals
+                    </button>
+                  </div>
+                )}
               </Suspense>
             </ErrorBoundary>
           </>
@@ -839,7 +855,7 @@ function App() {
 
         <main
           id="main-content"
-          className="flex-1 overflow-hidden"
+          className="flex-1 overflow-y-auto"
           role="main"
           aria-label="Main content"
           tabIndex={-1}

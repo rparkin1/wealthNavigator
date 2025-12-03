@@ -29,24 +29,69 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // LocalStorage keys for persistence
+  const ACCOUNTS_KEY = `portfolio_accounts_${userId}`;
+  const HOLDINGS_KEY = `portfolio_holdings_${userId}`;
+
   useEffect(() => {
     loadData();
   }, [userId]);
+
+  // Save accounts to localStorage whenever they change
+  useEffect(() => {
+    if (!loading) {
+      try {
+        localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+        console.log('[PortfolioDataManager] Saved', accounts.length, 'accounts to localStorage');
+      } catch (err) {
+        console.error('[PortfolioDataManager] Failed to save accounts to localStorage:', err);
+      }
+    }
+  }, [accounts, ACCOUNTS_KEY, loading]);
+
+  // Save holdings to localStorage whenever they change
+  useEffect(() => {
+    if (!loading) {
+      try {
+        localStorage.setItem(HOLDINGS_KEY, JSON.stringify(holdings));
+        console.log('[PortfolioDataManager] Saved', holdings.length, 'holdings to localStorage');
+      } catch (err) {
+        console.error('[PortfolioDataManager] Failed to save holdings to localStorage:', err);
+      }
+    }
+  }, [holdings, HOLDINGS_KEY, loading]);
 
   const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // TODO: Replace with actual API calls
+      // Load from localStorage
+      const savedAccounts = localStorage.getItem(ACCOUNTS_KEY);
+      const savedHoldings = localStorage.getItem(HOLDINGS_KEY);
+
+      if (savedAccounts) {
+        const parsedAccounts = JSON.parse(savedAccounts);
+        setAccounts(parsedAccounts);
+        console.log('[PortfolioDataManager] Loaded', parsedAccounts.length, 'accounts from localStorage');
+      } else {
+        setAccounts([]);
+      }
+
+      if (savedHoldings) {
+        const parsedHoldings = JSON.parse(savedHoldings);
+        setHoldings(parsedHoldings);
+        console.log('[PortfolioDataManager] Loaded', parsedHoldings.length, 'holdings from localStorage');
+      } else {
+        setHoldings([]);
+      }
+
+      // TODO: Replace with actual API calls when backend is ready
       // const accountsResponse = await fetch(`/api/v1/portfolio/accounts?user_id=${userId}`);
       // const holdingsResponse = await fetch(`/api/v1/portfolio/holdings?user_id=${userId}`);
-
-      // Mock data for now
-      setAccounts([]);
-      setHoldings([]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load portfolio data');
+      console.error('[PortfolioDataManager] Error loading data:', err);
     } finally {
       setLoading(false);
     }
@@ -159,7 +204,7 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
   }
 
   return (
-    <div className="h-full max-h-screen overflow-y-auto p-6 space-y-6">
+    <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -365,12 +410,78 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
           <ImportExportPanel
             dataType="accounts"
             onImport={async (data) => {
-              // Import accounts - use ID from CSV if provided, otherwise generate new UUID
-              const newAccounts = data.map(item => ({
-                ...item,
-                id: item.id || crypto.randomUUID(),
-              } as Account));
-              setAccounts(prev => [...prev, ...newAccounts]);
+              console.log('[PortfolioDataManager] Starting accounts import with', data.length, 'rows');
+              console.log('[PortfolioDataManager] Sample account row:', data[0]);
+
+              // Transform CSV snake_case to camelCase
+              const accountsToCreate = data.map(item => ({
+                id: item.id as string || undefined,
+                name: item.name as string,
+                account_type: item.account_type as string,
+                institution: item.institution as string,
+                account_number: item.account_number as string || undefined,
+                balance: item.balance as number,
+                opened: item.opened as string || undefined,
+                notes: item.notes as string || undefined,
+              }));
+
+              // Persist to database via API
+              try {
+                const response = await fetch('http://localhost:8000/api/v1/portfolio-data/accounts/bulk', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    user_id: userId,
+                    accounts: accountsToCreate,
+                  }),
+                });
+
+                if (!response.ok) {
+                  const errorData = await response.json();
+                  console.error('[PortfolioDataManager] API Error Response:', errorData);
+
+                  // Handle validation errors (422) - format as readable string
+                  if (response.status === 422 && Array.isArray(errorData.detail)) {
+                    const validationErrors = errorData.detail
+                      .map((err: any) => `${err.loc.join('.')}: ${err.msg}`)
+                      .join('; ');
+                    throw new Error(`Validation failed: ${validationErrors}`);
+                  }
+
+                  // Handle other errors
+                  const errorMessage = typeof errorData.detail === 'string'
+                    ? errorData.detail
+                    : JSON.stringify(errorData.detail);
+                  throw new Error(errorMessage || 'Failed to save accounts to database');
+                }
+
+                const result = await response.json();
+                console.log('[PortfolioDataManager] Successfully saved', result.created_count, 'accounts to database');
+
+                // Update local state with response from database (includes IDs)
+                const newAccounts = result.accounts.map((acc: any) => ({
+                  id: acc.id,
+                  name: acc.name,
+                  accountType: acc.account_type,
+                  institution: acc.institution,
+                  accountNumber: acc.account_number,
+                  balance: acc.balance,
+                  opened: acc.opened,
+                  notes: acc.notes,
+                }));
+
+                setAccounts(prev => [...prev, ...newAccounts]);
+
+                if (result.errors && result.errors.length > 0) {
+                  console.warn('[PortfolioDataManager] Some accounts had errors:', result.errors);
+                }
+              } catch (err) {
+                console.error('[PortfolioDataManager] Failed to save accounts to database:', err);
+                setError(err instanceof Error ? err.message : 'Failed to save accounts to database');
+                throw err; // Re-throw to prevent UI from showing success
+              }
             }}
             onExport={async () => accounts}
             existingData={accounts}
@@ -380,21 +491,17 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
           <ImportExportPanel
             dataType="holdings"
             onImport={async (data) => {
-              // Import holdings and validate account references
+              console.log('[PortfolioDataManager] Starting holdings import with', data.length, 'rows');
+              console.log('[PortfolioDataManager] Sample row:', data[0]);
+
+              // Validate account references
               const accountIds = new Set(accounts.map(a => a.id));
               const orphanedHoldings: string[] = [];
 
-              const newHoldings = data.map(item => {
-                // Check if account_id exists
+              data.forEach(item => {
                 if (item.account_id && !accountIds.has(item.account_id as string)) {
                   orphanedHoldings.push(`${item.ticker} (account_id: ${item.account_id})`);
                 }
-
-                return {
-                  ...item,
-                  id: item.id || crypto.randomUUID(),
-                  accountId: item.account_id,
-                } as Holding;
               });
 
               // Warn about orphaned holdings
@@ -409,7 +516,67 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
                 if (!proceed) return;
               }
 
-              setHoldings(prev => [...prev, ...newHoldings]);
+              // Transform for API
+              const holdingsToCreate = data.map(item => ({
+                id: item.id as string || undefined,
+                ticker: item.ticker as string,
+                name: item.name as string,
+                security_type: item.security_type as string,
+                shares: item.shares as number,
+                cost_basis: item.cost_basis as number,
+                current_value: item.current_value as number,
+                purchase_date: item.purchase_date as string || undefined,
+                account_id: item.account_id as string,
+                asset_class: item.asset_class as string || undefined,
+                expense_ratio: item.expense_ratio as number || undefined,
+              }));
+
+              // Persist to database via API
+              try {
+                const response = await fetch('http://localhost:8000/api/v1/portfolio-data/holdings/bulk', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    user_id: userId,
+                    holdings: holdingsToCreate,
+                  }),
+                });
+
+                if (!response.ok) {
+                  const errorData = await response.json();
+                  throw new Error(errorData.detail || 'Failed to save holdings to database');
+                }
+
+                const result = await response.json();
+                console.log('[PortfolioDataManager] Successfully saved', result.created_count, 'holdings to database');
+
+                // Update local state with response from database (includes IDs)
+                const newHoldings = result.holdings.map((h: any) => ({
+                  id: h.id,
+                  ticker: h.ticker,
+                  name: h.name,
+                  securityType: h.security_type,
+                  shares: h.shares,
+                  costBasis: h.cost_basis,
+                  currentValue: h.current_value,
+                  purchaseDate: h.purchase_date,
+                  accountId: h.account_id,
+                  assetClass: h.asset_class,
+                  expenseRatio: h.expense_ratio,
+                }));
+
+                setHoldings(prev => [...prev, ...newHoldings]);
+
+                if (result.errors && result.errors.length > 0) {
+                  console.warn('[PortfolioDataManager] Some holdings had errors:', result.errors);
+                }
+              } catch (err) {
+                console.error('[PortfolioDataManager] Failed to save holdings to database:', err);
+                setError(err instanceof Error ? err.message : 'Failed to save holdings to database');
+                throw err; // Re-throw to prevent UI from showing success
+              }
             }}
             onExport={async () => holdings}
             existingData={holdings}

@@ -8,6 +8,7 @@ REQ-RISK-010: Diversification recommendations
 
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from typing import List, Optional
 from pydantic import BaseModel
 
@@ -18,6 +19,7 @@ from app.services.risk.diversification_analysis import (
 )
 from app.core.database import get_db
 from app.models.user import User
+from app.models.plaid import PlaidHolding
 from app.api.deps import get_current_user
 
 router = APIRouter()
@@ -49,6 +51,88 @@ class SimplifiedDiversificationRequest(BaseModel):
 
 
 # Endpoints
+
+@router.get("/analyze", response_model=DiversificationAnalysisResult)
+async def analyze_user_portfolio_diversification(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> DiversificationAnalysisResult:
+    """
+    Analyze diversification of user's portfolio holdings from database
+
+    Automatically fetches the user's holdings from Plaid/database and performs
+    comprehensive diversification analysis.
+
+    **REQ-RISK-008:** Diversification metrics
+    **REQ-RISK-009:** Concentration risk identification
+    **REQ-RISK-010:** Diversification recommendations
+    """
+    try:
+        # Fetch user's holdings from database
+        query = select(PlaidHolding).where(PlaidHolding.user_id == current_user.id)
+        result = await db.execute(query)
+        db_holdings = result.scalars().all()
+
+        if not db_holdings:
+            raise HTTPException(
+                status_code=404,
+                detail="No holdings found for user. Please sync your accounts first."
+            )
+
+        # Calculate total portfolio value
+        portfolio_value = sum(float(h.institution_value or 0) for h in db_holdings)
+
+        if portfolio_value <= 0:
+            raise HTTPException(
+                status_code=400,
+                detail="Portfolio value must be positive. Please ensure your holdings have valid values."
+            )
+
+        # Convert database holdings to HoldingInfo format
+        holdings = []
+        for h in db_holdings:
+            value = float(h.institution_value or 0)
+            weight = value / portfolio_value if portfolio_value > 0 else 0
+
+            # Map security type to asset class
+            asset_class = "US_LargeCap"  # Default
+            if h.type:
+                type_lower = h.type.lower()
+                if "etf" in type_lower or "mutual" in type_lower:
+                    asset_class = "US_Blend"
+                elif "bond" in type_lower or "fixed" in type_lower:
+                    asset_class = "US_Bonds"
+                elif "cash" in type_lower:
+                    asset_class = "Cash"
+
+            holdings.append(HoldingInfo(
+                symbol=h.security_id or h.ticker_symbol or "UNKNOWN",
+                name=h.name or "Unknown Holding",
+                value=value,
+                weight=weight,
+                asset_class=asset_class,
+                sector=None,  # Could be enriched from external data source
+                industry=None,
+                geography="US",  # Default, could be enhanced
+                manager=h.institution_name or "Unknown"
+            ))
+
+        # Perform diversification analysis
+        service = DiversificationAnalysisService()
+        result = service.analyze_diversification(
+            portfolio_value=portfolio_value,
+            holdings=holdings
+        )
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Diversification analysis failed: {str(e)}"
+        )
+
 
 @router.post("/analyze", response_model=DiversificationAnalysisResult)
 async def analyze_diversification(

@@ -83,30 +83,60 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
     return [headerRow, ...dataRows].join('\n');
   };
 
-  // Parse CSV content
+  // Parse CSV content with proper quoted field handling
   const parseCSV = (content: string): ImportData[] => {
     const lines = content.trim().split('\n');
     if (lines.length < 2) return [];
 
-    const headers = lines[0].split(',').map(h => h.trim());
+    // Parse CSV line respecting quoted fields
+    const parseLine = (line: string): string[] => {
+      const result: string[] = [];
+      let current = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          result.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      result.push(current.trim());
+      return result;
+    };
+
+    const headers = parseLine(lines[0]);
     const data: ImportData[] = [];
 
+    console.log('[ImportExportPanel] CSV Headers:', headers);
+
     for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+      const values = parseLine(lines[i]);
       const row: ImportData = {};
+
       headers.forEach((header, index) => {
-        const value = values[index];
+        const value = values[index]?.trim() || '';
+
+        // Remove currency symbols and commas from numbers
+        const cleanedValue = value.replace(/[$,]/g, '');
+
         // Convert to appropriate type
         if (value === '' || value === 'null' || value === 'undefined') {
           row[header] = null;
-        } else if (!isNaN(Number(value)) && value !== '') {
-          row[header] = Number(value);
+        } else if (!isNaN(Number(cleanedValue)) && cleanedValue !== '') {
+          row[header] = Number(cleanedValue);
         } else if (value === 'true' || value === 'false') {
           row[header] = value === 'true';
         } else {
           row[header] = value;
         }
       });
+
       data.push(row);
     }
 
@@ -141,22 +171,37 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
 
       // Type-specific validation
       if (dataType === 'holdings') {
-        console.log(`[ImportExportPanel] ✓ In HOLDINGS validation branch for row ${index + 2}:`, item);
+        console.log(`[ImportExportPanel] Validating HOLDING row ${index + 2}:`, {
+          ticker: item.ticker,
+          account_id: item.account_id,
+          shares: item.shares,
+          cost_basis: item.cost_basis,
+          current_value: item.current_value
+        });
 
         if (!item.ticker || typeof item.ticker !== 'string') {
+          console.log(`[ImportExportPanel] ❌ Row ${index + 2}: Missing or invalid ticker`);
           errors.push('Ticker is required');
         }
         if (!item.account_id || typeof item.account_id !== 'string') {
-          errors.push('Account ID (account_id) is required');
+          console.log(`[ImportExportPanel] ❌ Row ${index + 2}: Missing or invalid account_id (got ${typeof item.account_id}): ${item.account_id}`);
+          errors.push('Account ID (account_id) is required and must be a string');
         }
-        if (!item.shares || item.shares <= 0) {
-          errors.push('Shares must be greater than 0');
+        if (typeof item.shares !== 'number' || item.shares === 0) {
+          console.log(`[ImportExportPanel] ❌ Row ${index + 2}: Invalid shares (got ${typeof item.shares}): ${item.shares}`);
+          errors.push('Shares must be a non-zero number (negative for short positions)');
         }
-        if (item.cost_basis !== undefined && item.cost_basis < 0) {
-          errors.push('Cost basis cannot be negative');
+        if (item.cost_basis !== null && item.cost_basis !== undefined) {
+          if (typeof item.cost_basis !== 'number') {
+            console.log(`[ImportExportPanel] ❌ Row ${index + 2}: Invalid cost_basis: ${item.cost_basis}`);
+            errors.push('Cost basis must be a number (can be negative for short positions)');
+          }
         }
-        if (item.current_value !== undefined && item.current_value < 0) {
-          errors.push('Current value cannot be negative');
+        if (item.current_value !== null && item.current_value !== undefined) {
+          if (typeof item.current_value !== 'number') {
+            console.log(`[ImportExportPanel] ❌ Row ${index + 2}: Invalid current_value: ${item.current_value}`);
+            errors.push('Current value must be a number (can be negative for short positions)');
+          }
         }
 
         // Check for duplicates

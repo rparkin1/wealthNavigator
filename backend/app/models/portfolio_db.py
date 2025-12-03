@@ -114,6 +114,12 @@ class Account(Base, TimestampMixin):
 
     institution: Mapped[str] = mapped_column(String(255), nullable=False)
 
+    # Additional account fields
+    account_number: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    balance: Mapped[float] = mapped_column(Float, default=0.0)
+    opened: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    notes: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+
     # Account value
     current_value: Mapped[float] = mapped_column(Float, default=0.0)
 
@@ -132,11 +138,69 @@ class Account(Base, TimestampMixin):
         nullable=True
     )
 
-    # Holdings (stored as JSON array)
-    holdings: Mapped[Optional[List[dict]]] = mapped_column(JSON, nullable=True)
-
     # Relationships
     portfolio: Mapped["Portfolio"] = relationship("Portfolio", back_populates="accounts")
+    holdings: Mapped[List["Holding"]] = relationship(
+        "Holding",
+        back_populates="account",
+        cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<Account(id={self.id}, name={self.name}, type={self.account_type})>"
+
+
+class SecurityType(str, enum.Enum):
+    """Security type categories"""
+    STOCK = "stock"
+    ETF = "etf"
+    MUTUAL_FUND = "mutual_fund"
+    BOND = "bond"
+    CASH = "cash"
+    OTHER = "other"
+
+
+class Holding(Base, TimestampMixin):
+    """Individual security holding within an account"""
+
+    __tablename__ = "holdings"
+
+    # Primary key
+    id: Mapped[str] = mapped_column(
+        String(36),
+        primary_key=True,
+        default=lambda: str(uuid.uuid4())
+    )
+
+    # Foreign keys
+    account_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("accounts.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+
+    # Security details
+    ticker: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    security_type: Mapped[SecurityType] = mapped_column(
+        SQLEnum(SecurityType),
+        nullable=False,
+        index=True
+    )
+
+    # Quantity and value
+    shares: Mapped[float] = mapped_column(Float, nullable=False)
+    cost_basis: Mapped[float] = mapped_column(Float, nullable=False)
+    current_value: Mapped[float] = mapped_column(Float, nullable=False)
+
+    # Additional details
+    purchase_date: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    asset_class: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    expense_ratio: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+
+    # Relationships
+    account: Mapped["Account"] = relationship("Account", back_populates="holdings")
+
+    def __repr__(self) -> str:
+        return f"<Holding(id={self.id}, ticker={self.ticker}, shares={self.shares})>"
