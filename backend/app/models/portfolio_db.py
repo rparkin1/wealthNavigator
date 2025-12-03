@@ -3,7 +3,7 @@ Portfolio and account database models
 """
 
 from sqlalchemy import String, Float, ForeignKey, JSON, Enum as SQLEnum, DateTime
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from typing import Optional, List
 from datetime import datetime
 import uuid
@@ -203,6 +203,21 @@ class Holding(Base, TimestampMixin):
 
     # Relationships
     account: Mapped["Account"] = relationship("Account", back_populates="holdings")
+
+    @validates("security_type")
+    def validate_security_type(self, key, value):
+        """Normalize and validate security type inputs."""
+        if isinstance(value, SecurityType):
+            return value
+
+        normalized = str(value).lower()
+        try:
+            return SecurityType(normalized)
+        except ValueError as exc:
+            valid_types = ", ".join([st.value for st in SecurityType])
+            raise ValueError(
+                f"Invalid security_type '{value}'. Must be one of: {valid_types}"
+            ) from exc
 
     def __repr__(self) -> str:
         return f"<Holding(id={self.id}, ticker={self.ticker}, shares={self.shares})>"
