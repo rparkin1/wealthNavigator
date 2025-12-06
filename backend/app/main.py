@@ -120,6 +120,7 @@ from app.api.v1.endpoints.goal_funding import router as goal_funding_router
 from app.api.v1.endpoints.mental_accounting import router as mental_accounting_router
 from app.api.v1.endpoints.portfolio_optimization import router as portfolio_optimization_router
 from app.api.v1.endpoints.portfolio_data import router as portfolio_data_router
+from app.api.v1.endpoints.portfolio_summary import router as portfolio_summary_router
 from app.api.v1.endpoints.risk_management import router as risk_management_router
 from app.api.v1.endpoints.diversification import router as diversification_router
 from app.api.v1.endpoints.reserve_monitoring import router as reserve_monitoring_router
@@ -165,7 +166,7 @@ app.include_router(goal_scenarios_router, prefix=f"{settings.API_V1_PREFIX}/goal
 goal_scenarios_alias = APIRouter(prefix="/goal-planning/scenarios", include_in_schema=False)
 goal_scenarios_alias.include_router(goal_scenarios_router)
 app.include_router(goal_scenarios_alias, prefix=settings.API_V1_PREFIX, tags=["goal-planning"])
-app.include_router(ai_goal_assistance_router, prefix=f"{settings.API_V1_PREFIX}/goal-planning/ai", tags=["goal-planning", "ai"])
+app.include_router(ai_goal_assistance_router, prefix=f"{settings.API_V1_PREFIX}/ai-goal-assistance", tags=["goal-planning", "ai"])
 app.include_router(goal_funding_router, prefix=f"{settings.API_V1_PREFIX}/goal-planning/funding", tags=["goal-planning"])
 app.include_router(mental_accounting_router, prefix=f"{settings.API_V1_PREFIX}/goal-planning/mental-accounting", tags=["goal-planning", "mental-accounting"])
 
@@ -174,6 +175,9 @@ app.include_router(portfolio_optimization_router, prefix=f"{settings.API_V1_PREF
 
 # Portfolio Data Management v1 endpoints (accounts and holdings)
 app.include_router(portfolio_data_router, prefix=settings.API_V1_PREFIX, tags=["portfolio-data"])
+
+# Portfolio Summary v1 endpoints (aggregated portfolio data for dashboards)
+app.include_router(portfolio_summary_router, prefix=settings.API_V1_PREFIX, tags=["portfolio-summary"])
 
 # Risk Management v1 endpoints
 app.include_router(risk_management_router, prefix=f"{settings.API_V1_PREFIX}/risk-management", tags=["risk-management"])

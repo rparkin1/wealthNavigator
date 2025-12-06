@@ -19,7 +19,7 @@ from app.services.risk.diversification_analysis import (
 )
 from app.core.database import get_db
 from app.models.user import User
-from app.models.plaid import PlaidHolding
+from app.models.portfolio_db import Portfolio, Account, Holding
 from app.api.deps import get_current_user
 
 router = APIRouter()
@@ -68,19 +68,41 @@ async def analyze_user_portfolio_diversification(
     **REQ-RISK-010:** Diversification recommendations
     """
     try:
-        # Fetch user's holdings from database
-        query = select(PlaidHolding).where(PlaidHolding.user_id == current_user.id)
-        result = await db.execute(query)
+        # Get user's portfolio
+        portfolio_query = select(Portfolio).where(Portfolio.user_id == current_user.id)
+        result = await db.execute(portfolio_query)
+        portfolio = result.scalar_one_or_none()
+
+        if not portfolio:
+            raise HTTPException(
+                status_code=404,
+                detail="No portfolio found for user. Please add holdings first."
+            )
+
+        # Get all accounts for this portfolio
+        accounts_query = select(Account.id).where(Account.portfolio_id == portfolio.id)
+        result = await db.execute(accounts_query)
+        account_ids = [row[0] for row in result.all()]
+
+        if not account_ids:
+            raise HTTPException(
+                status_code=404,
+                detail="No accounts found. Please add holdings first."
+            )
+
+        # Fetch holdings from database
+        holdings_query = select(Holding).where(Holding.account_id.in_(account_ids))
+        result = await db.execute(holdings_query)
         db_holdings = result.scalars().all()
 
         if not db_holdings:
             raise HTTPException(
                 status_code=404,
-                detail="No holdings found for user. Please sync your accounts first."
+                detail="No holdings found for user. Please add holdings first."
             )
 
         # Calculate total portfolio value
-        portfolio_value = sum(float(h.institution_value or 0) for h in db_holdings)
+        portfolio_value = sum(float(h.current_value) for h in db_holdings)
 
         if portfolio_value <= 0:
             raise HTTPException(
@@ -91,30 +113,43 @@ async def analyze_user_portfolio_diversification(
         # Convert database holdings to HoldingInfo format
         holdings = []
         for h in db_holdings:
-            value = float(h.institution_value or 0)
+            value = float(h.current_value)
             weight = value / portfolio_value if portfolio_value > 0 else 0
 
-            # Map security type to asset class
-            asset_class = "US_LargeCap"  # Default
-            if h.type:
-                type_lower = h.type.lower()
-                if "etf" in type_lower or "mutual" in type_lower:
-                    asset_class = "US_Blend"
-                elif "bond" in type_lower or "fixed" in type_lower:
-                    asset_class = "US_Bonds"
-                elif "cash" in type_lower:
+            # Normalize asset class
+            asset_class = h.asset_class or "US_LargeCap"
+            if asset_class:
+                asset_class_lower = asset_class.lower()
+                # Map common variations
+                if "cash" in asset_class_lower:
                     asset_class = "Cash"
+                elif "bond" in asset_class_lower or "agg" in asset_class_lower:
+                    asset_class = "US_Bonds"
+                elif "treasury" in asset_class_lower or "govt" in asset_class_lower:
+                    asset_class = "US_Treasury"
+                elif "large cap" in asset_class_lower or "lc" in asset_class_lower:
+                    asset_class = "US_LargeCap"
+                elif "small cap" in asset_class_lower or "sc" in asset_class_lower:
+                    asset_class = "US_SmallCap"
+                elif "international" in asset_class_lower or "intl" in asset_class_lower:
+                    asset_class = "International_Developed"
+                elif "emerging" in asset_class_lower:
+                    asset_class = "Emerging_Markets"
+                elif "reit" in asset_class_lower:
+                    asset_class = "REIT"
+                elif "gold" in asset_class_lower:
+                    asset_class = "Gold"
 
             holdings.append(HoldingInfo(
-                symbol=h.security_id or h.ticker_symbol or "UNKNOWN",
-                name=h.name or "Unknown Holding",
+                symbol=h.ticker,
+                name=h.name,
                 value=value,
                 weight=weight,
                 asset_class=asset_class,
                 sector=None,  # Could be enriched from external data source
                 industry=None,
                 geography="US",  # Default, could be enhanced
-                manager=h.institution_name or "Unknown"
+                manager="Unknown"  # Could be enriched from account data
             ))
 
         # Perform diversification analysis

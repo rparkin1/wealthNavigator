@@ -100,6 +100,12 @@ class User(Base, TimestampMixin):
         cascade="all, delete-orphan"
     )
 
+    plaid_investment_transactions: Mapped[List["PlaidInvestmentTransaction"]] = relationship(
+        "PlaidInvestmentTransaction",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
     life_events: Mapped[List["LifeEvent"]] = relationship(
         "LifeEvent",
         back_populates="user",

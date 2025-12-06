@@ -3,6 +3,8 @@
  * Tracks Web Vitals and custom performance metrics
  */
 
+import React from 'react';
+
 interface PerformanceMetric {
   name: string;
   value: number;
@@ -236,7 +238,7 @@ export function usePerformanceTracking(componentName: string) {
 export function withPerformanceTracking<P extends object>(
   Component: React.ComponentType<P>,
   componentName?: string
-) {
+): React.ComponentType<P> {
   const name = componentName || Component.displayName || Component.name || 'Unknown';
 
   return (props: P) => {
@@ -246,7 +248,7 @@ export function withPerformanceTracking<P extends object>(
       return trackEnd;
     });
 
-    return <Component {...props} />;
+    return React.createElement(Component, props);
   };
 }
 

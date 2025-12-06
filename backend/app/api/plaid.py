@@ -6,10 +6,10 @@ from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, desc
 from typing import List, Optional
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 from app.api.deps import get_db, get_current_user, CurrentUser
-from app.models.plaid import PlaidItem, PlaidAccount, PlaidTransaction, PlaidHolding
+from app.models.plaid import PlaidItem, PlaidAccount, PlaidTransaction, PlaidHolding, PlaidInvestmentTransaction
 from app.schemas.plaid import (
     LinkTokenCreateRequest,
     LinkTokenCreateResponse,
@@ -27,6 +27,11 @@ from app.schemas.plaid import (
     HoldingsSyncResponse,
     HoldingsListResponse,
     PlaidHoldingResponse,
+    InvestmentTransactionsSyncRequest,
+    InvestmentTransactionsSyncResponse,
+    InvestmentTransactionsListRequest,
+    InvestmentTransactionsListResponse,
+    PlaidInvestmentTransactionResponse,
     PlaidItemResponse,
     ItemsListResponse,
     ItemRemoveRequest,
@@ -112,6 +117,16 @@ async def exchange_public_token(
         encrypted_token = encryption_service.encrypt_access_token(access_token)
 
         # Create PlaidItem record
+        # Convert Products enums to strings for JSON storage
+        available_products = item_details.get("available_products", [])
+        billed_products = item_details.get("billed_products", [])
+
+        # Handle Products enum objects from Plaid API - force to string values
+        if available_products:
+            available_products = [str(p.value) if hasattr(p, 'value') else str(p) for p in available_products]
+        if billed_products:
+            billed_products = [str(p.value) if hasattr(p, 'value') else str(p) for p in billed_products]
+
         plaid_item = PlaidItem(
             user_id=current_user.id,
             item_id=item_id,
@@ -119,8 +134,8 @@ async def exchange_public_token(
             institution_id=item_details.get("institution_id"),
             institution_name=institution_name,
             consent_expiration_time=item_details.get("consent_expiration_time"),
-            available_products=item_details.get("available_products"),
-            billed_products=item_details.get("billed_products"),
+            available_products=available_products,
+            billed_products=billed_products,
             is_active=True
         )
 
@@ -194,8 +209,11 @@ async def remove_item(
         )
 
     try:
+        # Decrypt access token before sending to Plaid
+        access_token = encryption_service.decrypt_access_token(item.access_token)
+
         # Remove from Plaid
-        plaid_service.remove_item(item.access_token)
+        plaid_service.remove_item(access_token)
 
         # Delete from database (cascade will handle accounts, transactions, holdings)
         await db.delete(item)
@@ -321,11 +339,20 @@ async def sync_transactions(
         total_removed = 0
 
         for item in items:
+            # Decrypt access token
+            access_token = encryption_service.decrypt_access_token(item.access_token)
+
             # Sync transactions for this item
-            sync_result = plaid_service.sync_transactions(
-                access_token=item.access_token,
-                cursor=item.cursor
-            )
+            # Only pass cursor if it exists (not None)
+            sync_kwargs = {"access_token": access_token}
+            if item.cursor:
+                sync_kwargs["cursor"] = item.cursor
+
+            sync_result = plaid_service.sync_transactions(**sync_kwargs)
+
+            # Log what we got from Plaid
+            print(f">>> PLAID SYNC RESULT for item {item.id}: added={len(sync_result['added'])}, modified={len(sync_result['modified'])}, removed={len(sync_result['removed'])}, cursor={sync_result['cursor']}")
+            logger.info(f"Plaid sync result for item {item.id}: added={len(sync_result['added'])}, modified={len(sync_result['modified'])}, removed={len(sync_result['removed'])}")
 
             # Process added transactions
             for txn_data in sync_result["added"]:
@@ -487,8 +514,11 @@ async def sync_holdings(
             if "investments" not in (item.billed_products or []):
                 continue
 
+            # Decrypt access token
+            access_token = encryption_service.decrypt(item.access_token)
+
             # Get holdings
-            holdings_data = plaid_service.get_investments_holdings(item.access_token)
+            holdings_data = plaid_service.get_investments_holdings(access_token)
 
             # Process holdings
             for holding_data in holdings_data["holdings"]:
@@ -535,6 +565,187 @@ async def list_holdings(
     return HoldingsListResponse(
         holdings=[PlaidHoldingResponse.model_validate(h) for h in holdings],
         total=len(holdings)
+    )
+
+
+# Investment Transactions
+@router.post("/investment-transactions/sync", response_model=InvestmentTransactionsSyncResponse)
+async def sync_investment_transactions(
+    request: InvestmentTransactionsSyncRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user)
+):
+    """
+    Sync investment transactions from Plaid
+
+    This fetches buy, sell, dividend, and other investment transactions
+    from investment accounts (brokerage, 401k, IRA, etc.)
+    """
+    try:
+        # Default date range: last 90 days to today
+        if not request.start_date:
+            request.start_date = (datetime.now() - timedelta(days=90)).date()
+        if not request.end_date:
+            request.end_date = datetime.now().date()
+
+        # Get investment items
+        query = select(PlaidItem).where(PlaidItem.user_id == current_user.id)
+
+        if request.item_id:
+            query = query.where(PlaidItem.id == request.item_id)
+
+        result = await db.execute(query)
+        items = result.scalars().all()
+
+        if not items:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No Plaid items found"
+            )
+
+        total_added = 0
+        all_securities = {}
+
+        for item in items:
+            # Check if this item has investment accounts
+            accounts_result = await db.execute(
+                select(PlaidAccount).where(
+                    and_(
+                        PlaidAccount.item_id == item.id,
+                        PlaidAccount.type == "investment"
+                    )
+                )
+            )
+            investment_accounts = accounts_result.scalars().all()
+
+            if not investment_accounts:
+                continue  # Skip non-investment items
+
+            # Decrypt access token
+            access_token = encryption_service.decrypt(item.access_token)
+
+            # Fetch investment transactions from Plaid
+            inv_data = plaid_service.get_investment_transactions(
+                access_token=access_token,
+                start_date=request.start_date.isoformat(),
+                end_date=request.end_date.isoformat()
+            )
+
+            print(f">>> INVESTMENT TRANSACTIONS for item {item.id}: total={inv_data['total_transactions']}, fetched={len(inv_data['transactions'])}")
+
+            # Store securities info
+            all_securities.update(inv_data['securities'])
+
+            # Process each transaction
+            for txn_data in inv_data['transactions']:
+                # Find the corresponding PlaidAccount
+                plaid_account = next(
+                    (acc for acc in investment_accounts if acc.account_id == txn_data['account_id']),
+                    None
+                )
+
+                if not plaid_account:
+                    continue
+
+                # Get security info for ticker symbol
+                security = inv_data['securities'].get(txn_data.get('security_id'))
+                ticker_symbol = security.get('ticker_symbol') if security else None
+
+                # Check if transaction already exists
+                existing = await db.execute(
+                    select(PlaidInvestmentTransaction).where(
+                        PlaidInvestmentTransaction.investment_transaction_id == txn_data['investment_transaction_id']
+                    )
+                )
+                existing_txn = existing.scalar_one_or_none()
+
+                if existing_txn:
+                    # Update existing transaction
+                    existing_txn.amount = txn_data['amount']
+                    existing_txn.quantity = txn_data.get('quantity')
+                    existing_txn.price = txn_data.get('price')
+                    existing_txn.fees = txn_data.get('fees')
+                else:
+                    # Create new transaction
+                    new_txn = PlaidInvestmentTransaction(
+                        account_id=plaid_account.id,
+                        user_id=current_user.id,
+                        investment_transaction_id=txn_data['investment_transaction_id'],
+                        security_id=txn_data.get('security_id'),
+                        ticker_symbol=ticker_symbol,
+                        date=txn_data['date'],
+                        name=txn_data['name'],
+                        amount=txn_data['amount'],
+                        quantity=txn_data.get('quantity'),
+                        price=txn_data.get('price'),
+                        fees=txn_data.get('fees'),
+                        type=txn_data['type'],
+                        subtype=txn_data.get('subtype'),
+                        iso_currency_code=txn_data.get('iso_currency_code', 'USD'),
+                        unofficial_currency_code=txn_data.get('unofficial_currency_code')
+                    )
+                    db.add(new_txn)
+                    total_added += 1
+
+            await db.commit()
+
+        return InvestmentTransactionsSyncResponse(
+            transactions_added=total_added,
+            securities_count=len(all_securities),
+            total_transactions=total_added
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error syncing investment transactions: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to sync investment transactions: {str(e)}"
+        )
+
+
+@router.post("/investment-transactions", response_model=InvestmentTransactionsListResponse)
+async def list_investment_transactions(
+    request: InvestmentTransactionsListRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user)
+):
+    """List investment transactions with filters"""
+    query = select(PlaidInvestmentTransaction).where(
+        PlaidInvestmentTransaction.user_id == current_user.id
+    )
+
+    # Apply filters
+    if request.account_id:
+        query = query.where(PlaidInvestmentTransaction.account_id == request.account_id)
+
+    if request.start_date:
+        query = query.where(PlaidInvestmentTransaction.date >= request.start_date)
+
+    if request.end_date:
+        query = query.where(PlaidInvestmentTransaction.date <= request.end_date)
+
+    if request.transaction_type:
+        query = query.where(PlaidInvestmentTransaction.type == request.transaction_type)
+
+    if request.ticker:
+        query = query.where(PlaidInvestmentTransaction.ticker_symbol == request.ticker)
+
+    # Get total count
+    count_result = await db.execute(select(PlaidInvestmentTransaction.id).select_from(query.subquery()))
+    total = len(count_result.all())
+
+    # Apply ordering and pagination
+    query = query.order_by(desc(PlaidInvestmentTransaction.date))
+    query = query.limit(request.limit).offset(request.offset)
+
+    result = await db.execute(query)
+    transactions = result.scalars().all()
+
+    return InvestmentTransactionsListResponse(
+        transactions=[PlaidInvestmentTransactionResponse.model_validate(t) for t in transactions],
+        total=total
     )
 
 
@@ -615,14 +826,24 @@ async def _sync_accounts_for_item(
             account.last_balance_update = datetime.utcnow().isoformat()
         else:
             # Create new account
+            # Convert enum types to strings - use more explicit conversion
+            account_type = acc_data["type"]
+            # Force convert to string to avoid enum serialization issues
+            account_type = str(account_type.value) if hasattr(account_type, 'value') else str(account_type)
+
+            account_subtype = acc_data.get("subtype")
+            # Force convert to string to avoid enum serialization issues
+            if account_subtype:
+                account_subtype = str(account_subtype.value) if hasattr(account_subtype, 'value') else str(account_subtype)
+
             account = PlaidAccount(
                 item_id=item.id,
                 user_id=item.user_id,
                 account_id=acc_data["account_id"],
                 name=acc_data["name"],
                 official_name=acc_data.get("official_name"),
-                type=acc_data["type"],
-                subtype=acc_data.get("subtype"),
+                type=account_type,
+                subtype=account_subtype,
                 mask=acc_data.get("mask"),
                 current_balance=acc_data["balances"]["current"],
                 available_balance=acc_data["balances"]["available"],

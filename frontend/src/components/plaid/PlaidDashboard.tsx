@@ -8,8 +8,9 @@ import { PlaidLinkButton } from './PlaidLinkButton';
 import { ConnectedAccounts } from './ConnectedAccounts';
 import { TransactionsList } from './TransactionsList';
 import { InvestmentHoldings } from './InvestmentHoldings';
+import { InvestmentTransactionsList } from './InvestmentTransactionsList';
 
-type Tab = 'accounts' | 'transactions' | 'investments';
+type Tab = 'accounts' | 'transactions' | 'investments' | 'investment-transactions';
 
 export function PlaidDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('accounts');
@@ -22,8 +23,9 @@ export function PlaidDashboard() {
 
   const tabs: { id: Tab; label: string; icon: string }[] = [
     { id: 'accounts', label: 'Accounts', icon: '🏦' },
-    { id: 'transactions', label: 'Transactions', icon: '💸' },
-    { id: 'investments', label: 'Investments', icon: '📈' },
+    { id: 'transactions', label: 'Bank Transactions', icon: '💸' },
+    { id: 'investments', label: 'Holdings', icon: '📈' },
+    { id: 'investment-transactions', label: 'Investment Trades', icon: '📊' },
   ];
 
   return (
@@ -71,6 +73,7 @@ export function PlaidDashboard() {
         {activeTab === 'accounts' && <ConnectedAccounts key={`accounts-${refreshKey}`} />}
         {activeTab === 'transactions' && <TransactionsList key={`transactions-${refreshKey}`} />}
         {activeTab === 'investments' && <InvestmentHoldings key={`investments-${refreshKey}`} />}
+        {activeTab === 'investment-transactions' && <InvestmentTransactionsList key={`investment-transactions-${refreshKey}`} />}
       </div>
     </div>
   );

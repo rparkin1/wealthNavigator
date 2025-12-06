@@ -72,6 +72,44 @@ async function apiFetch<T>(
 }
 
 /**
+ * Portfolio Summary Response Types
+ */
+export interface PortfolioSummaryResponse {
+  total_value: number;
+  allocation: Record<string, number>;
+  holdings_count: number;
+  accounts_count: number;
+}
+
+export interface HoldingDetail {
+  symbol: string;
+  name: string;
+  value: number;
+  weight: number;
+  shares: number;
+  cost_basis: number;
+  asset_class: string;
+  security_type: string;
+  purchase_date: string | null;
+  expense_ratio: number | null;
+}
+
+export interface DetailedPortfolioResponse {
+  summary: PortfolioSummaryResponse;
+  holdings: HoldingDetail[];
+  account_breakdown: Record<string, number>;
+}
+
+export interface FinancialSnapshotResponse {
+  monthly_income: number;
+  monthly_expenses: number;
+  current_reserves: number;
+  has_dependents: boolean;
+  risk_tolerance: string;
+  age: number;
+}
+
+/**
  * Portfolio API Service
  */
 export const portfolioApi = {
@@ -80,6 +118,39 @@ export const portfolioApi = {
    */
   healthCheck: async (): Promise<ApiResponse<{ status: string; features: string[] }>> => {
     return apiFetch('/portfolio/health', {
+      method: 'GET',
+    });
+  },
+
+  /**
+   * Get portfolio summary (value, allocation, counts)
+   */
+  getPortfolioSummary: async (
+    userId: string
+  ): Promise<ApiResponse<PortfolioSummaryResponse>> => {
+    return apiFetch(`/portfolio-summary/summary?user_id=${userId}`, {
+      method: 'GET',
+    });
+  },
+
+  /**
+   * Get detailed portfolio data (summary + holdings + account breakdown)
+   */
+  getDetailedPortfolio: async (
+    userId: string
+  ): Promise<ApiResponse<DetailedPortfolioResponse>> => {
+    return apiFetch(`/portfolio-summary/detailed?user_id=${userId}`, {
+      method: 'GET',
+    });
+  },
+
+  /**
+   * Get financial snapshot (income, expenses, reserves)
+   */
+  getFinancialSnapshot: async (
+    userId: string
+  ): Promise<ApiResponse<FinancialSnapshotResponse>> => {
+    return apiFetch(`/portfolio-summary/financial-snapshot?user_id=${userId}`, {
       method: 'GET',
     });
   },

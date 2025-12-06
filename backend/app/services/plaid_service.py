@@ -15,6 +15,7 @@ from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchan
 from plaid.model.accounts_get_request import AccountsGetRequest
 from plaid.model.transactions_sync_request import TransactionsSyncRequest as PlaidTransactionsSyncRequest
 from plaid.model.investments_holdings_get_request import InvestmentsHoldingsGetRequest
+from plaid.model.investments_transactions_get_request import InvestmentsTransactionsGetRequest
 from plaid.model.item_get_request import ItemGetRequest
 from plaid.model.item_remove_request import ItemRemoveRequest
 from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdRequest
@@ -170,12 +171,51 @@ class PlaidService:
 
             accounts = []
             for account in response['accounts']:
+                # Convert enum types to strings with robust handling
+                account_type = account['type']
+                # Handle enum conversion - try multiple approaches
+                try:
+                    if hasattr(account_type, 'value'):
+                        # It's an enum object, get its value as string
+                        account_type = str(account_type.value)
+                    elif hasattr(account_type, 'name'):
+                        # Try name attribute
+                        account_type = str(account_type.name)
+                    else:
+                        # Force to string
+                        account_type = str(account_type)
+
+                    # Final safety check - ensure it's a plain string
+                    if not isinstance(account_type, str):
+                        account_type = str(account_type)
+                except Exception as e:
+                    logger.warning(f"Error converting account_type: {e}, using str() fallback")
+                    account_type = str(account_type)
+
+                account_subtype = account.get('subtype')
+                if account_subtype:
+                    # Handle enum conversion - try multiple approaches
+                    try:
+                        if hasattr(account_subtype, 'value'):
+                            account_subtype = str(account_subtype.value)
+                        elif hasattr(account_subtype, 'name'):
+                            account_subtype = str(account_subtype.name)
+                        else:
+                            account_subtype = str(account_subtype)
+
+                        # Final safety check
+                        if not isinstance(account_subtype, str):
+                            account_subtype = str(account_subtype)
+                    except Exception as e:
+                        logger.warning(f"Error converting account_subtype: {e}, using str() fallback")
+                        account_subtype = str(account_subtype)
+
                 accounts.append({
                     "account_id": account['account_id'],
                     "name": account['name'],
                     "official_name": account.get('official_name'),
-                    "type": account['type'],
-                    "subtype": account.get('subtype'),
+                    "type": account_type,
+                    "subtype": account_subtype,
                     "mask": account.get('mask'),
                     "balances": {
                         "current": account['balances'].get('current'),
@@ -207,10 +247,18 @@ class PlaidService:
             Dict containing added, modified, removed transactions and new cursor
         """
         try:
-            request = PlaidTransactionsSyncRequest(
-                access_token=access_token,
-                cursor=cursor
-            )
+            # Build request - create different requests based on cursor presence
+            # The Plaid SDK requires cursor to be a string or completely omitted (not None)
+            if cursor:
+                request = PlaidTransactionsSyncRequest(
+                    access_token=access_token,
+                    cursor=cursor
+                )
+            else:
+                request = PlaidTransactionsSyncRequest(
+                    access_token=access_token
+                )
+
             response = self.client.transactions_sync(request)
 
             return {
@@ -272,6 +320,91 @@ class PlaidService:
             logger.error(f"Plaid API error getting holdings: {e}")
             raise Exception(f"Failed to get holdings: {e.body}")
 
+    def get_investment_transactions(
+        self,
+        access_token: str,
+        start_date: str,
+        end_date: str
+    ) -> Dict[str, Any]:
+        """
+        Get investment transactions for an item
+
+        Args:
+            access_token: Plaid access token
+            start_date: Start date in YYYY-MM-DD format
+            end_date: End date in YYYY-MM-DD format
+
+        Returns:
+            Dict containing investment transactions and securities
+        """
+        try:
+            # Convert string dates to date objects if needed
+            from datetime import datetime
+            if isinstance(start_date, str):
+                start_date = datetime.fromisoformat(start_date).date()
+            if isinstance(end_date, str):
+                end_date = datetime.fromisoformat(end_date).date()
+
+            request = InvestmentsTransactionsGetRequest(
+                access_token=access_token,
+                start_date=start_date,
+                end_date=end_date
+            )
+            response = self.client.investments_transactions_get(request)
+
+            transactions = []
+            for txn in response.get('investment_transactions', []):
+                # Convert enum types to strings
+                txn_type = txn.get('type')
+                if hasattr(txn_type, 'value'):
+                    txn_type = str(txn_type.value)
+                else:
+                    txn_type = str(txn_type)
+
+                txn_subtype = txn.get('subtype')
+                if txn_subtype and hasattr(txn_subtype, 'value'):
+                    txn_subtype = str(txn_subtype.value)
+                elif txn_subtype:
+                    txn_subtype = str(txn_subtype)
+
+                transactions.append({
+                    "investment_transaction_id": txn['investment_transaction_id'],
+                    "account_id": txn['account_id'],
+                    "security_id": txn.get('security_id'),
+                    "date": txn['date'],
+                    "name": txn['name'],
+                    "amount": txn['amount'],
+                    "quantity": txn.get('quantity'),
+                    "price": txn.get('price'),
+                    "fees": txn.get('fees'),
+                    "type": txn_type,
+                    "subtype": txn_subtype,
+                    "iso_currency_code": txn.get('iso_currency_code', 'USD'),
+                    "unofficial_currency_code": txn.get('unofficial_currency_code')
+                })
+
+            securities = {}
+            for security in response.get('securities', []):
+                securities[security['security_id']] = {
+                    "security_id": security['security_id'],
+                    "ticker_symbol": security.get('ticker_symbol'),
+                    "name": security.get('name'),
+                    "type": security.get('type'),
+                    "cusip": security.get('cusip'),
+                    "isin": security.get('isin'),
+                    "sedol": security.get('sedol')
+                }
+
+            return {
+                "transactions": transactions,
+                "securities": securities,
+                "total_transactions": response.get('total_investment_transactions', len(transactions))
+            }
+
+        except plaid.ApiException as e:
+            logger.error(f"Plaid API error getting investment transactions: {e}")
+            raise Exception(f"Failed to get investment transactions: {e.body}")
+
     def get_item(self, access_token: str) -> Dict[str, Any]:
         """
         Get item details
@@ -287,13 +420,23 @@ class PlaidService:
             response = self.client.item_get(request)
 
             item = response.get('item', {})
+
+            # Convert Products enums to strings
+            available_products = item.get('available_products', [])
+            if available_products:
+                available_products = [str(p.value) if hasattr(p, 'value') else str(p) for p in available_products]
+
+            billed_products = item.get('billed_products', [])
+            if billed_products:
+                billed_products = [str(p.value) if hasattr(p, 'value') else str(p) for p in billed_products]
+
             return {
                 "item_id": item.get('item_id'),
                 "institution_id": item.get('institution_id'),
                 "webhook": item.get('webhook'),
                 "error": item.get('error'),
-                "available_products": item.get('available_products', []),
-                "billed_products": item.get('billed_products', []),
+                "available_products": available_products,
+                "billed_products": billed_products,
                 "consent_expiration_time": item.get('consent_expiration_time'),
                 "update_type": item.get('update_type')
             }
@@ -355,6 +498,24 @@ class PlaidService:
 
     def _format_transaction(self, transaction: Dict[str, Any]) -> Dict[str, Any]:
         """Format a transaction from Plaid response"""
+        # Convert PersonalFinanceCategory to dict if it exists
+        personal_finance_category = transaction.get('personal_finance_category')
+        if personal_finance_category and hasattr(personal_finance_category, 'to_dict'):
+            personal_finance_category = personal_finance_category.to_dict()
+        elif personal_finance_category and isinstance(personal_finance_category, dict):
+            # Already a dict, keep as is
+            pass
+        elif personal_finance_category:
+            # Try to convert to dict manually
+            try:
+                personal_finance_category = {
+                    "primary": getattr(personal_finance_category, 'primary', None),
+                    "detailed": getattr(personal_finance_category, 'detailed', None),
+                    "confidence_level": getattr(personal_finance_category, 'confidence_level', None)
+                }
+            except Exception:
+                personal_finance_category = None
+
         return {
             "transaction_id": transaction['transaction_id'],
             "account_id": transaction['account_id'],
@@ -366,7 +527,7 @@ class PlaidService:
             "merchant_name": transaction.get('merchant_name'),
             "category": transaction.get('category'),
             "category_id": transaction.get('category_id'),
-            "personal_finance_category": transaction.get('personal_finance_category'),
+            "personal_finance_category": personal_finance_category,
             "pending": transaction.get('pending', False),
             "payment_channel": transaction.get('payment_channel'),
             "location": transaction.get('location'),

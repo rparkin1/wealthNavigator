@@ -1,0 +1,10 @@
+id,name,account_type,institution,account_number,balance,opened,notes
+E*Trade,E*Trade,taxable,E*Trade,1234,566549.0312,1/1/25,
+Fidelity-Yang-IRA,Fidelity-Yang-IRA,tax_exempt,Fidelity-Yang-IRA,1234,232396.42,1/2/25,
+IBRK,IBRK,taxable,IBRK,1234,202029.73,1/3/25,
+Merrill-Yang-401k,Merrill-Yang-401k,tax_deferred,Merrill-Yang-401k,1234,198231.06,1/4/25,
+MerrillEdge,MerrillEdge,taxable,MerrillEdge,1234,1049703.78,1/5/25,
+Netbenefits 401k,Netbenefits 401k,tax_deferred,Netbenefits 401k,1234,1505972.63,1/6/25,
+NetBenefits-Excess 401k,NetBenefits-Excess 401k,tax_deferred,NetBenefits-Excess 401k,1234,59571.38,1/7/25,
+Schwab,Schwab,taxable,Schwab,1234,578816.78,1/8/25,
+WellsFargo,WellsFargo,taxable,WellsFargo,1234,1186541.49,1/9/25,

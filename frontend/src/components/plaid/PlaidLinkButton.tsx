@@ -6,7 +6,7 @@
 import { useState, useEffect, useCallback, memo, useRef } from 'react';
 import { usePlaidLink, type PlaidLinkOptions } from 'react-plaid-link';
 import { plaidApi } from '../../services/plaidApi';
-import { ensurePlaidScript } from '../../utils/plaidSingleton';
+import { ensurePlaidScript, isPlaidInitialized, markPlaidInitialized } from '../../utils/plaidSingleton';
 
 interface PlaidLinkButtonProps {
   onSuccess?: () => void;
@@ -26,11 +26,12 @@ export const PlaidLinkButton = memo(function PlaidLinkButton({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const initializeAttempted = useRef(false);
+  const plaidInitialized = useRef(false);
 
-  // Create link token on mount - singleton pattern
+  // Create link token on mount - singleton pattern with StrictMode protection
   useEffect(() => {
-    // Prevent duplicate initialization
-    if (initializeAttempted.current) {
+    // Prevent duplicate initialization (handles React StrictMode double-mounting)
+    if (initializeAttempted.current || isPlaidInitialized()) {
       return;
     }
     initializeAttempted.current = true;
@@ -96,6 +97,14 @@ export const PlaidLinkButton = memo(function PlaidLinkButton({
     onSuccess: handleSuccess,
     onExit: handleExit,
   };
+
+  // Mark Plaid as initialized when usePlaidLink is first called
+  useEffect(() => {
+    if (linkToken && !plaidInitialized.current) {
+      markPlaidInitialized();
+      plaidInitialized.current = true;
+    }
+  }, [linkToken]);
 
   // Only initialize Plaid Link if token is available
   const { open, ready } = usePlaidLink(linkToken ? config : { token: null, onSuccess: handleSuccess });

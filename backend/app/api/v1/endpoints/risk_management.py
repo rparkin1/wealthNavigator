@@ -5,10 +5,15 @@ Comprehensive API for risk assessment, stress testing, and hedging strategies
 REQ-RISK-007: Risk management API endpoints
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 from typing import List, Dict, Optional
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.database import get_db
+from app.api.deps import get_current_user
+from app.models.user import User
+from app.services.portfolio_data_service import get_portfolio_value_and_allocation
 from app.services.risk.risk_assessment import (
     RiskAssessmentService,
     RiskMetrics,
@@ -150,6 +155,68 @@ async def assess_risk(request: RiskAssessmentRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get(
+    "/assess-risk-auto",
+    response_model=RiskAssessmentResult,
+    summary="Auto risk assessment from database",
+    description="Automatically fetch portfolio from database and perform risk assessment",
+    tags=["Risk Assessment"]
+)
+async def assess_risk_auto(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    expected_return: float = 0.08,
+    volatility: float = 0.15
+):
+    """
+    Perform risk assessment using real portfolio data from database.
+
+    Automatically fetches:
+    - Portfolio value from holdings
+    - Asset allocation from holdings by asset class
+    - Then performs comprehensive risk analysis
+
+    **Advantages over POST endpoint:**
+    - No manual data entry needed
+    - Always uses current portfolio state
+    - Consistent with database values
+
+    **Parameters:**
+    - `expected_return`: Expected annual return (default 8%)
+    - `volatility`: Expected annual volatility (default 15%)
+    """
+    try:
+        # Fetch real portfolio data from database
+        portfolio_value, allocation = await get_portfolio_value_and_allocation(
+            user_id=current_user.id,
+            db=db
+        )
+
+        if portfolio_value == 0 or not allocation:
+            raise HTTPException(
+                status_code=404,
+                detail="No portfolio data found. Please add holdings first."
+            )
+
+        # Perform risk assessment with real data
+        service = RiskAssessmentService()
+        result = service.assess_risk(
+            portfolio_value=portfolio_value,
+            allocation=allocation,
+            expected_return=expected_return,
+            volatility=volatility,
+            returns_history=None,
+            benchmark_returns=None
+        )
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Risk assessment failed: {str(e)}")
+
+
 @router.post(
     "/stress-test",
     response_model=StressTestingSuite,
@@ -215,6 +282,55 @@ async def run_stress_test(request: StressTestRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get(
+    "/stress-test-auto",
+    response_model=StressTestingSuite,
+    summary="Auto stress test from database",
+    description="Automatically fetch portfolio and run stress tests",
+    tags=["Stress Testing"]
+)
+async def stress_test_auto(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    scenarios: Optional[List[str]] = None,
+    include_all_presets: bool = True
+):
+    """
+    Run stress tests using real portfolio data from database.
+
+    Automatically fetches portfolio value and allocation from holdings,
+    then runs comprehensive stress test suite.
+    """
+    try:
+        # Fetch real portfolio data
+        portfolio_value, allocation = await get_portfolio_value_and_allocation(
+            user_id=current_user.id,
+            db=db
+        )
+
+        if portfolio_value == 0 or not allocation:
+            raise HTTPException(
+                status_code=404,
+                detail="No portfolio data found. Please add holdings first."
+            )
+
+        # Run stress test
+        service = StressTestingService()
+        result = service.run_stress_test_suite(
+            portfolio_value=portfolio_value,
+            allocation=allocation,
+            scenarios=scenarios,
+            include_all_presets=include_all_presets
+        )
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Stress test failed: {str(e)}")
 
 
 @router.post(
@@ -288,6 +404,74 @@ async def recommend_hedging(request: HedgingRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get(
+    "/hedging-strategies-auto",
+    response_model=HedgingRecommendation,
+    summary="Auto hedging recommendations from database",
+    description="Automatically fetch portfolio and generate hedging strategies",
+    tags=["Hedging"]
+)
+async def hedging_strategies_auto(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Generate hedging recommendations using real portfolio data from database.
+
+    Automatically:
+    1. Fetches portfolio value and allocation from holdings
+    2. Calculates risk metrics
+    3. Recommends appropriate hedging strategies
+    """
+    try:
+        # Fetch real portfolio data
+        portfolio_value, allocation = await get_portfolio_value_and_allocation(
+            user_id=current_user.id,
+            db=db
+        )
+
+        if portfolio_value == 0 or not allocation:
+            raise HTTPException(
+                status_code=404,
+                detail="No portfolio data found. Please add holdings first."
+            )
+
+        # First assess risk to get metrics
+        risk_service = RiskAssessmentService()
+        risk_result = risk_service.assess_risk(
+            portfolio_value=portfolio_value,
+            allocation=allocation,
+            expected_return=0.08,
+            volatility=0.15
+        )
+
+        # Convert risk result to dict format for hedging service
+        risk_metrics = {
+            "annual_volatility": risk_result.metrics.volatility,
+            "beta": risk_result.metrics.beta,
+            "max_drawdown": risk_result.metrics.max_drawdown,
+            "risk_level": risk_result.metrics.risk_level,
+            "var_95_1day": risk_result.metrics.var_95_1day,
+        }
+
+        # Generate hedging recommendations
+        hedging_service = HedgingService()
+        result = hedging_service.recommend_hedging_strategies(
+            portfolio_value=portfolio_value,
+            allocation=allocation,
+            risk_metrics=risk_metrics,
+            market_conditions=None,
+            objectives=None
+        )
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Hedging recommendations failed: {str(e)}")
 
 
 @router.post(

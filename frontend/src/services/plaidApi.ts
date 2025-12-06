@@ -153,6 +153,37 @@ class PlaidApiService {
     const response = await this.client.get<HoldingsListResponse>('/holdings', { params });
     return response.data;
   }
+
+  /**
+   * Sync investment transactions (buy/sell/dividend/etc)
+   */
+  async syncInvestmentTransactions(itemId?: string): Promise<{ transactions_added: number; securities_count: number; total_transactions: number }> {
+    const response = await this.client.post('/investment-transactions/sync', { item_id: itemId });
+    return response.data;
+  }
+
+  /**
+   * List investment transactions with filtering and pagination
+   */
+  async listInvestmentTransactions(request: {
+    account_id?: string;
+    start_date?: string;
+    end_date?: string;
+    transaction_type?: string;
+    ticker?: string;
+    limit?: number;
+    offset?: number;
+  } = {}): Promise<{
+    transactions: any[];
+    total: number;
+  }> {
+    const response = await this.client.post('/investment-transactions', {
+      limit: 50,
+      offset: 0,
+      ...request,
+    });
+    return response.data;
+  }
 }
 
 // Export singleton instance

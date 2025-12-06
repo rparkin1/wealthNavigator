@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   getHedgingRecommendations,
+  getHedgingRecommendationsAuto,
   formatCurrency,
   formatPercentage,
   getStrategyIcon,
@@ -21,10 +22,11 @@ import type {
 } from '../../types/hedgingStrategies';
 
 export interface HedgingStrategyDashboardProps {
-  portfolioValue: number;
-  allocation: Record<string, number>;
-  riskMetrics: Record<string, any>;
+  portfolioValue?: number;
+  allocation?: Record<string, number>;
+  riskMetrics?: Record<string, any>;
   marketConditions?: Record<string, any>;
+  usePlaidData?: boolean; // New prop to control whether to use Plaid data
 }
 
 export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> = ({
@@ -32,6 +34,7 @@ export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> =
   allocation,
   riskMetrics,
   marketConditions,
+  usePlaidData = true, // Default to using Plaid data
 }) => {
   const [recommendation, setRecommendation] = useState<HedgingRecommendation | null>(null);
   const [loading, setLoading] = useState(false);
@@ -47,27 +50,37 @@ export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> =
 
   // Load recommendations on mount
   useEffect(() => {
-    if (portfolioValue && Object.keys(allocation).length > 0 && riskMetrics) {
+    if (usePlaidData) {
+      loadRecommendations();
+    } else if (portfolioValue && allocation && Object.keys(allocation).length > 0 && riskMetrics) {
       loadRecommendations();
     }
-  }, [portfolioValue, allocation, riskMetrics, marketConditions]);
+  }, [usePlaidData, portfolioValue, allocation, riskMetrics, marketConditions]);
 
   const loadRecommendations = async (customObjectives?: HedgingObjectives) => {
     try {
       setLoading(true);
       setError(null);
 
-      const request: HedgingRequest = {
-        portfolio_value: portfolioValue,
-        allocation,
-        risk_metrics: riskMetrics,
-        market_conditions: marketConditions,
-        objectives: customObjectives || objectives,
-      };
+      if (usePlaidData) {
+        // Use Plaid data automatically - backend will fetch portfolio and calculate risk
+        const result = await getHedgingRecommendationsAuto();
+        setRecommendation(result);
+        setSelectedStrategy(result.optimal_strategy);
+      } else if (portfolioValue && allocation && riskMetrics) {
+        // Use manual data if provided
+        const request: HedgingRequest = {
+          portfolio_value: portfolioValue,
+          allocation,
+          risk_metrics: riskMetrics,
+          market_conditions: marketConditions,
+          objectives: customObjectives || objectives,
+        };
 
-      const result = await getHedgingRecommendations(request);
-      setRecommendation(result);
-      setSelectedStrategy(result.optimal_strategy);
+        const result = await getHedgingRecommendations(request);
+        setRecommendation(result);
+        setSelectedStrategy(result.optimal_strategy);
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to load hedging recommendations');
     } finally {
