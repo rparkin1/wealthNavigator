@@ -6,6 +6,7 @@
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 import EstatePlanningDashboard from '../EstatePlanningDashboard';
 import EstateTaxProjection from '../EstateTaxProjection';
 import TrustStructureBuilder from '../TrustStructureBuilder';
@@ -15,7 +16,7 @@ import GiftingStrategyAnalyzer from '../GiftingStrategyAnalyzer';
 import * as api from '../../../services/estatePlanningApi';
 
 // Mock the API module
-jest.mock('../../../services/estatePlanningApi');
+vi.mock('../../../services/estatePlanningApi');
 
 describe('Estate Planning Dashboard', () => {
   test('renders dashboard with all tabs', () => {
@@ -48,7 +49,7 @@ describe('Estate Planning Dashboard', () => {
 
 describe('Estate Tax Projection', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders form with all inputs', () => {
@@ -80,7 +81,7 @@ describe('Estate Tax Projection', () => {
       has_state_tax_liability: false,
     };
 
-    (api.estatePlanningApi.calculateEstateTax as jest.Mock).mockResolvedValue(mockCalculation);
+    vi.mocked(api.estatePlanningApi.calculateEstateTax).mockResolvedValue(mockCalculation);
 
     render(<EstateTaxProjection />);
 
@@ -94,7 +95,7 @@ describe('Estate Tax Projection', () => {
   });
 
   test('handles API error gracefully', async () => {
-    (api.estatePlanningApi.calculateEstateTax as jest.Mock).mockRejectedValue(
+    vi.mocked(api.estatePlanningApi.calculateEstateTax).mockRejectedValue(
       new Error('Failed to calculate')
     );
 
@@ -118,7 +119,7 @@ describe('Estate Tax Projection', () => {
   });
 
   test('shows loading state during calculation', async () => {
-    (api.estatePlanningApi.calculateEstateTax as jest.Mock).mockImplementation(
+    vi.mocked(api.estatePlanningApi.calculateEstateTax).mockImplementation(
       () => new Promise((resolve) => setTimeout(resolve, 100))
     );
 
@@ -133,7 +134,7 @@ describe('Estate Tax Projection', () => {
 
 describe('Trust Structure Builder', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders form with all inputs', () => {
@@ -162,7 +163,7 @@ describe('Trust Structure Builder', () => {
       ],
     };
 
-    (api.estatePlanningApi.recommendTrustStructures as jest.Mock).mockResolvedValue(
+    vi.mocked(api.estatePlanningApi.recommendTrustStructures).mockResolvedValue(
       mockRecommendations
     );
 
@@ -196,7 +197,7 @@ describe('Trust Structure Builder', () => {
       ],
     };
 
-    (api.estatePlanningApi.recommendTrustStructures as jest.Mock).mockResolvedValue(
+    vi.mocked(api.estatePlanningApi.recommendTrustStructures).mockResolvedValue(
       mockRecommendations
     );
 
@@ -283,7 +284,7 @@ describe('Beneficiary Manager', () => {
 
 describe('Legacy Goal Planner', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders form with all inputs', () => {
@@ -311,7 +312,7 @@ describe('Legacy Goal Planner', () => {
       funding_strategies: [],
     };
 
-    (api.estatePlanningApi.calculateLegacyGoal as jest.Mock).mockResolvedValue(mockAnalysis);
+    vi.mocked(api.estatePlanningApi.calculateLegacyGoal).mockResolvedValue(mockAnalysis);
 
     render(<LegacyGoalPlanner />);
 
@@ -346,7 +347,7 @@ describe('Legacy Goal Planner', () => {
       ],
     };
 
-    (api.estatePlanningApi.calculateLegacyGoal as jest.Mock).mockResolvedValue(mockAnalysis);
+    vi.mocked(api.estatePlanningApi.calculateLegacyGoal).mockResolvedValue(mockAnalysis);
 
     render(<LegacyGoalPlanner />);
 
@@ -363,7 +364,7 @@ describe('Legacy Goal Planner', () => {
 
 describe('Gifting Strategy Analyzer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders form with all inputs', () => {
@@ -393,7 +394,7 @@ describe('Gifting Strategy Analyzer', () => {
       gift_tax_applicable: true,
     };
 
-    (api.estatePlanningApi.analyzeGiftingStrategy as jest.Mock).mockResolvedValue(mockAnalysis);
+    vi.mocked(api.estatePlanningApi.analyzeGiftingStrategy).mockResolvedValue(mockAnalysis);
 
     render(<GiftingStrategyAnalyzer />);
 
@@ -425,7 +426,7 @@ describe('Gifting Strategy Analyzer', () => {
       gift_tax_applicable: true,
     };
 
-    (api.estatePlanningApi.analyzeGiftingStrategy as jest.Mock).mockResolvedValue(mockAnalysis);
+    vi.mocked(api.estatePlanningApi.analyzeGiftingStrategy).mockResolvedValue(mockAnalysis);
 
     render(<GiftingStrategyAnalyzer />);
 
@@ -455,7 +456,7 @@ describe('Gifting Strategy Analyzer', () => {
       gift_tax_applicable: false,
     };
 
-    (api.estatePlanningApi.analyzeGiftingStrategy as jest.Mock).mockResolvedValue(mockAnalysis);
+    vi.mocked(api.estatePlanningApi.analyzeGiftingStrategy).mockResolvedValue(mockAnalysis);
 
     render(<GiftingStrategyAnalyzer />);
 
