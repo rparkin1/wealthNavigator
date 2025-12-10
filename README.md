@@ -231,8 +231,8 @@ Comprehensive documentation is available in the `docs/` directory:
 
 - **[CLAUDE.md](CLAUDE.md)** - Claude Code development guidance
 - **[DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md)** - Detailed development plan
-- **[ProductDescription/PRD.md](ProductDescription/PRD.md)** - Product requirements
-- **[ProductDescription/user-stories.md](ProductDescription/user-stories.md)** - User stories
+- **[development_docs/ProductDescription/PRD.md](development_docs/ProductDescription/PRD.md)** - Product requirements
+- **[development_docs/ProductDescription/user-stories.md](development_docs/ProductDescription/user-stories.md)** - User stories
 
 ---
 
@@ -292,7 +292,9 @@ wealthNavigator/
 │   └── requirements.txt
 │
 ├── docs/                      # Documentation
-├── ProductDescription/        # Product specifications
+├── development_docs/
+│   ├── ProductDescription/    # Product specifications
+│   └── plans/                 # Development plans
 ├── CLAUDE.md                  # Claude Code guidance
 └── README.md                  # This file
 ```
