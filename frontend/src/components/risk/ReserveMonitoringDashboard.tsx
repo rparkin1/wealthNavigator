@@ -11,7 +11,7 @@ import { ReserveAlertsPanel } from './ReserveAlertsPanel';
 import { ReserveReplenishmentPlan } from './ReserveReplenishmentPlan';
 import { ReserveGrowthSimulator } from './ReserveGrowthSimulator';
 import { monitorReserves, getReserveGuidelines } from '../../services/reserveMonitoringApi';
-import {
+import type {
   ReserveMonitoringResult,
   ReserveGuidelines,
   IncomeStability,
