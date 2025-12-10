@@ -59,7 +59,7 @@ export const CollarStrategyBuilder: React.FC<CollarStrategyBuilderProps> = ({
     const maxUpside = equityValue * (callStrike - 1);
     const maxDownside = equityValue * (1 - putStrike) + netCost;
     const breakeven = portfolioValue - netCost;
-    const effectiveCost = netCostPct / equityAllocation;
+    const effectiveCost = netCost / portfolioValue;
 
     setResults({
       equityValue,
@@ -70,7 +70,7 @@ export const CollarStrategyBuilder: React.FC<CollarStrategyBuilderProps> = ({
       maxUpside,
       maxDownside,
       breakeven,
-      effectiveCost: netCost / portfolioValue,
+      effectiveCost,
     });
   };
 
