@@ -3,11 +3,11 @@
  * Handles all HTTP requests to the backend API
  */
 
-import axios, { AxiosInstance, AxiosError } from 'axios';
-import { Thread, ThreadListItem } from '../types/thread';
-import { Goal } from '../types/goal';
-import { Portfolio, OptimizationParams, OptimizationResult } from '../types/portfolio';
-import { SimulationParams, SimulationResult } from '../types/simulation';
+import axios, { type AxiosInstance, AxiosError } from 'axios';
+import { type Thread, type ThreadListItem } from '../types/thread';
+import { type Goal } from '../types/goal';
+import { type Portfolio, type OptimizationParams, type OptimizationResult } from '../types/portfolio';
+import { type SimulationParams, type SimulationResult } from '../types/simulation';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
 
