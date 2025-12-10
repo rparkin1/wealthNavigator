@@ -3,8 +3,9 @@ Main FastAPI Application
 Entry point for the WealthNavigator AI backend
 """
 
-from fastapi import FastAPI, APIRouter, Request
+from fastapi import FastAPI, APIRouter, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
@@ -18,6 +19,7 @@ from app.middleware import (
 from app.core.monitoring import init_sentry
 from app.core.cache import cache
 import logging
+import traceback
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +32,29 @@ app = FastAPI(
     version=settings.APP_VERSION,
     description="AI-powered financial planning and portfolio management platform",
 )
+
+# Global exception handler to ensure CORS headers on errors
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """
+    Global exception handler that ensures CORS headers are present
+    even when unhandled exceptions occur.
+    """
+    logger.error(f"Unhandled exception: {exc}")
+    logger.error(traceback.format_exc())
+
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "error": "internal_server_error",
+            "message": "An internal server error occurred",
+            "detail": str(exc) if settings.DEBUG else "Please contact support"
+        },
+        headers={
+            "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
+            "Access-Control-Allow-Credentials": "true",
+        }
+    )
 
 # Configure rate limiting
 if settings.RATE_LIMIT_ENABLED:
@@ -100,10 +125,10 @@ async def health_check():
 
 # Import and include routers
 from app.api.threads import router as threads_router
-from app.api.chat import router as chat_router
+# from app.api.chat import router as chat_router  # Temporarily disabled due to langgraph issue
 from app.api.goals import router as goals_router
 from app.api.portfolio import router as portfolio_router
-from app.api.budget import router as budget_router
+# from app.api.budget import router as budget_router  # Temporarily disabled due to langgraph issue
 from app.api.recurring_transactions import router as recurring_router
 from app.api.retirement import router as retirement_router
 from app.api.plaid import router as plaid_router
@@ -146,12 +171,12 @@ app.include_router(privacy_router, prefix=settings.API_V1_PREFIX)
 
 # Core endpoints
 app.include_router(threads_router, prefix=settings.API_V1_PREFIX)
-app.include_router(chat_router, prefix=f"{settings.API_V1_PREFIX}/chat", tags=["chat"])
+# app.include_router(chat_router, prefix=f"{settings.API_V1_PREFIX}/chat", tags=["chat"])  # Temporarily disabled
 app.include_router(goals_router, prefix=f"{settings.API_V1_PREFIX}/goals", tags=["goals"])
 app.include_router(portfolio_router, prefix=settings.API_V1_PREFIX, tags=["portfolio"])
 # Routers define their own path segments (e.g., "/budget", "/recurring")
 # so we include them under the API v1 prefix only to avoid double-segmentation.
-app.include_router(budget_router, prefix=settings.API_V1_PREFIX, tags=["budget"])
+# app.include_router(budget_router, prefix=settings.API_V1_PREFIX, tags=["budget"])  # Temporarily disabled
 app.include_router(recurring_router, prefix=settings.API_V1_PREFIX, tags=["recurring-transactions"])
 app.include_router(retirement_router, prefix=f"{settings.API_V1_PREFIX}/retirement", tags=["retirement"])
 app.include_router(plaid_router, prefix=settings.API_V1_PREFIX, tags=["plaid"])

@@ -41,6 +41,11 @@ class SocialSecurityResult(BaseModel):
     reduction_percentage: float  # If filing early
     increase_percentage: float  # If filing late
     breakeven_age: int  # Age where delayed filing pays off
+    # Original parameters (needed for income projections)
+    primary_insurance_amount: float
+    birth_year: int
+    filing_age: int
+    cola_rate: float
 
 
 class SpendingPattern(BaseModel):
@@ -159,7 +164,12 @@ async def calculate_social_security(params: SocialSecurityParams) -> SocialSecur
         full_retirement_age=full_retirement_age,
         reduction_percentage=reduction_percentage,
         increase_percentage=increase_percentage,
-        breakeven_age=breakeven_age
+        breakeven_age=breakeven_age,
+        # Include original parameters for income projections
+        primary_insurance_amount=params.primary_insurance_amount,
+        birth_year=params.birth_year,
+        filing_age=params.filing_age,
+        cola_rate=params.cola_rate
     )
 
 
@@ -270,12 +280,19 @@ async def project_retirement_income(
     spending_pattern: Optional[SpendingPattern] = None,
     portfolio_withdrawal_rate: float = 0.04,
     initial_portfolio: float = 1000000,
+    expected_return: float = 0.07,  # Expected annual return on investments (7% default)
     planning_age: int = 95
 ) -> List[RetirementIncomeProjection]:
     """
     Project complete retirement income and expenses by year.
 
     Combines all income sources and spending to show net cash flow.
+
+    **Portfolio Growth Model:**
+    - Applies expected annual returns to portfolio balance
+    - Withdrawals reduce portfolio value
+    - Net cash flow (income - expenses) affects portfolio balance
+    - Models realistic portfolio depletion/growth over retirement
     """
     projections = []
 
@@ -292,10 +309,15 @@ async def project_retirement_income(
     portfolio_value = initial_portfolio
 
     for year_num, age in enumerate(range(retirement_age, planning_age + 1)):
+        # Apply investment returns at beginning of year (before withdrawals)
+        # This models portfolio growth throughout retirement
+        if year_num > 0:  # Don't apply returns in first year
+            portfolio_value *= (1 + expected_return)
+
         # Social Security (if started)
         ss_income = 0
-        if social_security and age >= social_security.full_retirement_age:
-            # Use cumulative benefits to get annual amount
+        if social_security and age >= social_security.filing_age:
+            # Use cumulative benefits to get annual amount with COLA
             ages_list = sorted(social_security.lifetime_benefits.keys())
             if age in ages_list:
                 idx = ages_list.index(age)
@@ -307,8 +329,12 @@ async def project_retirement_income(
                 else:
                     ss_income = social_security.annual_benefit
 
-        # Portfolio withdrawal (simplified 4% rule)
-        portfolio_withdrawal = portfolio_value * portfolio_withdrawal_rate
+        # Portfolio withdrawal
+        # Use 4% rule but cap at portfolio value to avoid negative balances
+        portfolio_withdrawal = min(
+            portfolio_value * portfolio_withdrawal_rate,
+            portfolio_value
+        )
 
         # Total income
         total_income = ss_income + pension_annual + portfolio_withdrawal
@@ -319,8 +345,10 @@ async def project_retirement_income(
         # Net cash flow
         net_cash_flow = total_income - total_expenses
 
-        # Update portfolio value (very simplified - would use Monte Carlo for accuracy)
-        portfolio_value += net_cash_flow
+        # Update portfolio value
+        # Subtract withdrawal and adjust for any surplus/deficit
+        portfolio_value -= portfolio_withdrawal
+        portfolio_value += (total_income - total_expenses - portfolio_withdrawal)  # Add surplus or subtract deficit
         portfolio_value = max(0, portfolio_value)  # Can't go negative
 
         projections.append(RetirementIncomeProjection(

@@ -21,6 +21,11 @@ export interface SocialSecurityResult {
   reduction_percentage: number;
   increase_percentage: number;
   breakeven_age: number;
+  // Original parameters (needed for income projections)
+  primary_insurance_amount: number;
+  birth_year: number;
+  filing_age: number;
+  cola_rate: number;
 }
 
 export interface SpendingPattern {
@@ -60,13 +65,15 @@ export interface LongevityResult {
 }
 
 export interface RetirementProjectionRequest {
+  user_id: string; // User ID to fetch real portfolio data from Plaid
   current_age: number;
   retirement_age: number;
   social_security?: SocialSecurityParams;
   pension_annual?: number;
   spending_pattern?: SpendingPattern;
   portfolio_withdrawal_rate?: number;
-  initial_portfolio?: number;
+  initial_portfolio?: number; // Optional - backend fetches actual portfolio if not provided
+  expected_return?: number; // Expected annual portfolio return (default 7%)
   planning_age?: number;
 }
 
@@ -80,6 +87,19 @@ export interface RetirementIncomeProjection {
   total_income: number;
   total_expenses: number;
   net_cash_flow: number;
+}
+
+export interface RetirementProjectionMetadata {
+  portfolio_source: 'plaid' | 'override' | 'default';
+  portfolio_value: number;
+  expected_return: number;
+  accounts_count: number;
+  user_id: string;
+}
+
+export interface RetirementProjectionResponse {
+  projections: RetirementIncomeProjection[];
+  metadata: RetirementProjectionMetadata;
 }
 
 // API Functions
@@ -119,7 +139,8 @@ export const retirementApi = {
    */
   projectRetirementIncome: async (
     request: RetirementProjectionRequest
-  ): Promise<RetirementIncomeProjection[]> => {
+  ): Promise<RetirementProjectionResponse> => {
+    console.log('Sending income projection request:', JSON.stringify(request, null, 2));
     const response = await apiClient.post('/retirement/income-projection', request);
     return response.data;
   },

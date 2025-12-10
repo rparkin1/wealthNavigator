@@ -3,10 +3,14 @@ Retirement Planning API Endpoints
 Provides Social Security, spending patterns, longevity, and income projections
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from typing import Dict, List, Optional
+import logging
 
+from app.core.database import get_db
+from app.services.portfolio_data_service import get_portfolio_value_and_allocation
 from app.tools.retirement_income import (
     SocialSecurityParams,
     SocialSecurityResult,
@@ -19,6 +23,7 @@ from app.tools.retirement_income import (
 )
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 # Request/Response Models
@@ -54,13 +59,15 @@ class LongevityRequest(BaseModel):
 
 class RetirementProjectionRequest(BaseModel):
     """Complete retirement income projection request"""
+    user_id: str  # User ID to fetch real portfolio data
     current_age: int
     retirement_age: int
     social_security: Optional[SocialSecurityParams] = None
     pension_annual: float = 0
     spending_pattern: Optional[SpendingPattern] = None
     portfolio_withdrawal_rate: float = 0.04
-    initial_portfolio: float = 1000000
+    initial_portfolio: Optional[float] = None  # Optional - will use actual portfolio if not provided
+    expected_return: float = 0.07  # Expected annual portfolio return (7% default)
     planning_age: int = 95
 
 
@@ -133,14 +140,58 @@ async def calculate_longevity(request: LongevityRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/income-projection", response_model=List[Dict])
-async def project_income(request: RetirementProjectionRequest):
+@router.post("/income-projection")
+async def project_income(
+    request: RetirementProjectionRequest,
+    db: AsyncSession = Depends(get_db)
+):
     """
     Project complete retirement income and expenses by year
 
-    Combines Social Security, pension, portfolio withdrawals, and spending patterns
+    Combines Social Security, pension, portfolio withdrawals, and spending patterns.
+
+    **NEW:** Now automatically fetches your actual portfolio value from Plaid data!
+    If initial_portfolio is not provided, uses real portfolio value from your accounts.
+
+    Returns:
+        {
+            "projections": [...],
+            "metadata": {
+                "portfolio_source": "plaid" | "override" | "default",
+                "portfolio_value": 1234567.89,
+                "expected_return": 0.07,
+                "accounts_count": 3
+            }
+        }
     """
     try:
+        # Fetch actual portfolio value if not explicitly provided
+        initial_portfolio = request.initial_portfolio
+        portfolio_source = "default"
+        accounts_count = 0
+
+        if initial_portfolio is not None:
+            portfolio_source = "override"
+            logger.info(f"Using override portfolio value: ${initial_portfolio:,.2f}")
+        else:
+            logger.info(f"Fetching actual portfolio value for user {request.user_id}")
+            portfolio_value, allocation = await get_portfolio_value_and_allocation(
+                request.user_id,
+                db
+            )
+
+            if portfolio_value > 0:
+                initial_portfolio = portfolio_value
+                portfolio_source = "plaid"
+                # Count number of holdings to estimate accounts
+                accounts_count = len(allocation) if allocation else 0
+                logger.info(f"Using actual portfolio value from Plaid: ${portfolio_value:,.2f}")
+            else:
+                # Fallback to $1M default if no portfolio data found
+                initial_portfolio = 1000000
+                portfolio_source = "default"
+                logger.warning(f"No portfolio data found for user {request.user_id}, using default $1M")
+
         # Calculate Social Security if provided
         ss_result = None
         if request.social_security:
@@ -153,13 +204,24 @@ async def project_income(request: RetirementProjectionRequest):
             pension_annual=request.pension_annual,
             spending_pattern=request.spending_pattern,
             portfolio_withdrawal_rate=request.portfolio_withdrawal_rate,
-            initial_portfolio=request.initial_portfolio,
+            initial_portfolio=initial_portfolio,
+            expected_return=request.expected_return,
             planning_age=request.planning_age
         )
 
-        # Convert Pydantic models to dicts
-        return [proj.dict() for proj in projections]
+        # Return projections with metadata
+        return {
+            "projections": [proj.dict() for proj in projections],
+            "metadata": {
+                "portfolio_source": portfolio_source,
+                "portfolio_value": initial_portfolio,
+                "expected_return": request.expected_return,
+                "accounts_count": accounts_count,
+                "user_id": request.user_id
+            }
+        }
     except Exception as e:
+        logger.error(f"Error projecting retirement income: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
 
 

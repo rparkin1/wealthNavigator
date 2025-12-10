@@ -5,21 +5,13 @@
  */
 
 import { useState } from 'react';
+import type { SocialSecurityResult } from '../../services/retirementApi';
 
 interface SocialSecurityParams {
   primaryInsuranceAmount: number;
   birthYear: number;
   filingAge: number;
   colaRate: number;
-}
-
-interface SocialSecurityResult {
-  monthlyBenefit: number;
-  annualBenefit: number;
-  fullRetirementAge: number;
-  reductionPercentage: number;
-  increasePercentage: number;
-  breakevenAge: number;
 }
 
 interface SocialSecurityCalculatorProps {
@@ -79,12 +71,18 @@ export function SocialSecurityCalculator({
     const breakevenAge = fra + 12;
 
     const calculatedResult: SocialSecurityResult = {
-      monthlyBenefit,
-      annualBenefit,
-      fullRetirementAge: fra,
-      reductionPercentage,
-      increasePercentage,
-      breakevenAge
+      monthly_benefit: monthlyBenefit,
+      annual_benefit: annualBenefit,
+      lifetime_benefits: {}, // Simplified for client-side calculation
+      full_retirement_age: fra,
+      reduction_percentage: reductionPercentage,
+      increase_percentage: increasePercentage,
+      breakeven_age: breakevenAge,
+      // Include original parameters for income projections
+      primary_insurance_amount: params.primaryInsuranceAmount,
+      birth_year: params.birthYear,
+      filing_age: params.filingAge,
+      cola_rate: params.colaRate
     };
 
     setResult(calculatedResult);
@@ -247,14 +245,14 @@ export function SocialSecurityCalculator({
             <div className="p-4 bg-blue-50 rounded-lg">
               <div className="text-xs text-gray-600 mb-1">Monthly Benefit</div>
               <div className="text-2xl font-bold text-blue-600">
-                {formatCurrency(result.monthlyBenefit)}
+                {formatCurrency(result.monthly_benefit)}
               </div>
             </div>
 
             <div className="p-4 bg-blue-50 rounded-lg">
               <div className="text-xs text-gray-600 mb-1">Annual Benefit</div>
               <div className="text-2xl font-bold text-blue-600">
-                {formatCurrency(result.annualBenefit)}
+                {formatCurrency(result.annual_benefit)}
               </div>
             </div>
           </div>
@@ -262,30 +260,30 @@ export function SocialSecurityCalculator({
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">Full Retirement Age:</span>
-              <span className="font-semibold">{result.fullRetirementAge}</span>
+              <span className="font-semibold">{result.full_retirement_age}</span>
             </div>
 
-            {result.reductionPercentage > 0 && (
+            {result.reduction_percentage > 0 && (
               <div className="flex justify-between">
                 <span className="text-gray-600">Early Filing Reduction:</span>
                 <span className="font-semibold text-orange-600">
-                  -{result.reductionPercentage.toFixed(1)}%
+                  -{result.reduction_percentage.toFixed(1)}%
                 </span>
               </div>
             )}
 
-            {result.increasePercentage > 0 && (
+            {result.increase_percentage > 0 && (
               <div className="flex justify-between">
                 <span className="text-gray-600">Delayed Filing Increase:</span>
                 <span className="font-semibold text-green-600">
-                  +{result.increasePercentage.toFixed(1)}%
+                  +{result.increase_percentage.toFixed(1)}%
                 </span>
               </div>
             )}
 
             <div className="flex justify-between">
               <span className="text-gray-600">Breakeven Age:</span>
-              <span className="font-semibold">{result.breakevenAge}</span>
+              <span className="font-semibold">{result.breakeven_age}</span>
             </div>
           </div>
 
