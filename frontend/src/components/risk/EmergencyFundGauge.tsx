@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { ReserveStatus } from '../../types/reserveMonitoring';
+import type { ReserveStatus } from '../../types/reserveMonitoring';
 
 export interface EmergencyFundGaugeProps {
   currentReserves: number;

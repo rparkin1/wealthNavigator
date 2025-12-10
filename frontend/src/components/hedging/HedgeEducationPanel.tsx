@@ -8,7 +8,7 @@ import {
   getHedgingEducation,
   getHedgingEducationTopic,
 } from '../../services/hedgingStrategiesApi';
-import { HedgingEducationContent, HedgingEducationTopic } from '../../types/hedgingStrategies';
+import type { HedgingEducationContent, HedgingEducationTopic } from '../../types/hedgingStrategies';
 
 export const HedgeEducationPanel: React.FC = () => {
   const [content, setContent] = useState<HedgingEducationContent | null>(null);
