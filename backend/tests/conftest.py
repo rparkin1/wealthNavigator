@@ -7,8 +7,11 @@ import asyncio
 from typing import AsyncGenerator
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
 from app.models.base import Base
 from app.main import app
+from app.core.database import get_db
 
 
 # Test database URL - Using SQLite for tests (no external database required)
@@ -48,16 +51,36 @@ async def async_engine():
 
 
 @pytest.fixture(scope="function")
-async def async_session(async_engine) -> AsyncGenerator[AsyncSession, None]:
-    """Create async session for testing."""
-    async_session_maker = async_sessionmaker(
+def async_session_maker(async_engine):
+    """Session factory shared between tests and FastAPI dependency override."""
+    return async_sessionmaker(
         async_engine,
         class_=AsyncSession,
         expire_on_commit=False,
     )
 
+
+@pytest.fixture(scope="function")
+async def async_session(async_session_maker) -> AsyncGenerator[AsyncSession, None]:
+    """Create async session for testing."""
     async with async_session_maker() as session:
         yield session
+
+
+@pytest.fixture(scope="function")
+def sync_session():
+    """Create synchronous session for tests that run without asyncio."""
+    sync_engine = create_engine(
+        TEST_DATABASE_URL.replace("+aiosqlite", ""),
+        future=True,
+    )
+    SessionLocal = sessionmaker(bind=sync_engine)
+    session = SessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
+        sync_engine.dispose()
 
 
 @pytest.fixture
@@ -138,9 +161,63 @@ def test_user_id() -> str:
 
 
 @pytest.fixture
-async def db(async_session) -> AsyncSession:
-    """Provide database session alias for compatibility."""
-    return async_session
+async def test_user(async_session):
+    """Create a test user in the database."""
+    from tests.utils.auth_helpers import create_test_user
+
+    user = await create_test_user(
+        async_session,
+        email="test@example.com",
+        password="testpass123",
+        user_id="test-user-123"
+    )
+    return user
+
+
+@pytest.fixture
+async def auth_headers(async_session, test_user):
+    """Get authentication headers for API requests."""
+    from tests.utils.auth_helpers import create_test_token
+
+    token = create_test_token(test_user.id)
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+async def authenticated_client(client, auth_headers) -> AsyncClient:
+    """Create an authenticated HTTP client for testing."""
+    client.headers.update(auth_headers)
+    return client
+
+
+@pytest.fixture
+def db(request, async_session, sync_session):
+    """Provide database session for tests (async for asyncio-marked tests, sync otherwise)."""
+
+    if request.node.get_closest_marker("asyncio"):
+        yield async_session
+    else:
+        yield sync_session
+
+
+@pytest.fixture(autouse=True)
+async def override_database_dependency(async_session_maker):
+    """
+    Override the application-level database dependency so API tests use the
+    in-memory SQLite session instead of attempting to reach an external
+    PostgreSQL instance.
+    """
+
+    async def _get_test_db():
+        async with async_session_maker() as session:
+            try:
+                yield session
+            finally:
+                await session.rollback()
+
+    app.dependency_overrides[get_db] = _get_test_db
+    yield
+    app.dependency_overrides.pop(get_db, None)
 
 
 @pytest.fixture

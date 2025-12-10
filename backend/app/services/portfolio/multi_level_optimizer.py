@@ -281,6 +281,48 @@ class MultiLevelOptimizer:
         required_return = (fv / pv) ** (1 / n) - 1
         return min(0.15, max(0.02, required_return))  # Cap at 2-15%
 
+    def _calculate_risk_tolerance(self, years_to_goal: float, priority: str) -> float:
+        """
+        Estimate goal-specific risk tolerance on a 0-1 scale.
+
+        Longer horizons and lower priority goals (aspirational) allow for
+        higher risk tolerance, while short horizons and essential goals
+        require more conservative positioning.
+        """
+        # Normalize time horizon (30+ years treated as maximum risk flexibility)
+        horizon_score = max(0.0, min(1.0, years_to_goal / 30.0))
+
+        priority_adjustment = {
+            "essential": -0.30,
+            "important": 0.0,
+            "aspirational": 0.25,
+        }
+        adjustment = priority_adjustment.get(priority, 0.0)
+
+        # Base risk tolerance anchored around medium risk (0.5)
+        base_risk = 0.4 + 0.5 * horizon_score + adjustment
+
+        return float(max(0.05, min(0.95, base_risk)))
+
+    def _calculate_stocks_allocation(self, years_to_goal: float, risk_tolerance: float) -> float:
+        """
+        Determine stock allocation percentage based on horizon and risk tolerance.
+
+        Uses a heuristic that increases equity exposure for long-term or
+        aggressive goals while dialing it back for short-term objectives.
+        """
+        horizon_factor = max(0.0, min(1.0, years_to_goal / 30.0))
+        short_term_penalty = 0.0
+        if years_to_goal < 5:
+            short_term_penalty = ((5 - years_to_goal) / 10.0) * 0.30
+
+        risk_component = 0.2 + 0.6 * max(0.0, min(1.0, risk_tolerance))
+        weighted_risk = risk_component * (0.7 + 0.3 * horizon_factor)
+        weighted_risk += 0.10 * horizon_factor
+        weighted_risk -= short_term_penalty
+
+        return float(max(0.10, min(0.95, weighted_risk)))
+
     def _optimize_single_goal(
         self,
         goal: Goal,

@@ -5,7 +5,7 @@ CRUD operations for financial goals.
 """
 
 from fastapi import APIRouter, HTTPException, Depends, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -13,6 +13,8 @@ import uuid
 
 from app.core.database import get_db
 from app.models import Goal as GoalModel, GoalCategory, GoalPriority
+from app.models.user import User
+from app.api.deps import get_current_user
 
 
 router = APIRouter(tags=["goals"])
@@ -28,6 +30,11 @@ class GoalCreate(BaseModel):
     current_amount: float = Field(default=0.0, ge=0)
     monthly_contribution: Optional[float] = Field(default=None, ge=0)
     description: Optional[str] = None
+    expected_return_stocks: float = Field(default=0.07, ge=0.0, description="Expected annual stock return (decimal)")
+    expected_return_bonds: float = Field(default=0.04, ge=0.0, description="Expected annual bond return (decimal)")
+    inflation_rate: float = Field(default=0.025, ge=0.0, description="Assumed annual inflation (decimal)")
+    retirement_age: int = Field(default=65, ge=40, le=80)
+    life_expectancy: int = Field(default=90, ge=60, le=120)
 
 
 class GoalUpdate(BaseModel):
@@ -39,6 +46,11 @@ class GoalUpdate(BaseModel):
     current_amount: Optional[float] = Field(None, ge=0)
     monthly_contribution: Optional[float] = Field(None, ge=0)
     description: Optional[str] = None
+    expected_return_stocks: Optional[float] = Field(None, ge=0.0)
+    expected_return_bonds: Optional[float] = Field(None, ge=0.0)
+    inflation_rate: Optional[float] = Field(None, ge=0.0)
+    retirement_age: Optional[int] = Field(None, ge=40, le=90)
+    life_expectancy: Optional[int] = Field(None, ge=60, le=120)
 
 
 class GoalResponse(BaseModel):
@@ -55,15 +67,12 @@ class GoalResponse(BaseModel):
     status: str
     description: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-        populate_by_name = True
-
+    model_config = ConfigDict(from_attributes=True)
 
 @router.post("", response_model=GoalResponse, status_code=201)
 async def create_goal(
     goal_data: GoalCreate,
-    user_id: str,  # In production, get from auth token
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -74,9 +83,11 @@ async def create_goal(
     - Success probability
     - Recommended asset allocation
     """
+    owner_id = current_user.id
+
     goal = GoalModel(
         id=str(uuid.uuid4()),
-        user_id=user_id,
+        user_id=owner_id,
         title=goal_data.title,
         category=goal_data.category,
         priority=goal_data.priority,
@@ -84,7 +95,12 @@ async def create_goal(
         target_date=goal_data.target_date,
         current_amount=goal_data.current_amount,
         monthly_contribution=goal_data.monthly_contribution,
-        description=goal_data.description
+        description=goal_data.description,
+        expected_return_stocks=goal_data.expected_return_stocks,
+        expected_return_bonds=goal_data.expected_return_bonds,
+        inflation_rate=goal_data.inflation_rate,
+        retirement_age=goal_data.retirement_age,
+        life_expectancy=goal_data.life_expectancy,
     )
 
     db.add(goal)
@@ -97,11 +113,11 @@ async def create_goal(
     return goal
 
 
-@router.get("", response_model=List[GoalResponse])
+@router.get("", response_model=List[GoalResponse], response_model_by_alias=False)
 async def list_goals(
-    user_id: str,  # In production, get from auth token
     category: Optional[GoalCategory] = None,
     priority: Optional[GoalPriority] = None,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -109,7 +125,7 @@ async def list_goals(
 
     Can be filtered by category and/or priority.
     """
-    query = select(GoalModel).where(GoalModel.user_id == user_id)
+    query = select(GoalModel).where(GoalModel.user_id == current_user.id)
 
     if category:
         query = query.where(GoalModel.category == category)
@@ -125,19 +141,60 @@ async def list_goals(
     return goals
 
 
-@router.get("/{goal_id}", response_model=GoalResponse)
+@router.get("/at-risk")
+async def list_at_risk_goals(
+    threshold: float = Query(
+        0.8,
+        ge=0.0,
+        le=1.0,
+        description="Minimum success probability before a goal is considered at risk",
+    ),
+    db: AsyncSession = Depends(get_db),
+):
+    """Identify goals whose success probability falls below the provided threshold."""
+
+    stmt = select(GoalModel).where(
+        (GoalModel.success_probability.is_(None)) | (GoalModel.success_probability < threshold)
+    )
+    result = await db.execute(stmt)
+    goals = result.scalars().all()
+
+    at_risk_payload: List[dict] = []
+    for goal in goals:
+        success_probability = goal.success_probability if goal.success_probability is not None else 0.0
+        funding_gap = max(goal.target_amount - goal.current_amount, 0.0)
+
+        recommended_actions = [
+            "Increase monthly contribution by $250",
+            "Review asset allocation for additional growth opportunities",
+            "Consider deferring goal timeline by 6 months",
+        ]
+
+        at_risk_payload.append({
+            "id": goal.id,
+            "title": goal.title,
+            "success_probability": round(success_probability, 3),
+            "funding_gap": round(funding_gap, 2),
+            "recommended_actions": recommended_actions,
+        })
+
+    return {
+        "threshold": threshold,
+        "at_risk_count": len(at_risk_payload),
+        "at_risk_goals": at_risk_payload,
+    }
+
+
+@router.get("/{goal_id}", response_model=GoalResponse, response_model_by_alias=False)
 async def get_goal(
     goal_id: str,
-    user_id: str,  # In production, get from auth token
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Get a specific goal by ID"""
-    result = await db.execute(
-        select(GoalModel).where(
-            GoalModel.id == goal_id,
-            GoalModel.user_id == user_id
-        )
-    )
+    query = select(GoalModel).where(GoalModel.id == goal_id, GoalModel.user_id == current_user.id)
+
+    result = await db.execute(query)
     goal = result.scalar_one_or_none()
 
     if not goal:
@@ -150,16 +207,13 @@ async def get_goal(
 async def update_goal(
     goal_id: str,
     goal_data: GoalUpdate,
-    user_id: str,  # In production, get from auth token
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Update a goal"""
-    result = await db.execute(
-        select(GoalModel).where(
-            GoalModel.id == goal_id,
-            GoalModel.user_id == user_id
-        )
-    )
+    query = select(GoalModel).where(GoalModel.id == goal_id, GoalModel.user_id == current_user.id)
+
+    result = await db.execute(query)
     goal = result.scalar_one_or_none()
 
     if not goal:
@@ -179,16 +233,13 @@ async def update_goal(
 @router.delete("/{goal_id}", status_code=204)
 async def delete_goal(
     goal_id: str,
-    user_id: str,  # In production, get from auth token
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Delete a goal"""
-    result = await db.execute(
-        select(GoalModel).where(
-            GoalModel.id == goal_id,
-            GoalModel.user_id == user_id
-        )
-    )
+    query = select(GoalModel).where(GoalModel.id == goal_id, GoalModel.user_id == current_user.id)
+
+    result = await db.execute(query)
     goal = result.scalar_one_or_none()
 
     if not goal:
@@ -203,7 +254,7 @@ async def delete_goal(
 @router.post("/{goal_id}/analyze")
 async def analyze_goal(
     goal_id: str,
-    user_id: str,  # In production, get from auth token
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -215,12 +266,9 @@ async def analyze_goal(
     from app.tools import analyze_goal as analyze_goal_tool
     from app.tools.goal_analyzer import Goal as GoalToolModel
 
-    result = await db.execute(
-        select(GoalModel).where(
-            GoalModel.id == goal_id,
-            GoalModel.user_id == user_id
-        )
-    )
+    query = select(GoalModel).where(GoalModel.id == goal_id, GoalModel.user_id == current_user.id)
+
+    result = await db.execute(query)
     goal = result.scalar_one_or_none()
 
     if not goal:

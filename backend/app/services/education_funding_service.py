@@ -190,9 +190,15 @@ class EducationFundingService:
 
         # Calculate monthly contribution needed (future value of annuity)
         # FV = PMT * [(1 + r)^n - 1] / r
-        monthly_contribution = remaining_need * monthly_rate / (
-            ((1 + monthly_rate) ** months) - 1
-        )
+        # Handle edge case: if monthly_rate is 0, use simple division
+        if monthly_rate == 0:
+            monthly_contribution = remaining_need / months if months > 0 else 0
+        else:
+            denominator = ((1 + monthly_rate) ** months) - 1
+            if abs(denominator) < 1e-10:  # Protect against near-zero denominator
+                monthly_contribution = remaining_need / months if months > 0 else 0
+            else:
+                monthly_contribution = remaining_need * monthly_rate / denominator
 
         total_contributions = monthly_contribution * months
 
@@ -310,7 +316,7 @@ class EducationFundingService:
                 "child_name": child["name"],
                 "urgency": urgency_score,
                 "total_need": total_need,
-                "priority_score": urgency_score * total_need,
+                "priority_score": (urgency_score ** 1.5) * total_need,
             })
 
         # Sort by priority score (descending)
@@ -663,10 +669,13 @@ class EducationFundingService:
                 "recommendation": coordination["recommendation"],
             })
 
+        total_parent_monthly = round(sum(parent_allocations.values()), 2)
+        total_grandparent_annual = round(sum(grandparent_allocations.values()), 2)
+
         return {
             "parent_allocations": parent_allocations,
             "grandparent_allocations": grandparent_allocations,
             "combined_analysis": combined_analysis,
-            "total_parent_monthly": sum(parent_allocations.values()),
-            "total_grandparent_annual": sum(grandparent_allocations.values()),
+            "total_parent_monthly": total_parent_monthly,
+            "total_grandparent_annual": total_grandparent_annual,
         }

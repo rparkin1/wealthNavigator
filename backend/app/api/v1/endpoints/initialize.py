@@ -13,7 +13,10 @@ from app.core.database import get_db
 from app.models.life_event import EventTemplate, DEFAULT_EVENT_TEMPLATES
 from app.services.historical_scenario_service import HistoricalScenarioService
 
-router = APIRouter()
+from app.api.deps import get_current_user
+from app.models.user import User
+
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @router.post("/life-events/templates")

@@ -84,8 +84,35 @@ class Goal(Base, TimestampMixin):
     # Financial parameters
     target_amount: Mapped[float] = mapped_column(Float, nullable=False)
     current_amount: Mapped[float] = mapped_column(Float, default=0.0)
-    target_date: Mapped[str] = mapped_column(String(10), nullable=False)  # ISO date string
+    target_date: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)  # ISO date string
     monthly_contribution: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+
+    # Planning assumptions used by simulations/sensitivity analysis
+    expected_return_stocks: Mapped[float] = mapped_column(
+        Float,
+        nullable=False,
+        default=0.07
+    )
+    expected_return_bonds: Mapped[float] = mapped_column(
+        Float,
+        nullable=False,
+        default=0.04
+    )
+    inflation_rate: Mapped[float] = mapped_column(
+        Float,
+        nullable=False,
+        default=0.025
+    )
+    retirement_age: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=65
+    )
+    life_expectancy: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=90
+    )
 
     # Success criteria
     success_threshold: Mapped[float] = mapped_column(

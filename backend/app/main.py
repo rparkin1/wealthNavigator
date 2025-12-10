@@ -3,9 +3,13 @@ Main FastAPI Application
 Entry point for the WealthNavigator AI backend
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter, Request
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+
 from app.core.config import settings
+from app.core.rate_limit import limiter
 
 # Create FastAPI app
 app = FastAPI(
@@ -13,6 +17,10 @@ app = FastAPI(
     version=settings.APP_VERSION,
     description="AI-powered financial planning and portfolio management platform",
 )
+
+# Configure rate limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Configure CORS
 app.add_middleware(
@@ -71,7 +79,12 @@ from app.api.v1.endpoints.tax_management import router as tax_management_router
 from app.api.v1.endpoints.estate_planning import router as estate_planning_router
 from app.api.v1.endpoints.insurance_optimization import router as insurance_optimization_router
 from app.api.v1.endpoints.sensitivity_analysis import router as sensitivity_analysis_router
+from app.api.v1.endpoints.auth import router as auth_router
 
+# Authentication endpoints (no prefix, auth handles its own /auth prefix)
+app.include_router(auth_router, prefix=settings.API_V1_PREFIX)
+
+# Core endpoints
 app.include_router(threads_router, prefix=settings.API_V1_PREFIX)
 app.include_router(chat_router, prefix=f"{settings.API_V1_PREFIX}/chat", tags=["chat"])
 app.include_router(goals_router, prefix=f"{settings.API_V1_PREFIX}/goals", tags=["goals"])
@@ -85,10 +98,13 @@ app.include_router(plaid_router, prefix=settings.API_V1_PREFIX, tags=["plaid"])
 
 # Goal Planning v1 endpoints
 app.include_router(goal_dependencies_router, prefix=f"{settings.API_V1_PREFIX}/goal-planning/dependencies", tags=["goal-planning"])
-app.include_router(education_funding_router, prefix=f"{settings.API_V1_PREFIX}/goal-planning/education", tags=["goal-planning"])
+app.include_router(education_funding_router, prefix=f"{settings.API_V1_PREFIX}/education-funding", tags=["goal-planning"])
 app.include_router(goal_milestones_router, prefix=f"{settings.API_V1_PREFIX}/goal-planning/milestones", tags=["goal-planning"])
 app.include_router(multi_goal_optimization_router, prefix=f"{settings.API_V1_PREFIX}/goal-planning/multi-goal", tags=["goal-planning"])
-app.include_router(goal_scenarios_router, prefix=f"{settings.API_V1_PREFIX}/goal-planning/scenarios", tags=["goal-planning"])
+app.include_router(goal_scenarios_router, prefix=f"{settings.API_V1_PREFIX}/goal-scenarios", tags=["goal-planning"])
+goal_scenarios_alias = APIRouter(prefix="/goal-planning/scenarios", include_in_schema=False)
+goal_scenarios_alias.include_router(goal_scenarios_router)
+app.include_router(goal_scenarios_alias, prefix=settings.API_V1_PREFIX, tags=["goal-planning"])
 app.include_router(ai_goal_assistance_router, prefix=f"{settings.API_V1_PREFIX}/goal-planning/ai", tags=["goal-planning", "ai"])
 app.include_router(goal_funding_router, prefix=f"{settings.API_V1_PREFIX}/goal-planning/funding", tags=["goal-planning"])
 app.include_router(mental_accounting_router, prefix=f"{settings.API_V1_PREFIX}/goal-planning/mental-accounting", tags=["goal-planning", "mental-accounting"])
@@ -98,6 +114,15 @@ app.include_router(portfolio_optimization_router, prefix=f"{settings.API_V1_PREF
 
 # Risk Management v1 endpoints
 app.include_router(risk_management_router, prefix=f"{settings.API_V1_PREFIX}/risk-management", tags=["risk-management"])
+
+# Temporary alias to support legacy double-prefixed risk management routes used by tests
+risk_management_alias = APIRouter(prefix="/risk-management", include_in_schema=False)
+risk_management_alias.include_router(risk_management_router)
+app.include_router(
+    risk_management_alias,
+    prefix=f"{settings.API_V1_PREFIX}/risk-management",
+    tags=["risk-management"],
+)
 
 # Diversification Analysis v1 endpoints
 app.include_router(diversification_router, prefix=f"{settings.API_V1_PREFIX}/diversification", tags=["risk-management", "diversification"])
@@ -118,7 +143,7 @@ app.include_router(insurance_optimization_router, prefix=settings.API_V1_PREFIX,
 app.include_router(sensitivity_analysis_router, prefix=settings.API_V1_PREFIX, tags=["sensitivity-analysis"])
 
 # Section 6: What-If Analysis & Scenario Planning - NEW!
-from app.api.v1 import life_events, historical_scenarios
+from app.api.v1 import life_events, historical_scenarios, simulations
 from app.api.v1.endpoints import initialize
 
 app.include_router(
@@ -131,6 +156,12 @@ app.include_router(
     historical_scenarios.router,
     prefix=f"{settings.API_V1_PREFIX}/historical-scenarios",
     tags=["historical-scenarios", "what-if-analysis"]
+)
+
+app.include_router(
+    simulations.router,
+    prefix=f"{settings.API_V1_PREFIX}/simulations",
+    tags=["simulations", "what-if-analysis"],
 )
 
 # Initialization endpoints (no auth required for testing)

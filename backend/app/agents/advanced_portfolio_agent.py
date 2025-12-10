@@ -4,7 +4,6 @@ Handles tax-loss harvesting, rebalancing, and performance tracking
 """
 
 from typing import Dict, List, Optional
-from langchain_anthropic import ChatAnthropic
 from app.agents.state import FinancialPlanningState
 from app.tools.tax_loss_harvester import (
     identify_tax_loss_harvesting_opportunities,
@@ -21,13 +20,16 @@ from app.tools.performance_tracker import (
 )
 import json
 import numpy as np
+from app.core.config import settings
+from app.core.llm import get_chat_model
 
 
-# Initialize Claude model
-llm = ChatAnthropic(
+# Initialize Claude model (falls back to stub when API key unavailable)
+llm = get_chat_model(
     model="claude-sonnet-4-20250514",
+    api_key=settings.ANTHROPIC_API_KEY,
     temperature=0.7,
-    max_tokens=4000
+    max_tokens=4000,
 )
 
 

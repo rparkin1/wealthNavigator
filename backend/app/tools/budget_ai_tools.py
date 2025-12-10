@@ -16,7 +16,14 @@ try:
     from langchain.tools import Tool as LC_Tool  # type: ignore
 except Exception:  # pragma: no cover - environment may lack specific LC APIs
     LC_Tool = None  # type: ignore
-from langchain_anthropic import ChatAnthropic
+
+try:  # pragma: no cover - optional dependency
+    from langchain_anthropic import ChatAnthropic
+except Exception:  # pragma: no cover
+    ChatAnthropic = Any  # type: ignore
+
+from app.core.config import settings
+from app.core.llm import get_chat_model
 
 from app.agents.prompts.budget_extraction import (
     BUDGET_EXTRACTION_SYSTEM_PROMPT,
@@ -31,14 +38,15 @@ from app.agents.prompts.budget_extraction import (
 class BudgetAITools:
     """AI-powered tools for budget management."""
 
-    def __init__(self, llm: Optional[ChatAnthropic] = None):
+    def __init__(self, llm: Optional[Any] = None):
         """Initialize budget AI tools.
 
         Args:
             llm: Language model instance. If None, creates default Sonnet 4.5 instance.
         """
-        self.llm = llm or ChatAnthropic(
+        self.llm = llm or get_chat_model(
             model="claude-sonnet-4-20250514",
+            api_key=settings.ANTHROPIC_API_KEY,
             temperature=0.3,  # Lower temperature for more consistent extraction
         )
 

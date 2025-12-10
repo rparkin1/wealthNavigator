@@ -7,7 +7,7 @@ Implements REQ-GOAL-007.
 
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from app.services.goal_funding_calculator import GoalFundingCalculator
 from app.api.deps import get_current_user
@@ -25,17 +25,7 @@ class FundingRequirementsRequest(BaseModel):
     expected_return: float = Field(default=0.07, ge=0, le=0.20)
     inflation_rate: float = Field(default=0.03, ge=0, le=0.10)
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "target_amount": 500000,
-                "current_amount": 50000,
-                "years_to_goal": 20,
-                "expected_return": 0.07,
-                "inflation_rate": 0.03
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class SuccessProbabilityRequest(BaseModel):
     """Request model for success probability calculation"""
@@ -47,19 +37,7 @@ class SuccessProbabilityRequest(BaseModel):
     return_volatility: float = Field(default=0.15, ge=0, le=0.50)
     iterations: int = Field(default=5000, ge=1000, le=10000)
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "target_amount": 500000,
-                "current_amount": 50000,
-                "monthly_contribution": 1500,
-                "years_to_goal": 20,
-                "expected_return": 0.07,
-                "return_volatility": 0.15,
-                "iterations": 5000
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class RequiredSavingsForProbabilityRequest(BaseModel):
     """Request model for calculating required savings for target probability"""
@@ -70,18 +48,7 @@ class RequiredSavingsForProbabilityRequest(BaseModel):
     expected_return: float = Field(default=0.07, ge=0, le=0.20)
     return_volatility: float = Field(default=0.15, ge=0, le=0.50)
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "target_amount": 500000,
-                "current_amount": 50000,
-                "years_to_goal": 20,
-                "target_probability": 0.90,
-                "expected_return": 0.07,
-                "return_volatility": 0.15
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class ContributionOptimizationRequest(BaseModel):
     """Request model for contribution timeline optimization"""
@@ -91,17 +58,7 @@ class ContributionOptimizationRequest(BaseModel):
     max_monthly_contribution: float = Field(..., ge=0)
     expected_return: float = Field(default=0.07, ge=0, le=0.20)
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "target_amount": 500000,
-                "current_amount": 50000,
-                "years_to_goal": 20,
-                "max_monthly_contribution": 1200,
-                "expected_return": 0.07
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class CatchUpStrategyRequest(BaseModel):
     """Request model for catch-up strategy calculation"""
@@ -111,17 +68,7 @@ class CatchUpStrategyRequest(BaseModel):
     years_behind_schedule: float = Field(..., ge=0)
     expected_return: float = Field(default=0.07, ge=0, le=0.20)
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "target_amount": 500000,
-                "current_amount": 30000,
-                "years_remaining": 15,
-                "years_behind_schedule": 5,
-                "expected_return": 0.07
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 # Endpoints
 

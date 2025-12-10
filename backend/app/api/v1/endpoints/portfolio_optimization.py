@@ -882,7 +882,7 @@ async def get_service_summary():
                 "security_market_line": True
             }
         },
-        "api_endpoints": 15,
+        "api_endpoints": 11,
         "documentation": "/docs"
     }
 

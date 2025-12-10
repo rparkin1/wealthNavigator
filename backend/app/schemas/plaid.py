@@ -2,7 +2,7 @@
 Pydantic schemas for Plaid API requests and responses
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List, Dict, Any
 from datetime import date, datetime
 from enum import Enum
@@ -123,8 +123,7 @@ class PlaidAccountResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AccountsGetResponse(BaseModel):
@@ -175,8 +174,7 @@ class PlaidTransactionResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TransactionsSyncRequest(BaseModel):
@@ -240,8 +238,7 @@ class PlaidHoldingResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class HoldingsSyncRequest(BaseModel):
@@ -278,8 +275,7 @@ class PlaidItemResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ItemsListResponse(BaseModel):
