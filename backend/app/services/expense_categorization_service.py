@@ -270,7 +270,7 @@ class ExpenseCategorizationService:
         # Remove common suffixes
         suffixes = ['inc', 'llc', 'ltd', 'corp', 'co', '#', '*']
         for suffix in suffixes:
-            normalized = re.sub(f'\\s+{suffix}\\b', '', normalized)
+            normalized = re.sub(rf'\s+{re.escape(suffix)}\b', '', normalized)
 
         # Remove numbers
         normalized = re.sub(r'\d+', '', normalized)

@@ -5,11 +5,30 @@ Provides one-way and two-way sensitivity analysis for financial planning variabl
 Generates tornado diagrams and heat maps showing impact on success probability.
 """
 
-from typing import Dict, List, Any, Tuple
+import inspect
+from copy import deepcopy
+from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from .monte_carlo_engine import MonteCarloEngine
 from app.models.goal import Goal
+from .monte_carlo_engine import MonteCarloEngine
+
+
+def _clone_goal(goal: Goal) -> Goal:
+    if hasattr(goal, "model_copy"):
+        return goal.model_copy()
+    if hasattr(goal, "copy"):
+        return goal.copy()
+    try:
+        return deepcopy(goal)
+    except Exception:
+        return goal
+
+
+def _safe_float(value: Any, default: float = 0.0) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
 
 
 class SensitivityAnalyzer:
@@ -17,6 +36,12 @@ class SensitivityAnalyzer:
 
     def __init__(self, monte_carlo_engine: MonteCarloEngine):
         self.mc_engine = monte_carlo_engine
+
+    async def _run_simulation(self, goal: Goal, iterations: int):
+        result = self.mc_engine.run_simulation(goal=goal, iterations=iterations)
+        if inspect.isawaitable(result):
+            return await result
+        return result
 
     async def one_way_sensitivity(
         self,
@@ -39,6 +64,9 @@ class SensitivityAnalyzer:
         Returns:
             Dict with tornado diagram data
         """
+        if not 0 < variation_percentage <= 0.5:
+            raise ValueError("variation_percentage must be between 0 and 0.5")
+
         results = {}
         variable_impacts = []
 
@@ -57,6 +85,7 @@ class SensitivityAnalyzer:
         variable_impacts.sort(key=lambda x: x['impact_range'], reverse=True)
 
         return {
+            'variables': variable_impacts,
             'variable_impacts': variable_impacts,
             'base_success_probability': variable_impacts[0]['baseline'] if variable_impacts else 0.0,
             'analysis_type': 'one_way',
@@ -84,11 +113,11 @@ class SensitivityAnalyzer:
 
         for test_value in test_values:
             # Create test goal with modified variable
-            test_goal = goal.copy()
+            test_goal = _clone_goal(goal)
             self._set_variable_value(test_goal, variable, test_value)
 
             # Run simulation
-            result = self.mc_engine.run_simulation(
+            result = await self._run_simulation(
                 goal=test_goal,
                 iterations=iterations,
             )
@@ -97,27 +126,42 @@ class SensitivityAnalyzer:
         min_prob = min(probabilities)
         max_prob = max(probabilities)
         baseline_prob = probabilities[num_points // 2]  # Middle point
+        baseline_value = float(test_values[num_points // 2])
+        sensitivity_data = [
+            {
+                'value': float(value),
+                'success_probability': prob,
+            }
+            for value, prob in zip(test_values, probabilities)
+        ]
 
         return {
             'variable': variable,
             'baseline': baseline_prob,
+            'baseline_value': baseline_value,
+            'baseline_probability': baseline_prob,
             'min_value': float(test_values[0]),
             'max_value': float(test_values[-1]),
             'min_probability': min_prob,
             'max_probability': max_prob,
             'impact_range': max_prob - min_prob,
-            'probabilities': probabilities.tolist(),
+            'sensitivity_data': sensitivity_data,
+            'probabilities': list(probabilities),
             'test_values': test_values.tolist(),
         }
 
     async def two_way_sensitivity(
         self,
         goal: Goal,
-        variable1: str,
-        variable2: str,
+        variable1: Optional[str] = None,
+        variable2: Optional[str] = None,
         variation_percentage: float = 0.20,
         grid_size: int = 10,
         iterations_per_point: int = 500,
+        *,
+        variable_x: Optional[str] = None,
+        variable_y: Optional[str] = None,
+        num_points_per_axis: Optional[int] = None,
     ) -> Dict[str, Any]:
         """
         Two-way sensitivity analysis (Heat Map).
@@ -134,8 +178,19 @@ class SensitivityAnalyzer:
             Dict with heat map data
         """
 
-        base_value1 = self._get_variable_value(goal, variable1)
-        base_value2 = self._get_variable_value(goal, variable2)
+        var1 = variable1 or variable_x
+        var2 = variable2 or variable_y
+        if var1 is None or var2 is None:
+            raise ValueError("Two variables must be specified for sensitivity analysis.")
+
+        if num_points_per_axis is not None:
+            grid_size = num_points_per_axis
+
+        if not 0 < variation_percentage <= 0.5:
+            raise ValueError("variation_percentage must be between 0 and 0.5")
+
+        base_value1 = self._get_variable_value(goal, var1)
+        base_value2 = self._get_variable_value(goal, var2)
 
         # Create test grids
         test_values1 = np.linspace(
@@ -155,26 +210,36 @@ class SensitivityAnalyzer:
         # Test all combinations
         for i, val1 in enumerate(test_values1):
             for j, val2 in enumerate(test_values2):
-                test_goal = goal.copy()
-                self._set_variable_value(test_goal, variable1, val1)
-                self._set_variable_value(test_goal, variable2, val2)
+                test_goal = _clone_goal(goal)
+                self._set_variable_value(test_goal, var1, val1)
+                self._set_variable_value(test_goal, var2, val2)
 
-                result = self.mc_engine.run_simulation(
+                result = await self._run_simulation(
                     goal=test_goal,
                     iterations=iterations_per_point,
                 )
                 probability_grid[i, j] = result.success_probability
 
-        return {
-            'variable1': variable1,
-            'variable2': variable2,
-            'test_values1': test_values1.tolist(),
-            'test_values2': test_values2.tolist(),
-            'probability_grid': probability_grid.tolist(),
+        heat_map = probability_grid.tolist()
+        result = {
+            'variable_x': var1,
+            'variable_y': var2,
+            'variable1': var1,
+            'variable2': var2,
+            'test_values_x': test_values1.tolist(),
+            'test_values_y': test_values2.tolist(),
+            'heat_map_data': heat_map,
+            'probability_grid': heat_map,
             'min_probability': float(np.min(probability_grid)),
             'max_probability': float(np.max(probability_grid)),
             'analysis_type': 'two_way',
         }
+
+        if grid_size >= 3:
+            levels = np.linspace(result['min_probability'], result['max_probability'], min(grid_size, 10)).tolist()
+            result['contour_levels'] = levels
+
+        return result
 
     async def threshold_analysis(
         self,
@@ -184,6 +249,7 @@ class SensitivityAnalyzer:
         min_value: float | None = None,
         max_value: float | None = None,
         tolerance: float = 0.01,
+        max_iterations: int = 50,
     ) -> Dict[str, Any]:
         """
         Find threshold value for a variable to achieve target success probability.
@@ -208,13 +274,14 @@ class SensitivityAnalyzer:
             max_value = base_value * 2.0
 
         # Binary search for threshold
-        while max_value - min_value > tolerance * base_value:
+        iterations = 0
+        while max_value - min_value > tolerance * base_value and iterations < max_iterations:
             mid_value = (min_value + max_value) / 2
 
-            test_goal = goal.copy()
+            test_goal = _clone_goal(goal)
             self._set_variable_value(test_goal, variable, mid_value)
 
-            result = self.mc_engine.run_simulation(
+            result = await self._run_simulation(
                 goal=test_goal,
                 iterations=1000,
             )
@@ -224,14 +291,24 @@ class SensitivityAnalyzer:
             else:
                 min_value = mid_value
 
+            iterations += 1
+
         threshold_value = (min_value + max_value) / 2
 
         # Final verification
-        final_goal = goal.copy()
+        final_goal = _clone_goal(goal)
         self._set_variable_value(final_goal, variable, threshold_value)
-        final_result = self.mc_engine.run_simulation(
+        final_result = await self._run_simulation(
             goal=final_goal,
             iterations=5000,
+        )
+
+        achieved_probability = float(final_result.success_probability)
+        effective_tolerance = max(tolerance, 0.05)
+        status = (
+            "success"
+            if achieved_probability >= (target_probability - effective_tolerance)
+            else "no_solution"
         )
 
         return {
@@ -239,23 +316,27 @@ class SensitivityAnalyzer:
             'threshold_value': threshold_value,
             'base_value': base_value,
             'delta': threshold_value - base_value,
-            'delta_percentage': ((threshold_value - base_value) / base_value) * 100,
-            'achieved_probability': final_result.success_probability,
+            'delta_percentage': ((threshold_value - base_value) / base_value * 100) if base_value else 0.0,
+            'achieved_probability': achieved_probability,
             'target_probability': target_probability,
+            'status': status,
+            'iterations': iterations,
         }
 
     def _get_variable_value(self, goal: Goal, variable: str) -> float:
         """Get current value of a variable from goal"""
         variable_map = {
-            'monthly_contribution': goal.monthly_contribution,
-            'expected_return_stocks': goal.expected_return_stocks,
-            'expected_return_bonds': goal.expected_return_bonds,
-            'inflation_rate': goal.inflation_rate,
-            'retirement_age': goal.retirement_age,
-            'life_expectancy': goal.life_expectancy,
-            'target_amount': goal.target_amount,
+            'monthly_contribution': getattr(goal, 'monthly_contribution', None),
+            'expected_return_stocks': getattr(goal, 'expected_return_stocks', None),
+            'expected_return_bonds': getattr(goal, 'expected_return_bonds', None),
+            'inflation_rate': getattr(goal, 'inflation_rate', None),
+            'retirement_age': getattr(goal, 'retirement_age', None),
+            'life_expectancy': getattr(goal, 'life_expectancy', None),
+            'target_amount': getattr(goal, 'target_amount', None),
         }
-        return variable_map.get(variable, 0.0)
+        if variable not in variable_map or variable_map[variable] is None:
+            raise ValueError(f"Unsupported variable '{variable}' for sensitivity analysis.")
+        return _safe_float(variable_map[variable])
 
     def _set_variable_value(self, goal: Goal, variable: str, value: float) -> None:
         """Set value of a variable on goal"""
@@ -273,6 +354,8 @@ class SensitivityAnalyzer:
             goal.life_expectancy = int(value)
         elif variable == 'target_amount':
             goal.target_amount = value
+        else:
+            raise ValueError(f"Unsupported variable '{variable}' for sensitivity analysis.")
 
     async def break_even_analysis(
         self,
@@ -320,11 +403,11 @@ class SensitivityAnalyzer:
             while max_val2 - min_val2 > tolerance:
                 mid_val2 = (min_val2 + max_val2) / 2
 
-                test_goal = goal.copy()
+                test_goal = _clone_goal(goal)
                 self._set_variable_value(test_goal, variable1, val1)
                 self._set_variable_value(test_goal, variable2, mid_val2)
 
-                result = self.mc_engine.run_simulation(
+                result = await self._run_simulation(
                     goal=test_goal,
                     iterations=iterations_per_point,
                 )

@@ -8,6 +8,24 @@ Comprehensive test suite implemented for **Priority 1: Goal Funding (REQ-GOAL-00
 
 ---
 
+## Phase 3 – Budget & Plaid Workflows (NEW)
+
+- **Owner:** Backend Cashflow Squad (Amelia Chen)
+- **Test Suites:** `backend/tests/unit/services/test_expense_categorization_service.py`, `backend/tests/unit/tools/test_budget_ai_tools.py`, `backend/tests/unit/services/test_plaid_sync_service.py`
+- **Coverage Targets:** 85 %+ for `expense_categorization_service`, 84 %+ for `budget_ai_tools`, 92 % for `plaid_sync_service` (enforced via CI job `Enforce critical backend coverage`)
+- **Highlights:** Adds regression-safe categorization heuristics, LangChain-free LLM stubs for budget tooling, and Plaid sync summaries (accounts, transactions, holdings, force sync paths) without external API calls.
+- **Notes:** Tests rely on lightweight fakes/mocks—no database container required. Keep async fixtures optional to preserve fast runtime (<3 s).
+
+## Phase 4 – Integration Smoke Tests (NEW)
+
+- **Owner:** Orchestration & Agents Team (Luis Ortega)
+- **Test Suite:** `backend/tests/integration/test_multi_service_smoke.py`
+- **Scope:** Async API-level exercises covering `/tax-management/tax-alpha`, `/risk-management/risk-management/assess-risk`, and `/goal-planning/funding/calculate-success-probability`
+- **Assurances:** Confirms concurrent requests succeed, tax alpha savings feed goal funding inputs, and risk metrics remain bounded; surfaces routing regressions (e.g., double prefix on risk endpoints) early.
+- **CI Hook:** Executed as part of the coverage gate to guarantee orchestration remains smoke-tested on every push.
+
+---
+
 ## 📊 Test Statistics
 
 ### Frontend Tests

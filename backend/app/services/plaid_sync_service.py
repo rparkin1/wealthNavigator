@@ -98,7 +98,7 @@ class PlaidSyncService:
         summary['holdings_updated'] = holdings_result
 
         # Update last sync time
-        item.last_sync = datetime.utcnow()
+        item.last_successful_sync = datetime.utcnow().isoformat()
         await db.commit()
 
         return summary
@@ -120,32 +120,30 @@ class PlaidSyncService:
         updated_count = 0
 
         for plaid_account_data in balances.get('accounts', []):
-            account_id = plaid_account_data['account_id']
+            plaid_account_id = plaid_account_data['account_id']
 
-            # Get or create PlaidAccount
             result = await db.execute(
-                select(PlaidAccount)
-                .where(PlaidAccount.plaid_account_id == account_id)
+                select(PlaidAccount).where(PlaidAccount.account_id == plaid_account_id)
             )
             plaid_account = result.scalar_one_or_none()
 
-            if plaid_account:
-                # Update balance
-                balance_info = plaid_account_data.get('balances', {})
-                plaid_account.available_balance = balance_info.get('available')
-                plaid_account.current_balance = balance_info.get('current')
-                plaid_account.limit_balance = balance_info.get('limit')
-                plaid_account.last_sync = datetime.utcnow()
+            if not plaid_account:
+                continue
 
-                # Update corresponding Portfolio Account
-                await self._update_portfolio_account(
-                    db,
-                    item.user_id,
-                    plaid_account.plaid_account_id,
-                    balance_info.get('current', 0),
-                )
+            balance_info = plaid_account_data.get('balances', {})
+            plaid_account.available_balance = balance_info.get('available')
+            plaid_account.current_balance = balance_info.get('current')
+            plaid_account.limit = balance_info.get('limit')
+            plaid_account.last_balance_update = datetime.utcnow().isoformat()
 
-                updated_count += 1
+            await self._update_portfolio_account(
+                db,
+                item.user_id,
+                plaid_account.account_id,
+                balance_info.get('current', 0),
+            )
+
+            updated_count += 1
 
         await db.commit()
         return updated_count
@@ -182,6 +180,14 @@ class PlaidSyncService:
         for txn_data in transactions_data.get('transactions', []):
             txn_id = txn_data['transaction_id']
 
+            account_result = await db.execute(
+                select(PlaidAccount).where(PlaidAccount.account_id == txn_data['account_id'])
+            )
+            account = account_result.scalar_one_or_none()
+
+            if not account:
+                continue
+
             # Check if transaction already exists
             result = await db.execute(
                 select(PlaidTransaction)
@@ -193,16 +199,24 @@ class PlaidSyncService:
                 # Create new transaction
                 transaction = PlaidTransaction(
                     transaction_id=txn_id,
-                    account_id=txn_data['account_id'],
-                    item_id=item.id,
+                    account_id=account.id,
+                    user_id=item.user_id,
                     amount=txn_data['amount'],
                     date=datetime.strptime(txn_data['date'], '%Y-%m-%d').date(),
-                    name=txn_data.get('name'),
+                    name=txn_data.get('name') or "",
                     merchant_name=txn_data.get('merchant_name'),
                     category=txn_data.get('category', []),
                     pending=txn_data.get('pending', False),
-                    transaction_type=txn_data.get('transaction_type'),
                     payment_channel=txn_data.get('payment_channel'),
+                    iso_currency_code=txn_data.get('iso_currency_code', 'USD'),
+                    authorized_date=(
+                        datetime.strptime(txn_data['authorized_date'], '%Y-%m-%d').date()
+                        if txn_data.get('authorized_date') else None
+                    ),
+                    location=txn_data.get('location'),
+                    payment_meta=txn_data.get('payment_meta'),
+                    personal_finance_category=txn_data.get('personal_finance_category'),
+                    category_id=txn_data.get('category_id'),
                 )
                 db.add(transaction)
                 synced_count += 1
@@ -227,14 +241,22 @@ class PlaidSyncService:
         updated_count = 0
 
         for holding_data in holdings_data.get('holdings', []):
-            account_id = holding_data['account_id']
+            plaid_account_id = holding_data['account_id']
             security_id = holding_data['security_id']
+
+            account_result = await db.execute(
+                select(PlaidAccount).where(PlaidAccount.account_id == plaid_account_id)
+            )
+            account = account_result.scalar_one_or_none()
+
+            if not account:
+                continue
 
             # Get or create PlaidHolding
             result = await db.execute(
                 select(PlaidHolding)
                 .where(
-                    PlaidHolding.account_id == account_id,
+                    PlaidHolding.account_id == account.id,
                     PlaidHolding.security_id == security_id,
                 )
             )
@@ -246,18 +268,18 @@ class PlaidSyncService:
                 holding.institution_price = holding_data.get('institution_price', 0)
                 holding.institution_value = holding_data.get('institution_value', 0)
                 holding.cost_basis = holding_data.get('cost_basis')
-                holding.last_sync = datetime.utcnow()
+                holding.iso_currency_code = holding_data.get('iso_currency_code', 'USD')
             else:
                 # Create new holding
                 holding = PlaidHolding(
-                    account_id=account_id,
+                    account_id=account.id,
+                    user_id=account.user_id,
                     security_id=security_id,
                     quantity=holding_data.get('quantity', 0),
                     institution_price=holding_data.get('institution_price', 0),
                     institution_value=holding_data.get('institution_value', 0),
                     cost_basis=holding_data.get('cost_basis'),
-                    currency=holding_data.get('iso_currency_code', 'USD'),
-                    last_sync=datetime.utcnow(),
+                    iso_currency_code=holding_data.get('iso_currency_code', 'USD'),
                 )
                 db.add(holding)
 
@@ -288,15 +310,15 @@ class PlaidSyncService:
             .join(Portfolio)
             .where(
                 Portfolio.user_id == user_id,
-                Account.external_account_id == plaid_account_id,
+                Account.plaid_account_id == plaid_account_id,
             )
         )
         account = result.scalar_one_or_none()
 
         if account:
             # Update balance
-            account.balance = current_balance
-            account.updated_at = datetime.utcnow()
+            account.current_value = current_balance
+            account.last_synced = datetime.utcnow()
             await db.commit()
 
     async def check_sync_status(self, db: AsyncSession, user_id: str) -> Dict[str, any]:
@@ -343,10 +365,17 @@ class PlaidSyncService:
         Returns:
             True if sync needed
         """
-        if not item.last_sync:
+        last_sync_str = getattr(item, "last_successful_sync", None)
+
+        if not last_sync_str:
             return True
 
-        age = datetime.utcnow() - item.last_sync
+        try:
+            last_sync = datetime.fromisoformat(last_sync_str)
+        except (TypeError, ValueError):
+            return True
+
+        age = datetime.utcnow() - last_sync
         return age > timedelta(hours=max_age_hours)
 
     async def force_sync_user(self, db: AsyncSession, user_id: str) -> Dict[str, any]:
