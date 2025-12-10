@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import { useComprehensiveAnalysis } from '../../hooks/usePortfolio';
-import type { AnalysisType } from '../../types/portfolio';
+import { AnalysisType } from '../../types/portfolio';
 import type { ComprehensiveAnalysisRequest } from '../../types/portfolio';
 
 interface ComprehensiveAnalysisProps {
