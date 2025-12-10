@@ -330,6 +330,239 @@ class ComprehensiveAnalysisResponse(BaseModel):
 
 
 # ============================================================================
+# Factor Attribution Request/Response Models (Fama-French)
+# ============================================================================
+
+class FactorAnalysisRequest(BaseModel):
+    """Request for Fama-French factor attribution analysis"""
+    portfolio_returns: List[float] = Field(..., description="Historical portfolio returns")
+    market_returns: List[float] = Field(..., description="Market benchmark returns")
+    factor_returns: Optional[Dict[str, List[float]]] = Field(None, description="Optional factor returns")
+    model_type: str = Field("three_factor", description="Model type: three_factor or five_factor")
+    frequency: str = Field("daily", description="Return frequency: daily or monthly")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "portfolio_returns": [0.001, 0.002, -0.001, 0.003],
+                "market_returns": [0.0008, 0.0015, -0.0012, 0.0025],
+                "factor_returns": None,
+                "model_type": "three_factor",
+                "frequency": "daily"
+            }
+        }
+
+
+class FactorExposureResponse(BaseModel):
+    """Factor exposure result"""
+    factor_name: str
+    beta: float
+    t_statistic: float
+    p_value: float
+    is_significant: bool
+
+
+class FactorAttributionResult(BaseModel):
+    """Performance attribution to a factor"""
+    factor_name: str
+    beta: float
+    factor_return: float
+    contribution: float
+    contribution_pct: float
+
+
+class FactorAnalysisResponse(BaseModel):
+    """Response from Fama-French factor analysis"""
+    model_type: str
+    alpha: float
+    alpha_annual: float
+    alpha_t_stat: float
+    alpha_p_value: float
+    r_squared: float
+    adjusted_r_squared: float
+    exposures: List[FactorExposureResponse]
+    attributions: List[FactorAttributionResult]
+    total_return: float
+    explained_return: float
+    residual_return: float
+    interpretation: str
+    recommendations: List[str]
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "model_type": "three_factor",
+                "alpha": 0.0003,
+                "alpha_annual": 0.0756,
+                "alpha_t_stat": 2.15,
+                "alpha_p_value": 0.032,
+                "r_squared": 0.89,
+                "adjusted_r_squared": 0.88,
+                "exposures": [
+                    {
+                        "factor_name": "MKT_RF",
+                        "beta": 0.95,
+                        "t_statistic": 15.3,
+                        "p_value": 0.001,
+                        "is_significant": True
+                    }
+                ],
+                "attributions": [
+                    {
+                        "factor_name": "MKT_RF",
+                        "beta": 0.95,
+                        "factor_return": 0.08,
+                        "contribution": 0.076,
+                        "contribution_pct": 85.3
+                    }
+                ],
+                "total_return": 0.089,
+                "explained_return": 0.081,
+                "residual_return": 0.008,
+                "interpretation": "Portfolio generated significant positive alpha of 7.56% annually...",
+                "recommendations": [
+                    "✅ Strong positive alpha. Strategy is adding value."
+                ]
+            }
+        }
+
+
+# ============================================================================
+# CAPM Request/Response Models
+# ============================================================================
+
+class CAPMAnalysisRequest(BaseModel):
+    """Request for CAPM analysis"""
+    security_returns: List[float] = Field(..., description="Security or portfolio returns")
+    market_returns: List[float] = Field(..., description="Market benchmark returns")
+    frequency: str = Field("daily", description="Return frequency: daily or monthly")
+    security_name: str = Field("Security", description="Name for reporting")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "security_returns": [0.001, 0.002, -0.001, 0.003],
+                "market_returns": [0.0008, 0.0015, -0.0012, 0.0025],
+                "frequency": "daily",
+                "security_name": "My Portfolio"
+            }
+        }
+
+
+class CAPMMetricsResponse(BaseModel):
+    """CAPM metrics result"""
+    risk_free_rate: float
+    market_return: float
+    market_premium: float
+    beta: float
+    beta_confidence_interval: tuple[float, float]
+    expected_return: float
+    actual_return: float
+    alpha: float
+    r_squared: float
+    correlation: float
+    tracking_error: float
+    information_ratio: float
+    treynor_ratio: float
+    position: str  # overvalued, undervalued, fair_value
+    distance_from_sml: float
+    interpretation: str
+    investment_recommendation: str
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "risk_free_rate": 0.04,
+                "market_return": 0.10,
+                "market_premium": 0.06,
+                "beta": 1.05,
+                "beta_confidence_interval": [0.98, 1.12],
+                "expected_return": 0.103,
+                "actual_return": 0.115,
+                "alpha": 0.012,
+                "r_squared": 0.92,
+                "correlation": 0.96,
+                "tracking_error": 0.035,
+                "information_ratio": 0.34,
+                "treynor_ratio": 0.071,
+                "position": "undervalued",
+                "distance_from_sml": 0.012,
+                "interpretation": "Portfolio moves roughly in line with the market (β=1.05)...",
+                "investment_recommendation": "🟢 BUY - Security appears undervalued..."
+            }
+        }
+
+
+class CAPMPortfolioRequest(BaseModel):
+    """Request for CAPM portfolio analysis"""
+    portfolio_returns: List[float] = Field(..., description="Portfolio returns")
+    market_returns: List[float] = Field(..., description="Market returns")
+    holdings: Optional[List[Dict]] = Field(None, description="Individual holdings with returns")
+    frequency: str = Field("daily", description="Return frequency")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "portfolio_returns": [0.001, 0.002, -0.001, 0.003],
+                "market_returns": [0.0008, 0.0015, -0.0012, 0.0025],
+                "holdings": [
+                    {
+                        "name": "SPY",
+                        "weight": 0.60,
+                        "returns": [0.0008, 0.0015, -0.0012, 0.0025]
+                    }
+                ],
+                "frequency": "daily"
+            }
+        }
+
+
+class CAPMPortfolioResponse(BaseModel):
+    """CAPM portfolio analysis result"""
+    portfolio_metrics: CAPMMetricsResponse
+    holdings_analysis: Optional[List[Dict]] = None
+    systematic_risk_pct: float
+    idiosyncratic_risk_pct: float
+    recommendations: List[str]
+    risk_warnings: List[str]
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "portfolio_metrics": {"beta": 1.05, "alpha": 0.012},
+                "holdings_analysis": None,
+                "systematic_risk_pct": 92.0,
+                "idiosyncratic_risk_pct": 8.0,
+                "recommendations": [
+                    "✅ Portfolio is well-positioned relative to CAPM expectations."
+                ],
+                "risk_warnings": []
+            }
+        }
+
+
+class SecurityMarketLineResponse(BaseModel):
+    """Security Market Line data for visualization"""
+    points: List[Dict[str, float]]
+    portfolio_point: Dict[str, float]
+    efficient_portfolios: List[Dict[str, float]]
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "points": [
+                    {"beta": 0.0, "expected_return": 0.04},
+                    {"beta": 1.0, "expected_return": 0.10}
+                ],
+                "portfolio_point": {"beta": 1.0, "expected_return": 0.10},
+                "efficient_portfolios": [
+                    {"name": "Conservative", "beta": 0.5, "expected_return": 0.07}
+                ]
+            }
+        }
+
+
+# ============================================================================
 # Error Response
 # ============================================================================
 
