@@ -72,6 +72,21 @@ const SensitivityAnalysisDashboard = lazy(() =>
   import('./components/sensitivity/SensitivityAnalysisDashboard').then(m => ({ default: m.SensitivityAnalysisDashboard }))
 );
 
+// Risk Management
+const RiskDashboard = lazy(() =>
+  import('./components/risk/RiskDashboard').then(m => ({ default: m.RiskDashboard }))
+);
+
+// Reserve Monitoring
+const ReserveMonitoringDashboard = lazy(() =>
+  import('./components/risk/ReserveMonitoringDashboard').then(m => ({ default: m.ReserveMonitoringDashboard }))
+);
+
+// Diversification Analysis
+const DiversificationAnalysisDashboard = lazy(() =>
+  import('./components/risk/DiversificationAnalysisDashboard').then(m => ({ default: m.DiversificationAnalysisDashboard }))
+);
+
 // Plaid Integration
 const PlaidDashboard = lazy(() =>
   import('./components/plaid/PlaidDashboard').then(m => ({ default: m.PlaidDashboard }))
@@ -127,6 +142,9 @@ type View =
   | 'hedging'
   | 'insurance'
   | 'sensitivity'
+  | 'risk'
+  | 'reserves'
+  | 'diversification'
   | 'plaid'
   | 'data-entry'
   | 'settings'
@@ -315,6 +333,60 @@ function App() {
             </ErrorBoundary>
           </>
         );
+      case 'risk':
+        return (
+          <>
+            <div className="px-6 pt-4">
+              <Breadcrumbs items={[{ label: 'Home', onClick: () => setCurrentView('home') }, { label: 'Risk Management' }]} />
+            </div>
+            <ErrorBoundary fallback={<LoadingView message="Loading risk management..." />}>
+              <Suspense fallback={<LoadingView message="Loading risk management..." />}>
+                <RiskDashboard
+                  portfolioValue={500000}
+                  allocation={{ stocks: 0.6, bonds: 0.3, cash: 0.1 }}
+                  expectedReturn={0.08}
+                  volatility={0.15}
+                />
+              </Suspense>
+            </ErrorBoundary>
+          </>
+        );
+      case 'reserves':
+        return (
+          <>
+            <div className="px-6 pt-4">
+              <Breadcrumbs items={[{ label: 'Home', onClick: () => setCurrentView('home') }, { label: 'Reserve Monitoring' }]} />
+            </div>
+            <ErrorBoundary fallback={<LoadingView message="Loading reserve monitoring..." />}>
+              <Suspense fallback={<LoadingView message="Loading reserve monitoring..." />}>
+                <ReserveMonitoringDashboard
+                  currentReserves={25000}
+                  monthlyExpenses={5000}
+                  monthlyIncome={8000}
+                  hasDependents={true}
+                  incomeStability="stable"
+                  jobSecurity="secure"
+                />
+              </Suspense>
+            </ErrorBoundary>
+          </>
+        );
+      case 'diversification':
+        return (
+          <>
+            <div className="px-6 pt-4">
+              <Breadcrumbs items={[{ label: 'Home', onClick: () => setCurrentView('home') }, { label: 'Diversification Analysis' }]} />
+            </div>
+            <ErrorBoundary fallback={<LoadingView message="Loading diversification analysis..." />}>
+              <Suspense fallback={<LoadingView message="Loading diversification analysis..." />}>
+                <DiversificationAnalysisDashboard
+                  portfolioValue={500000}
+                  holdings={[]}
+                />
+              </Suspense>
+            </ErrorBoundary>
+          </>
+        );
       case '529-calculator':
         return (
           <>
@@ -389,7 +461,7 @@ function App() {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'education' || currentView === '529-calculator' || currentView === 'tax' || currentView === 'estate-planning' || currentView === 'hedging' || currentView === 'insurance' || currentView === 'sensitivity' || currentView === 'budget' || currentView === 'recurring' || currentView === 'plaid' || currentView === 'data-entry' || currentView === 'what-if' || currentView === 'life-events' || currentView === 'scenarios') ? (
+      {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'education' || currentView === '529-calculator' || currentView === 'tax' || currentView === 'estate-planning' || currentView === 'hedging' || currentView === 'insurance' || currentView === 'risk' || currentView === 'reserves' || currentView === 'diversification' || currentView === 'sensitivity' || currentView === 'budget' || currentView === 'recurring' || currentView === 'plaid' || currentView === 'data-entry' || currentView === 'what-if' || currentView === 'life-events' || currentView === 'scenarios') ? (
         sidebarOpen && (
           <aside className="w-64 transition-all duration-300 bg-white border-r border-gray-200 overflow-hidden">
           <div className="p-4">
@@ -557,6 +629,36 @@ function App() {
             </div>
             <div className="mt-2 space-y-1 px-2">
               <button
+                onClick={() => setCurrentView('risk')}
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                  currentView === 'risk'
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                ⚠️ Risk Management
+              </button>
+              <button
+                onClick={() => setCurrentView('reserves')}
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                  currentView === 'reserves'
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                💰 Reserve Monitoring
+              </button>
+              <button
+                onClick={() => setCurrentView('diversification')}
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                  currentView === 'diversification'
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                🎯 Diversification
+              </button>
+              <button
                 onClick={() => setCurrentView('sensitivity')}
                 className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
                   currentView === 'sensitivity'
@@ -604,7 +706,7 @@ function App() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'tax' || currentView === 'estate-planning' || currentView === 'hedging' || currentView === 'insurance' || currentView === 'sensitivity' || currentView === 'what-if' || currentView === 'life-events' || currentView === 'scenarios') && (
+        {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'tax' || currentView === 'estate-planning' || currentView === 'hedging' || currentView === 'insurance' || currentView === 'risk' || currentView === 'reserves' || currentView === 'diversification' || currentView === 'sensitivity' || currentView === 'what-if' || currentView === 'life-events' || currentView === 'scenarios') && (
           <header className="flex-none bg-white border-b border-gray-200 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
@@ -1156,6 +1258,90 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
               </div>
               <button className="w-full btn-primary">
                 Optimize Coverage
+              </button>
+            </div>
+          </div>
+
+          {/* Risk Management */}
+          <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('risk')}>
+            <div className="text-center">
+              <div className="text-5xl mb-4">⚠️</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Risk Management</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Comprehensive risk assessment, stress testing, and hedging strategies for your portfolio.
+              </p>
+              <div className="text-left space-y-2 mb-4">
+                <div className="flex items-start text-sm">
+                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-gray-700">Portfolio risk assessment (VaR, Sharpe)</span>
+                </div>
+                <div className="flex items-start text-sm">
+                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-gray-700">Stress testing & scenario analysis</span>
+                </div>
+                <div className="flex items-start text-sm">
+                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-gray-700">Diversification & hedging strategies</span>
+                </div>
+              </div>
+              <button className="w-full btn-primary">
+                Assess Risk
+              </button>
+            </div>
+          </div>
+
+          {/* Reserve Monitoring */}
+          <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('reserves')}>
+            <div className="text-center">
+              <div className="text-5xl mb-4">💰</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Reserve Monitoring</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Monitor your emergency fund and ensure adequate reserves for unexpected expenses.
+              </p>
+              <div className="text-left space-y-2 mb-4">
+                <div className="flex items-start text-sm">
+                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-gray-700">Emergency fund status & alerts</span>
+                </div>
+                <div className="flex items-start text-sm">
+                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-gray-700">Replenishment planning</span>
+                </div>
+                <div className="flex items-start text-sm">
+                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-gray-700">Reserve growth simulator</span>
+                </div>
+              </div>
+              <button className="w-full btn-primary">
+                Monitor Reserves
+              </button>
+            </div>
+          </div>
+
+          {/* Diversification Analysis */}
+          <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('diversification')}>
+            <div className="text-center">
+              <div className="text-5xl mb-4">🎯</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Diversification Analysis</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Analyze portfolio diversification and identify concentration risks across holdings.
+              </p>
+              <div className="text-left space-y-2 mb-4">
+                <div className="flex items-start text-sm">
+                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-gray-700">Concentration risk analysis</span>
+                </div>
+                <div className="flex items-start text-sm">
+                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-gray-700">Sector & geographic exposure</span>
+                </div>
+                <div className="flex items-start text-sm">
+                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-gray-700">Diversification recommendations</span>
+                </div>
+              </div>
+              <button className="w-full btn-primary">
+                Analyze Diversification
               </button>
             </div>
           </div>
