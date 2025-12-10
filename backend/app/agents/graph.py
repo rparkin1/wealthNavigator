@@ -15,6 +15,7 @@ from .nodes import (
     monte_carlo_simulator_node,
     visualization_node,
 )
+from .advanced_portfolio_agent import advanced_portfolio_agent_node
 
 
 def route_after_orchestrator(state: FinancialPlanningState) -> str:
@@ -30,6 +31,7 @@ def route_after_orchestrator(state: FinancialPlanningState) -> str:
         "goal_planner": "goal_planner",
         "portfolio_architect": "portfolio_architect",
         "monte_carlo_simulator": "monte_carlo",
+        "advanced_portfolio": "advanced_portfolio",
         "visualization": "visualization",
     }
 
@@ -67,7 +69,9 @@ def route_after_portfolio(state: FinancialPlanningState) -> str:
 
     remaining = [a for a in active_agents if a not in completed]
 
-    if "monte_carlo_simulator" in remaining:
+    if "advanced_portfolio" in remaining:
+        return "advanced_portfolio"
+    elif "monte_carlo_simulator" in remaining:
         return "monte_carlo"
     else:
         return "visualization"
@@ -117,6 +121,7 @@ def create_financial_planning_graph(
     workflow.add_node("orchestrator", orchestrator_node)
     workflow.add_node("goal_planner", goal_planner_node)
     workflow.add_node("portfolio_architect", portfolio_architect_node)
+    workflow.add_node("advanced_portfolio", advanced_portfolio_agent_node)
     workflow.add_node("monte_carlo", monte_carlo_simulator_node)
     workflow.add_node("visualization", visualization_node)
 
@@ -130,6 +135,7 @@ def create_financial_planning_graph(
         {
             "goal_planner": "goal_planner",
             "portfolio_architect": "portfolio_architect",
+            "advanced_portfolio": "advanced_portfolio",
             "monte_carlo": "monte_carlo",
             "visualization": "visualization",
         }
@@ -149,7 +155,17 @@ def create_financial_planning_graph(
         "portfolio_architect",
         route_after_portfolio,
         {
+            "advanced_portfolio": "advanced_portfolio",
             "monte_carlo": "monte_carlo",
+            "visualization": "visualization",
+        }
+    )
+
+    # Add routing after advanced portfolio agent
+    workflow.add_conditional_edges(
+        "advanced_portfolio",
+        route_after_monte_carlo,  # Reuse same logic - goes to visualization
+        {
             "visualization": "visualization",
         }
     )

@@ -3,9 +3,18 @@
  * Root component with layout structure and routing
  */
 
-import { useState } from 'react';
-import { ChatInterface } from './components/conversation';
+import { useState, Suspense, lazy } from 'react';
 import './index.css';
+
+// Lazy load components for better error isolation
+const ChatInterface = lazy(() =>
+  import('./components/conversation').then(m => ({ default: m.ChatInterface }))
+);
+
+// Re-enabling portfolio with type-only imports fix
+const PortfolioView = lazy(() =>
+  import('./components/portfolio/PortfolioView').then(m => ({ default: m.PortfolioView }))
+);
 
 type View = 'home' | 'chat' | 'goals' | 'portfolio';
 
@@ -19,7 +28,17 @@ function App() {
   const renderView = () => {
     switch (currentView) {
       case 'chat':
-        return <ChatInterface userId={userId} />;
+        return (
+          <Suspense fallback={<LoadingView message="Loading chat interface..." />}>
+            <ChatInterface userId={userId} />
+          </Suspense>
+        );
+      case 'portfolio':
+        return (
+          <Suspense fallback={<LoadingView message="Loading portfolio..." />}>
+            <PortfolioView userId={userId} />
+          </Suspense>
+        );
       case 'home':
       default:
         return <HomeView onStartChat={() => setCurrentView('chat')} />;
@@ -29,7 +48,7 @@ function App() {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      {currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' ? (
+      {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio') ? (
         sidebarOpen && (
           <aside className="w-64 transition-all duration-300 bg-white border-r border-gray-200 overflow-hidden">
           <div className="p-4">
@@ -125,6 +144,17 @@ function App() {
         <main className="flex-1 overflow-hidden">
           {renderView()}
         </main>
+      </div>
+    </div>
+  );
+}
+
+function LoadingView({ message }: { message: string }) {
+  return (
+    <div className="h-full flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">{message}</p>
       </div>
     </div>
   );
