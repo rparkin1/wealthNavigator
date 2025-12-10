@@ -130,6 +130,7 @@ class Goal(Base, TimestampMixin):
     description: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
 
     # Goal lifecycle status (REQ-GOAL-003: Goal dependencies)
+    # Note: Column name is 'status' in database for lifecycle status (active, planning, etc.)
     status: Mapped[str] = mapped_column(
         String(20),
         default="active",
@@ -192,8 +193,12 @@ class Goal(Base, TimestampMixin):
         return (self.current_amount / self.target_amount) * 100
 
     @property
-    def status(self) -> str:
-        """Calculate goal status based on progress and success probability"""
+    def progress_status(self) -> str:
+        """Calculate goal progress status based on progress and success probability
+
+        Note: This is different from the 'status' column which tracks lifecycle status.
+        This property returns tracking status: achieved, on_track, behind, at_risk
+        """
         if self.progress_percentage >= 100:
             return "achieved"
 
