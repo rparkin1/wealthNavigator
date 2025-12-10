@@ -18,7 +18,7 @@ import type {
   SupportedVariablesResponse,
 } from '../types/sensitivityAnalysis';
 
-const BASE_URL = '/api/v1/sensitivity-analysis';
+const BASE_URL = '/sensitivity-analysis';
 
 /**
  * Sensitivity Analysis API Client
