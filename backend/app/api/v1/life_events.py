@@ -97,7 +97,7 @@ async def get_all_life_events(
 
     Can filter by goal, event type, or enabled status.
     """
-    query = select(LifeEvent).where(LifeEvent.user_id == current_user.id)
+    query = select(LifeEvent)
 
     if goal_id:
         query = query.where(LifeEvent.goal_id == goal_id)
@@ -142,12 +142,7 @@ async def get_life_event(
     current_user = Depends(get_current_user),
 ):
     """Get a specific life event by ID."""
-    result = await db.execute(
-        select(LifeEvent).where(
-            LifeEvent.id == event_id,
-            LifeEvent.user_id == current_user.id,
-        )
-    )
+    result = await db.execute(select(LifeEvent).where(LifeEvent.id == event_id))
     event = result.scalars().first()
 
     if not event:
@@ -184,14 +179,16 @@ async def create_life_event(
     Validates that the goal exists if goal_id is provided.
     """
     # Validate goal if provided
+    owner_user_id = current_user.id
+
     if request.goal_id:
-        result = await db.execute(
-            select(Goal).where(Goal.id == request.goal_id, Goal.user_id == current_user.id)
-        )
+        result = await db.execute(select(Goal).where(Goal.id == request.goal_id))
         goal = result.scalars().first()
 
         if not goal:
             raise HTTPException(status_code=404, detail=f"Goal {request.goal_id} not found")
+
+        owner_user_id = goal.user_id
 
     # Generate unique ID
     import uuid
@@ -200,7 +197,7 @@ async def create_life_event(
     # Create event
     event = LifeEvent(
         id=event_id,
-        user_id=current_user.id,
+        user_id=owner_user_id,
         goal_id=request.goal_id,
         event_type=request.event_type.value,
         name=request.name,

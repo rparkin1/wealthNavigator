@@ -6,7 +6,8 @@ for stress testing and what-if analysis.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
@@ -58,7 +59,7 @@ class ScenarioResultResponse(BaseModel):
 class CompareRequest(BaseModel):
     """Request to compare multiple scenarios"""
     goal_id: str
-    scenario_ids: List[str] = Field(..., min_items=2, max_items=5)
+    scenario_ids: List[str] = Field(..., min_length=2, max_length=5)
     initial_portfolio_value: float = Field(..., gt=0)
     monthly_contribution: float = Field(default=0, ge=0)
 
@@ -67,7 +68,7 @@ class CompareRequest(BaseModel):
 async def get_all_scenarios(
     featured_only: bool = Query(False, description="Only return featured scenarios"),
     active_only: bool = Query(True, description="Only return active scenarios"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user),
 ):
     """
@@ -86,7 +87,7 @@ async def get_all_scenarios(
 @router.get("/scenarios/{scenario_id}")
 async def get_scenario_detail(
     scenario_id: str,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user),
 ):
     """
@@ -123,7 +124,7 @@ async def get_scenario_detail(
 async def apply_scenario(
     scenario_id: str,
     request: ApplyScenarioRequest,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user),
 ):
     """
@@ -134,10 +135,12 @@ async def apply_scenario(
     service = HistoricalScenarioService(db)
 
     # Fetch goal
-    goal = db.query(Goal).filter(
+    stmt = select(Goal).where(
         Goal.id == request.goal_id,
-        Goal.user_id == current_user.id
-    ).first()
+        Goal.user_id == current_user.id,
+    )
+    result = await db.execute(stmt)
+    goal = result.scalars().first()
 
     if not goal:
         raise HTTPException(status_code=404, detail=f"Goal {request.goal_id} not found")
@@ -159,7 +162,7 @@ async def apply_scenario(
 @router.post("/scenarios/compare")
 async def compare_scenarios(
     request: CompareRequest,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user),
 ):
     """
@@ -170,10 +173,12 @@ async def compare_scenarios(
     service = HistoricalScenarioService(db)
 
     # Fetch goal
-    goal = db.query(Goal).filter(
+    stmt = select(Goal).where(
         Goal.id == request.goal_id,
-        Goal.user_id == current_user.id
-    ).first()
+        Goal.user_id == current_user.id,
+    )
+    result = await db.execute(stmt)
+    goal = result.scalars().first()
 
     if not goal:
         raise HTTPException(status_code=404, detail=f"Goal {request.goal_id} not found")
@@ -193,7 +198,7 @@ async def compare_scenarios(
 @router.get("/scenarios/{scenario_id}/statistics")
 async def get_scenario_statistics(
     scenario_id: str,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user),
 ):
     """
@@ -214,7 +219,7 @@ async def get_scenario_statistics(
 
 @router.post("/scenarios/initialize")
 async def initialize_default_scenarios(
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user),  # Should be admin only
 ):
     """

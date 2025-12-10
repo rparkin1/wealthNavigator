@@ -1,42 +1,19 @@
-"""SQLAlchemy database models."""
+"""SQLAlchemy database models.
+
+DEPRECATED: This file contains legacy model definitions.
+New code should use the models in app/models/ instead.
+
+Thread and Message models have been moved to app.models.thread_db
+"""
 from datetime import datetime
 from sqlalchemy import Column, String, Integer, Float, DateTime, Boolean, JSON, ForeignKey, Enum as SQLEnum
 from sqlalchemy.orm import relationship
-from app.core.database import Base
+from app.models.base import Base
 from app.models.thread import GoalCategory, MessageRole
 import enum
 
 
-class Thread(Base):
-    """Thread database model."""
-    __tablename__ = "threads"
-
-    id = Column(String, primary_key=True)
-    title = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-    deleted_at = Column(DateTime, nullable=True)
-    goal_types = Column(JSON, default=list)
-
-    # Relationships
-    messages = relationship("Message", back_populates="thread", cascade="all, delete-orphan")
-    goals = relationship("Goal", back_populates="thread", cascade="all, delete-orphan")
-
-
-class Message(Base):
-    """Message database model."""
-    __tablename__ = "messages"
-
-    id = Column(String, primary_key=True)
-    thread_id = Column(String, ForeignKey("threads.id"), nullable=False)
-    role = Column(SQLEnum(MessageRole), nullable=False)
-    content = Column(String, nullable=False)
-    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
-    agent_id = Column(String, nullable=True)
-    msg_metadata = Column(JSON, nullable=True)
-
-    # Relationships
-    thread = relationship("Thread", back_populates="messages")
+# Thread and Message models removed - use app.models.thread_db instead
 
 
 class Goal(Base):

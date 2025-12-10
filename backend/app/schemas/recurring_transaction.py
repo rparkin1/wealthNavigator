@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Optional, List
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
 class RecurringTransactionBase(BaseModel):
@@ -86,8 +86,7 @@ class RecurringTransactionResponse(RecurringTransactionBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RecurringTransactionsList(BaseModel):
@@ -126,5 +125,4 @@ class RecurringTransactionHistoryResponse(BaseModel):
     was_manual: bool
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

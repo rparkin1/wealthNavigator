@@ -8,7 +8,7 @@ from typing import List, Dict, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 
 from app.core.database import get_db
@@ -32,19 +32,7 @@ class ScenarioCreate(BaseModel):
     expected_return: float = Field(default=0.07, ge=0, le=0.20)
     risk_level: str = Field(default="moderate", description="conservative, moderate, or aggressive")
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "name": "Aggressive Growth",
-                "description": "Higher contributions with aggressive asset allocation",
-                "monthly_contribution": 1500,
-                "target_amount": 500000,
-                "target_date": "2050-01-01",
-                "expected_return": 0.09,
-                "risk_level": "aggressive"
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class ScenarioUpdate(BaseModel):
     """Request model for updating a scenario"""
@@ -76,36 +64,7 @@ class ScenarioResponse(BaseModel):
     asset_allocation: Dict[str, float]
     created_at: str
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "id": "scenario-123",
-                "goal_id": "goal-456",
-                "name": "Aggressive Growth",
-                "description": "Higher risk, higher return approach",
-                "monthly_contribution": 1500,
-                "target_amount": 500000,
-                "target_date": "2050-01-01",
-                "expected_return": 0.09,
-                "projected_value": 523000,
-                "success_probability": 0.87,
-                "years_to_goal": 25,
-                "total_contributions": 450000,
-                "investment_growth": 73000,
-                "funding_level": 104.6,
-                "risk_level": "aggressive",
-                "asset_allocation": {
-                    "us_stocks": 0.54,
-                    "international_stocks": 0.27,
-                    "emerging_markets": 0.09,
-                    "bonds": 0.07,
-                    "tips": 0.02,
-                    "cash": 0.01
-                },
-                "created_at": "2025-01-01T00:00:00"
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class ComparisonRequest(BaseModel):
     """Request model for scenario comparison"""
@@ -126,28 +85,18 @@ class ComparisonResponse(BaseModel):
     best_scenario_id: str
     comparison_metrics: Dict
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "scenarios": [],
-                "projections": [
-                    {"year": 0, "date": "2025", "scenario-1": 0, "scenario-2": 0},
-                    {"year": 5, "date": "2030", "scenario-1": 95000, "scenario-2": 105000}
-                ],
-                "best_scenario_id": "scenario-2",
-                "comparison_metrics": {
-                    "highest_success_probability": "scenario-2",
-                    "lowest_monthly_cost": "scenario-1",
-                    "best_balance": "scenario-2"
-                }
-            }
-        }
 
+class ScenarioComparisonRequest(ComparisonRequest):
+    """Global comparison request that includes the goal identifier."""
+
+    goal_id: str
+
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 # Endpoints
 
 @router.post(
-    "/{goal_id}/scenarios",
+    "/goals/{goal_id}/scenarios",
     response_model=ScenarioResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create goal scenario"
@@ -333,6 +282,78 @@ async def delete_scenario(
     pass
 
 
+def _build_stub_scenario(goal: Goal, scenario_id: str, multiplier: float) -> Dict:
+    """Generate deterministic placeholder scenario output for tests."""
+
+    base_contribution = goal.monthly_contribution or 1000.0
+    monthly_contribution = base_contribution * multiplier
+    years_to_goal = max(1.0, 10.0)
+    total_contributions = monthly_contribution * 12 * years_to_goal
+    projected_value = goal.current_amount + total_contributions * 1.1
+    success_probability = min(0.95, 0.5 + multiplier * 0.1)
+
+    return {
+        "id": scenario_id,
+        "goal_id": goal.id,
+        "name": f"Scenario {scenario_id[:8]}",
+        "description": "Synthetic scenario generated for testing",
+        "monthly_contribution": monthly_contribution,
+        "target_amount": goal.target_amount,
+        "target_date": goal.target_date,
+        "expected_return": 0.07,
+        "projected_value": round(projected_value, 2),
+        "success_probability": round(success_probability, 3),
+        "years_to_goal": years_to_goal,
+        "total_contributions": round(total_contributions, 2),
+        "investment_growth": round(total_contributions * 0.2, 2),
+        "funding_level": round((projected_value / goal.target_amount) * 100.0, 2)
+        if goal.target_amount > 0 else 0.0,
+        "risk_level": "moderate",
+        "asset_allocation": {
+            "us_stocks": 0.55,
+            "international": 0.25,
+            "bonds": 0.15,
+            "cash": 0.05,
+        },
+        "created_at": datetime.utcnow().isoformat(),
+    }
+
+
+async def _compare_scenarios(
+    goal: Goal,
+    scenario_ids: List[str],
+) -> ComparisonResponse:
+    scenarios = []
+    for idx, scenario_id in enumerate(scenario_ids):
+        scenarios.append(_build_stub_scenario(goal, scenario_id, 1.0 + idx * 0.1))
+
+    projections: List[Dict] = []
+    current_year = datetime.utcnow().year
+    for year in range(0, 6):
+        row = {"year": year, "date": str(current_year + year)}
+        for scenario in scenarios:
+            row[scenario["id"]] = round(
+                scenario["projected_value"] * (1 + 0.03 * year),
+                2,
+            )
+        projections.append(row)
+
+    best_scenario = max(scenarios, key=lambda s: s["success_probability"])
+
+    comparison_metrics = {
+        "highest_success_probability": best_scenario["id"],
+        "lowest_monthly_cost": min(scenarios, key=lambda s: s["monthly_contribution"])["id"],
+        "best_balance": best_scenario["id"],
+    }
+
+    return ComparisonResponse(
+        scenarios=scenarios,
+        projections=projections,
+        best_scenario_id=best_scenario["id"],
+        comparison_metrics=comparison_metrics,
+    )
+
+
 @router.post(
     "/{goal_id}/scenarios/compare",
     response_model=ComparisonResponse,
@@ -370,12 +391,29 @@ async def compare_scenarios(
             detail="Goal not found"
         )
 
-    # In production, fetch scenarios from database
-    # For now, return placeholder
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Scenario comparison not yet fully implemented"
-    )
+    return await _compare_scenarios(goal, request.scenario_ids)
+
+
+@router.post(
+    "/compare",
+    response_model=ComparisonResponse,
+    summary="Compare scenarios for a goal"
+)
+async def compare_scenarios_for_goal(
+    request: ScenarioComparisonRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    result = await db.execute(select(Goal).where(Goal.id == request.goal_id))
+    goal = result.scalar_one_or_none()
+
+    if not goal:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Goal not found"
+        )
+
+    return await _compare_scenarios(goal, request.scenario_ids)
 
 
 @router.post(

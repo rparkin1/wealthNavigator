@@ -46,6 +46,8 @@ from app.tools.performance_tracker import (
     generate_performance_report
 )
 import numpy as np
+from app.models.user import User
+from app.api.deps import get_current_user
 
 
 router = APIRouter(prefix="/portfolio", tags=["portfolio"])
@@ -203,6 +205,7 @@ def get_sample_asset_class_returns(user_id: str) -> dict:
 )
 async def analyze_tax_loss_harvesting(
     request: TaxLossHarvestRequest,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ) -> TaxLossHarvestResponse:
     """
@@ -213,8 +216,8 @@ async def analyze_tax_loss_harvesting(
     """
     try:
         # Get holdings and transactions (from database in production)
-        holdings = get_sample_holdings(request.user_id)
-        transactions = get_sample_transactions(request.user_id)
+        holdings = get_sample_holdings(current_user.id)
+        transactions = get_sample_transactions(current_user.id)
 
         # Run analysis
         tlh_strategy = await identify_tax_loss_harvesting_opportunities(
@@ -286,6 +289,7 @@ async def analyze_tax_loss_harvesting(
 )
 async def analyze_rebalancing(
     request: RebalanceRequest,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ) -> RebalanceResponse:
     """
@@ -296,9 +300,9 @@ async def analyze_rebalancing(
     """
     try:
         # Get portfolio data (from database in production)
-        target_allocation = get_sample_allocation(request.user_id)
-        current_holdings = get_sample_current_holdings(request.user_id)
-        account_breakdown = get_sample_account_breakdown(request.user_id)
+        target_allocation = get_sample_allocation(current_user.id)
+        current_holdings = get_sample_current_holdings(current_user.id)
+        account_breakdown = get_sample_account_breakdown(current_user.id)
 
         # Run analysis
         rebalancing_strategy = await generate_rebalancing_strategy(
@@ -367,6 +371,7 @@ async def analyze_rebalancing(
 )
 async def analyze_performance(
     request: PerformanceRequest,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ) -> PerformanceResponse:
     """
@@ -377,13 +382,13 @@ async def analyze_performance(
     """
     try:
         # Get portfolio data (from database in production)
-        historical_values = get_sample_historical_values(request.user_id)
-        asset_class_returns = get_sample_asset_class_returns(request.user_id)
-        asset_weights = get_sample_allocation(request.user_id)
+        historical_values = get_sample_historical_values(current_user.id)
+        asset_class_returns = get_sample_asset_class_returns(current_user.id)
+        asset_weights = get_sample_allocation(current_user.id)
 
         # Run analysis
         performance_report = await generate_performance_report(
-            portfolio_id=request.portfolio_id or request.user_id,
+            portfolio_id=request.portfolio_id or current_user.id,
             historical_values=historical_values,
             asset_class_returns=asset_class_returns,
             asset_weights=asset_weights
@@ -452,6 +457,7 @@ async def analyze_performance(
 async def analyze_comprehensive(
     request: ComprehensiveAnalysisRequest,
     background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ) -> ComprehensiveAnalysisResponse:
     """
@@ -473,11 +479,12 @@ async def analyze_comprehensive(
         # Run requested analyses
         if "tax_loss_harvesting" in [at.value for at in request.analysis_types]:
             tlh_req = TaxLossHarvestRequest(
-                user_id=request.user_id,
+                user_id=current_user.id,
                 portfolio_id=request.portfolio_id,
                 tax_rate=request.tax_rate
             )
-            tlh_result = await analyze_tax_loss_harvesting(tlh_req, db)
+            # Call endpoint handler directly - Depends() defaults are ignored when args provided
+            tlh_result = await analyze_tax_loss_harvesting(tlh_req, current_user, db)
 
             if tlh_result.opportunities_count > 0:
                 recommendations.append(
@@ -487,12 +494,13 @@ async def analyze_comprehensive(
 
         if "rebalancing" in [at.value for at in request.analysis_types]:
             rebal_req = RebalanceRequest(
-                user_id=request.user_id,
+                user_id=current_user.id,
                 portfolio_id=request.portfolio_id,
                 drift_threshold=request.drift_threshold,
                 tax_rate=request.tax_rate
             )
-            rebalancing_result = await analyze_rebalancing(rebal_req, db)
+            # Call endpoint handler directly - Depends() defaults are ignored when args provided
+            rebalancing_result = await analyze_rebalancing(rebal_req, current_user, db)
 
             if rebalancing_result.needs_rebalancing:
                 recommendations.append(
@@ -502,10 +510,11 @@ async def analyze_comprehensive(
 
         if "performance" in [at.value for at in request.analysis_types]:
             perf_req = PerformanceRequest(
-                user_id=request.user_id,
+                user_id=current_user.id,
                 portfolio_id=request.portfolio_id
             )
-            performance_result = await analyze_performance(perf_req, db)
+            # Call endpoint handler directly - Depends() defaults are ignored when args provided
+            performance_result = await analyze_performance(perf_req, current_user, db)
 
             recommendations.append(
                 f"YTD return: {performance_result.ytd_return:.2f}% "

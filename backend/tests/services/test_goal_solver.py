@@ -26,6 +26,9 @@ def mock_goal():
     goal.years_to_goal = 20
     goal.expected_return_annual = 0.07
     goal.risk_tolerance = 0.6
+    goal.current_age = 40
+    goal.retirement_age = 65
+    goal.life_expectancy = 90
     return goal
 
 

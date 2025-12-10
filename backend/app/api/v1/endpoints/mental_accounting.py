@@ -8,7 +8,7 @@ from typing import List, Dict, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from app.core.database import get_db
 from app.models.goal import Goal
@@ -27,16 +27,7 @@ class DedicatedAccount(BaseModel):
     contribution_rate: float = Field(default=0, ge=0, description="Monthly contribution")
     allocation_percentage: float = Field(default=100, ge=0, le=100)
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "account_id": "acc-123",
-                "balance": 50000,
-                "contribution_rate": 1000,
-                "allocation_percentage": 100
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class MentalAccountRequest(BaseModel):
     """Request to create mental account bucket"""
@@ -45,23 +36,7 @@ class MentalAccountRequest(BaseModel):
     expected_return: float = Field(default=0.07, ge=0, le=0.20)
     return_volatility: float = Field(default=0.15, ge=0, le=0.50)
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "goal_id": "goal-123",
-                "dedicated_accounts": [
-                    {
-                        "account_id": "acc-401k",
-                        "balance": 100000,
-                        "contribution_rate": 1500,
-                        "allocation_percentage": 60
-                    }
-                ],
-                "expected_return": 0.07,
-                "return_volatility": 0.15
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class AccountAllocationRequest(BaseModel):
     """Request to allocate account to goal"""
@@ -70,16 +45,7 @@ class AccountAllocationRequest(BaseModel):
     allocation_percentage: float = Field(..., ge=0, le=100)
     monthly_contribution: float = Field(..., ge=0)
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "goal_id": "goal-123",
-                "account_id": "acc-401k",
-                "allocation_percentage": 60,
-                "monthly_contribution": 1500
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class RebalancingRequest(BaseModel):
     """Request for rebalancing analysis"""

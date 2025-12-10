@@ -33,15 +33,18 @@ class HistoricalScenarioService:
         Returns:
             List of scenario metadata (without full return data)
         """
-        query = self.db.query(HistoricalScenario)
+        stmt = select(HistoricalScenario)
 
         if active_only:
-            query = query.filter(HistoricalScenario.is_active == True)
+            stmt = stmt.where(HistoricalScenario.is_active.is_(True))
 
         if featured_only:
-            query = query.filter(HistoricalScenario.is_featured == True)
+            stmt = stmt.where(HistoricalScenario.is_featured.is_(True))
 
-        scenarios = query.order_by(HistoricalScenario.start_date.desc()).all()
+        stmt = stmt.order_by(HistoricalScenario.start_date.desc())
+
+        result = await self.db.execute(stmt)
+        scenarios = result.scalars().all()
 
         return [
             {
@@ -71,9 +74,9 @@ class HistoricalScenarioService:
         Returns:
             Full scenario object with return data
         """
-        return self.db.query(HistoricalScenario).filter(
-            HistoricalScenario.id == scenario_id
-        ).first()
+        stmt = select(HistoricalScenario).where(HistoricalScenario.id == scenario_id)
+        result = await self.db.execute(stmt)
+        return result.scalars().first()
 
     async def apply_scenario_to_goal(
         self,
@@ -133,14 +136,25 @@ class HistoricalScenarioService:
 
         # Calculate metrics
         final_value = portfolio_values[-1]
-        total_return = (final_value - initial_portfolio_value) / initial_portfolio_value
+
+        # Protect against division by zero
+        if initial_portfolio_value > 0:
+            total_return = (final_value - initial_portfolio_value) / initial_portfolio_value
+        else:
+            total_return = 0.0
+
         max_value = max(portfolio_values)
         min_value = min(portfolio_values)
-        drawdown = (min_value - max_value) / max_value if max_value > 0 else 0
+
+        # Fixed: Drawdown should be (max - min) / max, not (min - max) / max
+        if max_value > 0:
+            drawdown = (max_value - min_value) / max_value
+        else:
+            drawdown = 0.0
 
         # Increment usage counter
         scenario.usage_count += 1
-        self.db.commit()
+        await self.db.commit()
 
         return {
             "scenario_id": scenario_id,

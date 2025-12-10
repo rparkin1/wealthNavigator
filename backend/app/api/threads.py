@@ -2,12 +2,12 @@
 from typing import List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import uuid4
 
 from app.core.database import get_db
 from app.models.thread import ThreadCreate, ThreadResponse, MessageCreate, MessageResponse
-from app.models import database_models as db_models
+from app.models.thread_db import Thread, Message
 
 router = APIRouter(prefix="/threads", tags=["threads"])
 
@@ -17,7 +17,7 @@ async def list_threads(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
     include_deleted: bool = Query(False),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     List all conversation threads.
@@ -26,12 +26,12 @@ async def list_threads(
     - **limit**: Maximum number of threads to return
     - **include_deleted**: Include soft-deleted threads
     """
-    query = db.query(db_models.Thread)
+    query = db.query(Thread)
 
     if not include_deleted:
-        query = query.filter(db_models.Thread.deleted_at.is_(None))
+        query = query.filter(Thread.deleted_at.is_(None))
 
-    threads = query.order_by(db_models.Thread.updated_at.desc()).offset(skip).limit(limit).all()
+    threads = query.order_by(Thread.updated_at.desc()).offset(skip).limit(limit).all()
 
     # Convert to response model
     return [
@@ -50,7 +50,7 @@ async def list_threads(
 @router.post("/", response_model=ThreadResponse, status_code=201)
 async def create_thread(
     thread_data: Optional[ThreadCreate] = None,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Create a new conversation thread.
@@ -60,7 +60,7 @@ async def create_thread(
     thread_id = str(uuid4())
     title = thread_data.title if thread_data and thread_data.title else "New Conversation"
 
-    db_thread = db_models.Thread(
+    db_thread = Thread(
         id=thread_id,
         title=title,
         created_at=datetime.utcnow(),
@@ -85,14 +85,14 @@ async def create_thread(
 @router.get("/{thread_id}", response_model=ThreadResponse)
 async def get_thread(
     thread_id: str,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Get a specific thread by ID.
 
     - **thread_id**: The UUID of the thread
     """
-    thread = db.query(db_models.Thread).filter(db_models.Thread.id == thread_id).first()
+    thread = db.query(Thread).filter(Thread.id == thread_id).first()
 
     if not thread:
         raise HTTPException(status_code=404, detail="Thread not found")
@@ -114,7 +114,7 @@ async def get_thread(
 async def update_thread(
     thread_id: str,
     thread_data: ThreadCreate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Update a thread's title.
@@ -122,7 +122,7 @@ async def update_thread(
     - **thread_id**: The UUID of the thread
     - **title**: New title for the thread
     """
-    thread = db.query(db_models.Thread).filter(db_models.Thread.id == thread_id).first()
+    thread = db.query(Thread).filter(Thread.id == thread_id).first()
 
     if not thread:
         raise HTTPException(status_code=404, detail="Thread not found")
@@ -150,7 +150,7 @@ async def update_thread(
 async def delete_thread(
     thread_id: str,
     permanent: bool = Query(False),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Delete a thread (soft delete by default).
@@ -158,7 +158,7 @@ async def delete_thread(
     - **thread_id**: The UUID of the thread
     - **permanent**: If true, permanently delete. Otherwise soft delete.
     """
-    thread = db.query(db_models.Thread).filter(db_models.Thread.id == thread_id).first()
+    thread = db.query(Thread).filter(Thread.id == thread_id).first()
 
     if not thread:
         raise HTTPException(status_code=404, detail="Thread not found")
@@ -177,21 +177,21 @@ async def delete_thread(
 @router.get("/{thread_id}/messages", response_model=List[MessageResponse])
 async def list_messages(
     thread_id: str,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Get all messages in a thread.
 
     - **thread_id**: The UUID of the thread
     """
-    thread = db.query(db_models.Thread).filter(db_models.Thread.id == thread_id).first()
+    thread = db.query(Thread).filter(Thread.id == thread_id).first()
 
     if not thread:
         raise HTTPException(status_code=404, detail="Thread not found")
 
-    messages = db.query(db_models.Message).filter(
-        db_models.Message.thread_id == thread_id
-    ).order_by(db_models.Message.timestamp.asc()).all()
+    messages = db.query(Message).filter(
+        Message.thread_id == thread_id
+    ).order_by(Message.timestamp.asc()).all()
 
     return [
         MessageResponse(
@@ -211,7 +211,7 @@ async def list_messages(
 async def create_message(
     thread_id: str,
     message_data: MessageCreate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Add a message to a thread.
@@ -220,7 +220,7 @@ async def create_message(
     - **role**: Message role (user, assistant, system)
     - **content**: Message content
     """
-    thread = db.query(db_models.Thread).filter(db_models.Thread.id == thread_id).first()
+    thread = db.query(Thread).filter(Thread.id == thread_id).first()
 
     if not thread:
         raise HTTPException(status_code=404, detail="Thread not found")
@@ -230,7 +230,7 @@ async def create_message(
 
     message_id = str(uuid4())
 
-    db_message = db_models.Message(
+    db_message = Message(
         id=message_id,
         thread_id=thread_id,
         role=message_data.role,

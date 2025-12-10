@@ -8,7 +8,7 @@ from typing import List, Optional, Dict
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from app.core.database import get_db
 from app.services.multi_goal_optimizer import MultiGoalOptimizer
@@ -26,15 +26,7 @@ class AccountInfo(BaseModel):
     type: str = Field(..., description="Account type: taxable, tax_deferred, tax_exempt, depository, credit")
     balance: float = Field(..., ge=0)
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "id": "account-123",
-                "type": "tax_deferred",
-                "balance": 150000
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class OptimizationRequest(BaseModel):
     """Request model for multi-goal optimization"""
@@ -42,19 +34,7 @@ class OptimizationRequest(BaseModel):
     accounts: List[AccountInfo] = Field(..., min_length=1, description="List of accounts with balances")
     total_portfolio_value: Optional[float] = Field(None, ge=0, description="Override total portfolio value")
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "goal_ids": ["goal-123", "goal-456", "goal-789"],
-                "accounts": [
-                    {"id": "account-1", "type": "taxable", "balance": 50000},
-                    {"id": "account-2", "type": "tax_deferred", "balance": 150000},
-                    {"id": "account-3", "type": "tax_exempt", "balance": 75000}
-                ],
-                "total_portfolio_value": 275000
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class GoalPortfolio(BaseModel):
     """Portfolio allocation for a single goal"""
@@ -92,53 +72,7 @@ class OptimizationResponse(BaseModel):
     aggregate_stats: AggregateStats
     optimization_summary: Dict
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "goal_allocations": {
-                    "goal-123": 150000,
-                    "goal-456": 80000,
-                    "goal-789": 45000
-                },
-                "goal_portfolios": [
-                    {
-                        "goal_id": "goal-123",
-                        "goal_title": "Retirement",
-                        "allocated_amount": 150000,
-                        "years_to_goal": 25,
-                        "risk_tolerance": 0.8,
-                        "allocation": {
-                            "us_stocks": 0.48,
-                            "international_stocks": 0.24,
-                            "bonds": 0.14
-                        },
-                        "expected_return": 0.078,
-                        "expected_risk": 0.142,
-                        "sharpe_ratio": 0.268
-                    }
-                ],
-                "account_allocations": [
-                    {
-                        "account_id": "account-1",
-                        "allocations": {"us_stocks": 30000, "international_stocks": 20000}
-                    }
-                ],
-                "aggregate_stats": {
-                    "total_value": 275000,
-                    "weighted_return": 0.071,
-                    "weighted_risk": 0.135,
-                    "sharpe_ratio": 0.230,
-                    "aggregate_allocation": {"us_stocks": 0.45, "bonds": 0.30}
-                },
-                "optimization_summary": {
-                    "total_goals": 3,
-                    "fully_funded_goals": 1,
-                    "partially_funded_goals": 2,
-                    "unfunded_goals": 0
-                }
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class RebalanceRequest(BaseModel):
     """Request model for portfolio rebalancing"""
@@ -146,18 +80,7 @@ class RebalanceRequest(BaseModel):
     target_allocations: Dict[str, Dict[str, float]] = Field(..., description="Target allocation per goal")
     minimize_taxes: bool = Field(default=True, description="Minimize tax impact during rebalancing")
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "user_id": "user-123",
-                "target_allocations": {
-                    "goal-123": {"us_stocks": 0.60, "bonds": 0.40},
-                    "goal-456": {"us_stocks": 0.80, "bonds": 0.20}
-                },
-                "minimize_taxes": True
-            }
-        }
-
+    model_config = ConfigDict(from_attributes=True, json_schema_extra=json_schema_extra) if "json_schema_extra" in dir() else ConfigDict(from_attributes=True)
 
 class RebalanceResponse(BaseModel):
     """Response model for rebalancing recommendations"""
