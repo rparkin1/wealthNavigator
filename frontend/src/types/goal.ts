@@ -51,3 +51,15 @@ export interface GoalProgress {
   percentComplete: number;
   successProbability: number;
 }
+
+// Explicit type re-exports for Vite/TypeScript compatibility
+export type {
+  FundingSource,
+  Goal,
+  GoalCategory,
+  GoalPriority,
+  GoalProgress,
+  GoalProjections,
+  GoalStatus,
+  GoalTimeline,
+};

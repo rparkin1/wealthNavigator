@@ -260,3 +260,31 @@ export type {
   ThresholdChartPoint,
   BreakEvenChartPoint,
 };
+
+// Explicit type re-exports for Vite/TypeScript compatibility
+export type {
+  AnalysisConfig,
+  AnalysisType,
+  BreakEvenAnalysisRequest,
+  BreakEvenAnalysisResult,
+  BreakEvenChartPoint,
+  BreakEvenDelta,
+  BreakEvenPoint,
+  export type {,
+  HeatmapCell,
+  OneWaySensitivityRequest,
+  OneWaySensitivityResult,
+  SensitivityAnalysisBaseProps,
+  SensitivityAnalysisState,
+  SensitivityVariable,
+  SupportedVariablesResponse,
+  ThresholdAnalysisRequest,
+  ThresholdAnalysisResult,
+  ThresholdChartPoint,
+  TornadoChartDatum,
+  TwoWaySensitivityRequest,
+  TwoWaySensitivityResult,
+  VariableImpact,
+  VariableInfo,
+  VariableSelectOption,
+};

@@ -226,3 +226,30 @@ export interface GiftingStrategyForm {
   years: number;
   expectedReturn: number;
 }
+
+// Explicit type re-exports for Vite/TypeScript compatibility
+export type {
+  Beneficiary,
+  BeneficiaryAccount,
+  BeneficiaryOptimizationRequest,
+  BeneficiaryOptimizationResponse,
+  BeneficiaryStrategy,
+  EstatePlanningState,
+  EstateTaxCalculation,
+  EstateTaxCalculationRequest,
+  EstateTaxForm,
+  EstateTaxRatesResponse,
+  FundingStrategy,
+  GiftingStrategyAnalysis,
+  GiftingStrategyForm,
+  GiftingStrategyRequest,
+  LegacyGoalAnalysis,
+  LegacyGoalForm,
+  LegacyGoalRequest,
+  StateTaxInfo,
+  TrustRecommendationForm,
+  TrustRecommendationRequest,
+  TrustRecommendationsResponse,
+  TrustStructure,
+  TrustTypesResponse,
+};

@@ -55,3 +55,14 @@ export interface ThreadFilters {
   goalType?: GoalCategory;
   search?: string;
 }
+
+// Explicit type re-exports for Vite/TypeScript compatibility
+export type {
+  GoalCategory,
+  Message,
+  MessageMetadata,
+  Thread,
+  ThreadCategory,
+  ThreadFilters,
+  ThreadListItem,
+};

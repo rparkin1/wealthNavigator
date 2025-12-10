@@ -139,3 +139,18 @@ export interface CAPMAnalysisState {
   loading: boolean;
   error: string | null;
 }
+
+// Explicit type re-exports for Vite/TypeScript compatibility
+export type {
+  CAPMAnalysisRequest,
+  CAPMAnalysisState,
+  CAPMMetrics,
+  CAPMPortfolioRequest,
+  CAPMPortfolioResponse,
+  FactorAnalysisRequest,
+  FactorAnalysisResponse,
+  FactorAnalysisState,
+  FactorAttribution,
+  FactorExposure,
+  SecurityMarketLineResponse,
+};
