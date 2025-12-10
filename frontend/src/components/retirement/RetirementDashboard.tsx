@@ -14,6 +14,7 @@ import { SpendingPatternEditor } from './SpendingPatternEditor';
 import { LongevityConfigurator } from './LongevityConfigurator';
 import { IncomeProjection } from './IncomeProjection';
 import { useIncomeProjection } from '../../hooks/useIncomeProjection';
+import { useUser } from '../../hooks/useUser';
 import type {
   SocialSecurityResult,
   SpendingPattern,
@@ -23,6 +24,17 @@ import type {
 } from '../../services/retirementApi';
 
 type TabView = 'overview' | 'social-security' | 'spending' | 'longevity' | 'projections';
+
+// Local interface for camelCase pattern from SpendingPatternEditor
+interface SpendingPatternCamelCase {
+  baseAnnualSpending: number;
+  goGoMultiplier: number;
+  slowGoMultiplier: number;
+  noGoMultiplier: number;
+  healthcareAnnual: number;
+  healthcareGrowthRate: number;
+  majorExpenses: Array<{ year: number; amount: number; description: string }>;
+}
 
 export function RetirementDashboard() {
   const [activeTab, setActiveTab] = useState<TabView>('overview');
@@ -96,8 +108,18 @@ export function RetirementDashboard() {
           {activeTab === 'spending' && (
             <div className="card">
               <SpendingPatternEditor
-                onChange={(pattern: Record<number, number>) => {
-                  setSpendingPattern({ base_annual_spending: Object.values(pattern)[0] || 0 });
+                onChange={(pattern: SpendingPatternCamelCase) => {
+                  // Convert camelCase to snake_case for API
+                  const apiPattern: SpendingPattern = {
+                    base_annual_spending: pattern.baseAnnualSpending,
+                    go_go_multiplier: pattern.goGoMultiplier,
+                    slow_go_multiplier: pattern.slowGoMultiplier,
+                    no_go_multiplier: pattern.noGoMultiplier,
+                    healthcare_annual: pattern.healthcareAnnual,
+                    healthcare_growth_rate: pattern.healthcareGrowthRate,
+                    major_expenses: pattern.majorExpenses,
+                  };
+                  setSpendingPattern(apiPattern);
                   console.log('Spending pattern updated:', pattern);
                 }}
                 currentAge={65}
@@ -322,26 +344,33 @@ interface ProjectionsTabProps {
 }
 
 function ProjectionsTab({ socialSecurity, spending, longevity }: ProjectionsTabProps) {
+  // Get user profile for personalized data
+  const userProfile = useUser();
+
   // Build projection request from configured data
+  // NOTE: initial_portfolio is now optional - backend will fetch actual portfolio value from Plaid
   const projectionRequest: RetirementProjectionRequest | null =
     socialSecurity && spending && longevity
       ? {
-          current_age: 65, // Default - should be from user profile
-          retirement_age: 65,
+          user_id: userProfile.userId, // ✅ Now uses actual user ID from localStorage
+          current_age: userProfile.age || 65, // ✅ Now uses user's actual age
+          retirement_age: userProfile.retirementAge || 65,
           social_security: {
-            primary_insurance_amount: socialSecurity.monthly_benefit * 12,
-            birth_year: new Date().getFullYear() - 65, // Default
-            filing_age: 65,
-            cola_rate: 0.02,
+            primary_insurance_amount: socialSecurity.primary_insurance_amount,
+            birth_year: socialSecurity.birth_year,
+            filing_age: socialSecurity.filing_age,
+            cola_rate: socialSecurity.cola_rate,
           },
+          pension_annual: 0,
           spending_pattern: spending,
           portfolio_withdrawal_rate: 0.04, // 4% rule
-          initial_portfolio: 1000000, // Default - should be from portfolio data
+          // initial_portfolio removed - backend fetches from Plaid automatically
+          expected_return: 0.07, // 7% expected annual return
           planning_age: longevity.planning_age,
         }
       : null;
 
-  const { projections, loading, error } = useIncomeProjection(projectionRequest);
+  const { projections, metadata, loading, error } = useIncomeProjection(projectionRequest);
 
   if (!socialSecurity || !spending || !longevity) {
     return (
@@ -417,11 +446,90 @@ function ProjectionsTab({ socialSecurity, spending, longevity }: ProjectionsTabP
 
   return (
     <div className="space-y-6">
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-        <p className="text-sm text-green-800">
-          ✓ All components configured! Your comprehensive retirement income projection is shown below.
-        </p>
-      </div>
+      {/* Portfolio Data Source Indicator */}
+      {metadata && (
+        <div
+          className={`rounded-lg p-4 border ${
+            metadata.portfolio_source === 'plaid'
+              ? 'bg-green-50 border-green-200'
+              : metadata.portfolio_source === 'default'
+              ? 'bg-yellow-50 border-yellow-200'
+              : 'bg-blue-50 border-blue-200'
+          }`}
+        >
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              {metadata.portfolio_source === 'plaid' ? (
+                <span className="text-2xl">✓</span>
+              ) : metadata.portfolio_source === 'default' ? (
+                <span className="text-2xl">⚠️</span>
+              ) : (
+                <span className="text-2xl">ℹ️</span>
+              )}
+            </div>
+            <div className="ml-3 flex-1">
+              <h3
+                className={`text-sm font-semibold ${
+                  metadata.portfolio_source === 'plaid'
+                    ? 'text-green-900'
+                    : metadata.portfolio_source === 'default'
+                    ? 'text-yellow-900'
+                    : 'text-blue-900'
+                }`}
+              >
+                {metadata.portfolio_source === 'plaid'
+                  ? 'Using Your Actual Portfolio'
+                  : metadata.portfolio_source === 'default'
+                  ? 'Using Default Portfolio Value'
+                  : 'Using Override Portfolio Value'}
+              </h3>
+              <div
+                className={`mt-1 text-sm ${
+                  metadata.portfolio_source === 'plaid'
+                    ? 'text-green-800'
+                    : metadata.portfolio_source === 'default'
+                    ? 'text-yellow-800'
+                    : 'text-blue-800'
+                }`}
+              >
+                {metadata.portfolio_source === 'plaid' ? (
+                  <>
+                    <p>
+                      Portfolio Value: <strong>${metadata.portfolio_value.toLocaleString()}</strong>
+                    </p>
+                    <p className="text-xs mt-1">
+                      ✓ Fetched from {metadata.accounts_count} connected Plaid account
+                      {metadata.accounts_count !== 1 ? 's' : ''}
+                    </p>
+                  </>
+                ) : metadata.portfolio_source === 'default' ? (
+                  <>
+                    <p>
+                      Using default: <strong>${metadata.portfolio_value.toLocaleString()}</strong>
+                    </p>
+                    <p className="text-xs mt-1">
+                      💡 Connect your investment accounts for accurate projections based on your
+                      actual portfolio value.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p>
+                      Override Value: <strong>${metadata.portfolio_value.toLocaleString()}</strong>
+                    </p>
+                    <p className="text-xs mt-1">
+                      Using manually specified portfolio value for this projection.
+                    </p>
+                  </>
+                )}
+                <p className="text-xs mt-1">
+                  Expected Return: {(metadata.expected_return * 100).toFixed(1)}% annually
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <IncomeProjection projections={projections} showControls={true} />
     </div>

@@ -63,7 +63,10 @@ class ApiClient {
       (error: AxiosError) => {
         if (error.response) {
           // Server responded with error status
-          console.error('API Error:', error.response.data);
+          console.error('API Error Response:', error.response.data);
+          console.error('API Error Status:', error.response.status);
+          console.error('API Request URL:', error.config?.url);
+          console.error('API Request Data:', error.config?.data);
         } else if (error.request) {
           // Request made but no response
           console.error('Network Error:', error.message);

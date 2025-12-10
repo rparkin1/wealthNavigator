@@ -16,8 +16,11 @@ interface LongevityAssumptions {
 
 interface LongevityResult {
   adjustedLifeExpectancy: number;
+  adjusted_life_expectancy: number; // snake_case for API
   yearsRemaining: number;
+  years_remaining: number; // snake_case for API
   planningBuffer: number;
+  planning_age: number; // Required by API
 }
 
 interface LongevityConfiguratorProps {
@@ -77,8 +80,11 @@ export function LongevityConfigurator({
 
     const calculatedResult: LongevityResult = {
       adjustedLifeExpectancy: adjusted,
+      adjusted_life_expectancy: adjusted, // snake_case for API
       yearsRemaining: Math.max(0, yearsRemaining),
-      planningBuffer
+      years_remaining: Math.max(0, yearsRemaining), // snake_case for API
+      planningBuffer,
+      planning_age: assumptions.planningAge, // Required by API
     };
 
     setResult(calculatedResult);
@@ -257,10 +263,10 @@ export function LongevityConfigurator({
               { age: assumptions.currentAge + 20, label: '20 years' },
               { age: assumptions.currentAge + 30, label: '30 years' },
               { age: result.adjustedLifeExpectancy, label: 'Life expect.' }
-            ].map(({ age, label }) => {
+            ].map(({ age, label }, index) => {
               const prob = getSurvivalProbability(age);
               return (
-                <div key={age} className="flex items-center justify-between">
+                <div key={`${label}-${index}`} className="flex items-center justify-between">
                   <span className="text-xs text-gray-600">
                     Age {age} ({label}):
                   </span>

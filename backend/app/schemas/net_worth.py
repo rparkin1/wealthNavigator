@@ -11,11 +11,11 @@ from datetime import date
 
 class AssetsByClass(BaseModel):
     """Asset breakdown by class"""
-    cash: float = Field(..., description="Cash and cash equivalents")
-    stocks: float = Field(..., description="Stock holdings")
-    bonds: float = Field(..., description="Bond holdings")
-    realEstate: float = Field(..., description="Real estate value")
-    other: float = Field(..., description="Other assets")
+    cash: float = Field(0.0, description="Cash and cash equivalents")
+    stocks: float = Field(0.0, description="Stock holdings")
+    bonds: float = Field(0.0, description="Bond holdings")
+    realEstate: float = Field(0.0, description="Real estate value")
+    other: float = Field(0.0, description="Other assets")
 
 
 class NetWorthDataPoint(BaseModel):
