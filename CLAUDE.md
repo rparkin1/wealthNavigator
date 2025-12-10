@@ -310,12 +310,12 @@ Focus: Professional-grade features
 
 ## Key Documentation Files
 
-- `ProductDescription/PRD.md` - 170+ requirements, full feature specifications
-- `ProductDescription/user-stories.md` - 40+ user stories with acceptance criteria
-- `ProductDescription/api-specification.md` - 50+ API endpoints fully documented
-- `ProductDescription/PROJECT-SUMMARY.md` - High-level overview, implementation roadmap
-- `ProductDescription/financial_planning_requirements.md` - Original requirements
-- `plans/mvp-development/plan.md` - MVP implementation plan
+- `development_docs/ProductDescription/PRD.md` - 170+ requirements, full feature specifications
+- `development_docs/ProductDescription/user-stories.md` - 40+ user stories with acceptance criteria
+- `development_docs/ProductDescription/api-specification.md` - 50+ API endpoints fully documented
+- `development_docs/ProductDescription/PROJECT-SUMMARY.md` - High-level overview, implementation roadmap
+- `development_docs/ProductDescription/financial_planning_requirements.md` - Original requirements
+- `development_docs/plans/mvp-development/plan.md` - MVP implementation plan
 
 ## Glossary
 
