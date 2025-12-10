@@ -5,7 +5,7 @@
  * REQ-RISK-012: Reserve monitoring API integration
  */
 
-import {
+import type {
   ReserveMonitoringRequest,
   ReserveMonitoringResult,
   ReserveAdequacyRequest,
@@ -13,6 +13,7 @@ import {
   ReserveGrowthRequest,
   ReserveGrowthSimulation,
   ReserveGuidelines,
+  
 } from '../types/reserveMonitoring';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';

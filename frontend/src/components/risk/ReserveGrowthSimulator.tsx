@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { simulateReserveGrowth } from '../../services/reserveMonitoringApi';
-import { ReserveGrowthSimulation } from '../../types/reserveMonitoring';
+import type { ReserveGrowthSimulation } from '../../types/reserveMonitoring';
 
 export interface ReserveGrowthSimulatorProps {
   currentReserves: number;
