@@ -548,6 +548,100 @@ async def analyze_roth_conversion(request: RothConversionRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+class TaxProjectionRequest(BaseModel):
+    """Tax projection request"""
+    income: float = Field(gt=0, description="Ordinary income (wages, interest, etc.)")
+    capital_gains: float = Field(ge=0, default=0, description="Long-term capital gains")
+    qualified_dividends: float = Field(ge=0, default=0, description="Qualified dividends")
+    ordinary_dividends: float = Field(ge=0, default=0, description="Ordinary dividends")
+    state: str = Field(description="State code (e.g., CA, NY)")
+    filing_status: str = Field(description="single, married_joint, married_separate, head_of_household")
+    deductions: float = Field(ge=0, default=0, description="Itemized deductions (0 for standard)")
+    years: int = Field(ge=1, le=30, default=1, description="Number of years to project")
+
+
+@router.post(
+    "/tax-projection",
+    summary="Calculate tax projection",
+    description="Multi-year tax liability projection with federal and state taxes"
+)
+async def calculate_tax_projection(request: TaxProjectionRequest):
+    """
+    Calculate tax projection for current and future years.
+
+    **REQ-TAX-010:** Estimate user tax liability
+    **REQ-TAX-012:** Multi-year tax projections
+
+    ## Features
+    - Federal income tax calculation
+    - State income tax calculation
+    - Net Investment Income Tax (NIIT) 3.8%
+    - Multi-year projections with inflation adjustment
+    - Effective and marginal tax rates
+    - Capital gains and qualified dividend treatment
+
+    ## Example Request
+    ```json
+    {
+      "income": 150000,
+      "capital_gains": 25000,
+      "qualified_dividends": 5000,
+      "ordinary_dividends": 2000,
+      "state": "CA",
+      "filing_status": "married_joint",
+      "deductions": 0,
+      "years": 5
+    }
+    ```
+
+    ## Example Response
+    ```json
+    {
+      "projections": [
+        {
+          "year": 2025,
+          "agi": 182000,
+          "taxable_income": 152800,
+          "federal_tax": 24500,
+          "niit": 0,
+          "state_tax": 20322,
+          "total_tax": 44822,
+          "effective_rate": 0.2463,
+          "marginal_rate": 0.24
+        }
+      ],
+      "filing_status": "married_joint",
+      "state": "CA",
+      "years": 5
+    }
+    ```
+
+    ## Tax Brackets (2024)
+    - Federal: 10%, 12%, 22%, 24%, 32%, 35%, 37%
+    - Capital Gains: 0%, 15%, 20%
+    - NIIT: 3.8% on investment income above threshold
+    - State: Varies by state (0% to 13.3%)
+    """
+    try:
+        service = TaxManagementService()
+
+        result = service.calculate_tax_projection(
+            income=request.income,
+            capital_gains=request.capital_gains,
+            qualified_dividends=request.qualified_dividends,
+            ordinary_dividends=request.ordinary_dividends,
+            state=request.state,
+            filing_status=request.filing_status,
+            deductions=request.deductions,
+            years=request.years
+        )
+
+        return result
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get(
     "/summary",
     summary="Service summary",
@@ -564,7 +658,7 @@ async def service_summary():
             "Municipal Bond Optimization (REQ-TAX-014)",
             "Asset Location Optimization (REQ-TAX-001-003)",
             "Withdrawal Strategy Optimization (REQ-TAX-007-009)",
-            "Tax Reporting (REQ-TAX-010, 012)",
+            "Tax Reporting & Projections (REQ-TAX-010, 012)",
             "Backdoor Roth Conversion Analysis (REQ-TAX-007, Phase 3)"
         ],
         "export_formats": [
@@ -574,7 +668,7 @@ async def service_summary():
             "TaxACT",
             "H&R Block"
         ],
-        "api_endpoints": 8,
-        "state_tax_rates": 50,
+        "api_endpoints": 9,
+        "state_tax_rates": 51,
         "optimization_strategies": 5
     }

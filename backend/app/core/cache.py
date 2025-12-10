@@ -197,6 +197,22 @@ class CacheKeys:
     ANALYSIS = "analysis:{analysis_id}"
     ANALYSIS_TTL = 1800
 
+    # Portfolio optimization results (15 minutes)
+    PORTFOLIO_OPTIMIZATION = "portfolio_opt:user:{user_id}:{hash}"
+    PORTFOLIO_OPTIMIZATION_TTL = 900
+
+    # Risk calculations (10 minutes)
+    RISK_METRICS = "risk:portfolio:{portfolio_id}"
+    RISK_METRICS_TTL = 600
+
+    # Tax calculations (20 minutes)
+    TAX_CALCULATION = "tax:user:{user_id}:year:{year}"
+    TAX_CALCULATION_TTL = 1200
+
+    # Diversification analysis (10 minutes)
+    DIVERSIFICATION = "diversification:portfolio:{portfolio_id}"
+    DIVERSIFICATION_TTL = 600
+
 
 async def invalidate_user_cache(user_id: str):
     """Invalidate all cache entries for a user"""

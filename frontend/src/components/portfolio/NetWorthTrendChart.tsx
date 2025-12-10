@@ -7,29 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart, ReferenceLine } from 'recharts';
-
-export interface NetWorthDataPoint {
-  date: string;
-  totalNetWorth: number;
-  totalAssets: number;
-  totalLiabilities: number;
-  liquidNetWorth?: number;
-  movingAverage?: number;
-  assetsByClass?: {
-    cash: number;
-    stocks: number;
-    bonds: number;
-    realEstate: number;
-    other: number;
-  };
-}
-
-export interface Milestone {
-  date: string;
-  label: string;
-  value: number;
-  type: 'goal' | 'event' | 'achievement';
-}
+import type { NetWorthDataPoint, Milestone } from '../../types/netWorth';
 
 interface NetWorthTrendChartProps {
   data: NetWorthDataPoint[];
@@ -435,5 +413,3 @@ export const NetWorthTrendChart: React.FC<NetWorthTrendChartProps> = ({
     </div>
   );
 };
-
-export default NetWorthTrendChart;

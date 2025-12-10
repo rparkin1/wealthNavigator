@@ -167,13 +167,14 @@ class MentalAccountingService:
 
         REQ-GOAL-009: Complete view of all mental accounts
         """
-        # Get all active goals for user
-        stmt = select(Goal).where(
-            Goal.user_id == user_id,
-            Goal.status.in_(["active", "planning"])
-        )
+        # Get all goals for user
+        # Note: status is a computed property, so we filter after fetching
+        stmt = select(Goal).where(Goal.user_id == user_id)
         result = await db.execute(stmt)
-        goals = result.scalars().all()
+        all_goals = result.scalars().all()
+
+        # Filter to active/planning goals using computed status property
+        goals = [g for g in all_goals if g.status in ["active", "planning"]]
 
         # Create mental accounts for each goal
         mental_accounts = []

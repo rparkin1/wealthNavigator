@@ -19,3 +19,58 @@
     @apply bg-white rounded-lg shadow-md p-6;
   }
 }
+
+@layer utilities {
+  /* Screen reader only utility - hides content visually but keeps it accessible */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Remove sr-only on focus (for skip links) */
+  .focus\:not-sr-only:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+
+  /* Skip link styles */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    z-index: 9999;
+    padding: 0.5rem 1rem;
+    background: #0284c7;
+    color: white;
+    text-decoration: none;
+    border-radius: 0 0 0.375rem 0;
+  }
+
+  .skip-link:focus {
+    top: 0;
+  }
+
+  /* Enhanced focus visible styles */
+  *:focus-visible {
+    outline: 2px solid #0284c7;
+    outline-offset: 2px;
+  }
+
+  /* Remove focus outline for mouse users */
+  *:focus:not(:focus-visible) {
+    outline: none;
+  }
+}

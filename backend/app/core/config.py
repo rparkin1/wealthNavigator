@@ -41,11 +41,24 @@ class Settings(BaseSettings):
     PLAID_PRODUCTS: List[str] = ["auth", "transactions", "investments"]
     PLAID_COUNTRY_CODES: List[str] = ["US", "CA"]
     PLAID_REDIRECT_URI: Optional[str] = None  # For OAuth flow
+    PLAID_WEBHOOK_VERIFICATION_KEY: Optional[str] = None  # For webhook signature verification
 
     # Security
     SECRET_KEY: str
+    ENCRYPTION_KEY: Optional[str] = None  # For MFA secrets and sensitive data (Fernet key)
 
-    model_config = ConfigDict(env_file=".env", case_sensitive=True)
+    # Monitoring (Optional)
+    SENTRY_DSN: Optional[str] = None  # Sentry error tracking
+
+    # Rate Limiting
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_STORAGE: str = "memory://"  # Use "redis://localhost:6379" in production
+
+    model_config = ConfigDict(
+        env_file=".env",
+        case_sensitive=True,
+        extra="ignore"  # Ignore extra fields in .env file
+    )
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
