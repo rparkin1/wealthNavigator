@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
 
-from app.database import get_db
+from app.core.database import get_db
 from app.models.goal import Goal
 from app.services.portfolio.sensitivity_analyzer import SensitivityAnalyzer
 from app.tools.monte_carlo_engine import MonteCarloEngine
