@@ -10,6 +10,12 @@ from .monte_carlo_engine import run_simulation, calculate_success_probability
 from .goal_analyzer import analyze_goal, calculate_required_savings
 from .risk_assessor import assess_risk, calculate_var
 from .tax_calculator import optimize_asset_location, calculate_tax_alpha
+from .retirement_income import (
+    calculate_social_security,
+    calculate_spending_by_age,
+    calculate_life_expectancy,
+    project_retirement_income,
+)
 
 __all__ = [
     "optimize_portfolio",
@@ -22,4 +28,8 @@ __all__ = [
     "calculate_var",
     "optimize_asset_location",
     "calculate_tax_alpha",
+    "calculate_social_security",
+    "calculate_spending_by_age",
+    "calculate_life_expectancy",
+    "project_retirement_income",
 ]
