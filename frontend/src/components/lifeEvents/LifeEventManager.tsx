@@ -9,7 +9,9 @@ import { useState, useEffect } from 'react';
 import { LifeEventForm } from './LifeEventForm';
 import { LifeEventTimeline } from './LifeEventTimeline';
 import { LifeEventImpactComparison } from './LifeEventImpactComparison';
-import type { LifeEvent, LifeEventManagerProps } from './types';
+import { EventTemplateSelector } from './EventTemplateSelector';
+import type { LifeEvent, LifeEventManagerProps, EventTemplate } from '../../types/lifeEvents';
+import * as lifeEventsApi from '../../services/lifeEventsApi';
 
 // Re-export types for backward compatibility
 export type { LifeEvent, LifeEventManagerProps };
@@ -57,7 +59,7 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
   const [error, setError] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<LifeEvent | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [showTimeline, setShowTimeline] = useState(false);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
   const [filterType, setFilterType] = useState<string | null>(null);
   const [filterEnabled, setFilterEnabled] = useState<boolean | null>(true);
@@ -67,31 +69,16 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
     loadEvents();
   }, [goalId, filterType, filterEnabled]);
 
-  const getUserId = () => localStorage.getItem('user_id') || 'test-user-123';
-
   const loadEvents = async (): Promise<LifeEvent[]> => {
     setLoading(true);
     setError(null);
 
     try {
-      const params = new URLSearchParams();
-      if (goalId) params.append('goal_id', goalId);
-      if (filterType) params.append('event_type', filterType);
-      if (filterEnabled !== null) params.append('enabled_only', String(filterEnabled));
-
-      const response = await fetch(`/api/v1/life-events/events?${params}`, {
-        headers: {
-          'X-User-Id': getUserId(),
-        },
+      const data = await lifeEventsApi.getAllLifeEvents({
+        goalId,
+        eventType: filterType || undefined,
+        enabledOnly: filterEnabled !== null ? filterEnabled : undefined,
       });
-      if (!response.ok) throw new Error(`Failed to load life events (HTTP ${response.status})`);
-
-      const contentType = response.headers.get('content-type') || '';
-      if (!contentType.includes('application/json')) {
-        const text = await response.text();
-        throw new Error('Unexpected response format while loading life events');
-      }
-      const data = await response.json();
       setEvents(data);
       return data;
     } catch (err) {
@@ -107,6 +94,21 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
     setShowForm(true);
   };
 
+  const handleCreateFromTemplate = () => {
+    setShowTemplateSelector(true);
+  };
+
+  const handleTemplateSelect = async (template: EventTemplate) => {
+    try {
+      const currentYear = new Date().getFullYear();
+      await lifeEventsApi.createFromTemplate(template.id, goalId, currentYear);
+      await loadEvents();
+      setShowTemplateSelector(false);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to create event from template');
+    }
+  };
+
   const handleEdit = (event: LifeEvent) => {
     setSelectedEvent(event);
     setShowForm(true);
@@ -116,15 +118,7 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
     if (!confirm('Are you sure you want to delete this life event?')) return;
 
     try {
-      const response = await fetch(`/api/v1/life-events/events/${eventId}`, {
-        method: 'DELETE',
-        headers: {
-          'X-User-Id': getUserId(),
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to delete event');
-
+      await lifeEventsApi.deleteLifeEvent(eventId);
       await loadEvents();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete event');
@@ -133,15 +127,7 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
 
   const handleToggle = async (eventId: string) => {
     try {
-      const response = await fetch(`/api/v1/life-events/events/${eventId}/toggle`, {
-        method: 'POST',
-        headers: {
-          'X-User-Id': getUserId(),
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to toggle event');
-
+      await lifeEventsApi.toggleLifeEvent(eventId);
       await loadEvents();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to toggle event');
@@ -155,17 +141,10 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
     }
 
     try {
-      const response = await fetch(`/api/v1/life-events/events/${event.id}/simulate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-User-Id': getUserId() },
-        body: JSON.stringify({
-          goal_id: event.goal_id,
-          iterations: 5000,
-        }),
+      await lifeEventsApi.simulateLifeEvent(event.id, {
+        goal_id: event.goal_id,
+        iterations: 5000,
       });
-
-      if (!response.ok) throw new Error('Simulation failed');
-
       const updated = await loadEvents();
       setSelectedEvent(updated.find(e => e.id === event.id) || null);
       setShowComparison(true);
@@ -183,22 +162,9 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
   const handleFormSave = async (data: any) => {
     try {
       if (selectedEvent) {
-        // Update existing event
-        const response = await fetch(`/api/v1/life-events/events/${selectedEvent.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', 'X-User-Id': getUserId() },
-          body: JSON.stringify(data),
-        });
-        if (!response.ok) throw new Error('Failed to update event');
+        await lifeEventsApi.updateLifeEvent(selectedEvent.id, data);
       } else {
-        // Create new event
-        const payload = { ...data, goal_id: goalId };
-        const response = await fetch(`/api/v1/life-events/events`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-User-Id': getUserId() },
-          body: JSON.stringify(payload),
-        });
-        if (!response.ok) throw new Error('Failed to create event');
+        await lifeEventsApi.createLifeEvent({ ...data, goal_id: goalId });
       }
       await loadEvents();
       handleFormClose(true);
@@ -245,15 +211,26 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
             Model major life events and understand their financial impact
           </p>
         </div>
-        <button
-          onClick={handleCreate}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Add Life Event
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleCreateFromTemplate}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            From Template
+          </button>
+          <button
+            onClick={handleCreate}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Custom Event
+          </button>
+        </div>
       </div>
 
       {/* Filters and View Toggle */}
@@ -493,6 +470,14 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
         <LifeEventImpactComparison
           event={selectedEvent}
           onClose={() => setShowComparison(false)}
+        />
+      )}
+
+      {showTemplateSelector && (
+        <EventTemplateSelector
+          eventType={filterType as any}
+          onSelect={handleTemplateSelect}
+          onClose={() => setShowTemplateSelector(false)}
         />
       )}
     </div>
