@@ -12,7 +12,7 @@
 import { useState, useMemo } from 'react';
 import type { BudgetEntry } from './BudgetForm';
 
-interface BudgetDashboardProps {
+export interface BudgetDashboardProps {
   entries: BudgetEntry[];
   onAddEntry: () => void;
   onEditEntry: (entry: BudgetEntry) => void;

@@ -107,7 +107,10 @@ export const TaxLossHarvestingPanel: React.FC<TaxLossHarvestingPanelProps> = ({
               max="1"
               step="0.01"
               value={taxRate}
-              onChange={(e) => setTaxRate(parseFloat(e.target.value))}
+              onChange={(e) => {
+                const v = e.currentTarget.valueAsNumber;
+                setTaxRate(Number.isFinite(v) ? v : 0.24);
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <p className="text-xs text-gray-500 mt-1">Enter as decimal (e.g., 0.24 for 24%)</p>
@@ -121,7 +124,10 @@ export const TaxLossHarvestingPanel: React.FC<TaxLossHarvestingPanelProps> = ({
               min="0"
               step="100"
               value={minLossThreshold}
-              onChange={(e) => setMinLossThreshold(parseFloat(e.target.value))}
+              onChange={(e) => {
+                const v = e.currentTarget.valueAsNumber;
+                setMinLossThreshold(Number.isFinite(v) ? v : 100);
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>

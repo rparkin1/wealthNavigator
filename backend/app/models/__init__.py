@@ -12,6 +12,7 @@ from .thread_db import Thread, Message, MessageRole
 from .goal import Goal, GoalCategory, GoalPriority
 from .portfolio_db import Portfolio, Account, AccountType, ConnectionStatus
 from .analysis import Analysis, MonteCarloSimulation, AnalysisType, SimulationStatus
+from .plaid import PlaidItem, PlaidAccount, PlaidTransaction, PlaidHolding
 
 __all__ = [
     # Base classes
@@ -55,4 +56,10 @@ __all__ = [
     "MonteCarloSimulation",
     "AnalysisType",
     "SimulationStatus",
+
+    # Plaid Integration
+    "PlaidItem",
+    "PlaidAccount",
+    "PlaidTransaction",
+    "PlaidHolding",
 ]

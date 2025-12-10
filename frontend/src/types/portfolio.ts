@@ -97,12 +97,12 @@ export interface OptimizationResult {
 
 // API Response types moved to ../types/api.ts
 
-export enum AnalysisType {
-  TAX_LOSS_HARVESTING = 'tax_loss_harvesting',
-  REBALANCING = 'rebalancing',
-  PERFORMANCE = 'performance',
-  COMPREHENSIVE = 'comprehensive',
-}
+export const AnalysisType = {
+  TAX_LOSS_HARVESTING: 'tax_loss_harvesting',
+  REBALANCING: 'rebalancing',
+  PERFORMANCE: 'performance',
+  COMPREHENSIVE: 'comprehensive',
+} as const;
 
 // Tax-Loss Harvesting Types
 export interface TaxLossHarvestRequest {
@@ -204,7 +204,7 @@ export interface PerformanceResponse {
 export interface ComprehensiveAnalysisRequest {
   user_id: string;
   portfolio_id?: string;
-  analysis_types?: AnalysisType[];
+  analysis_types?: typeof AnalysisType[keyof typeof AnalysisType][];
   tax_rate?: number;
   drift_threshold?: number;
 }

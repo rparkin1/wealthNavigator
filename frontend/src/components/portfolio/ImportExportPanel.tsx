@@ -9,17 +9,20 @@ import { useState, useRef } from 'react';
 import type { Holding } from './HoldingForm';
 import type { Account } from './AccountForm';
 
+// Generic import/export data type
+type ImportData = Record<string, string | number | boolean | null | undefined>;
+
 export interface ImportExportPanelProps {
   dataType: 'holdings' | 'accounts' | 'budget';
-  onImport: (data: any[]) => Promise<void>;
-  onExport: () => Promise<any[]>;
-  existingData?: any[];
+  onImport: (data: ImportData[]) => Promise<void>;
+  onExport: () => Promise<ImportData[]>;
+  existingData?: ImportData[];
 }
 
 interface ImportPreview {
-  valid: any[];
-  invalid: Array<{ row: number; data: any; errors: string[] }>;
-  duplicates: Array<{ row: number; data: any; existing: any }>;
+  valid: ImportData[];
+  invalid: Array<{ row: number; data: ImportData; errors: string[] }>;
+  duplicates: Array<{ row: number; data: ImportData; existing: ImportData }>;
 }
 
 const TEMPLATES = {
@@ -63,7 +66,7 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
   const template = TEMPLATES[dataType];
 
   // Generate CSV content
-  const generateCSV = (data: any[], headers: string[]): string => {
+  const generateCSV = (data: ImportData[], headers: string[]): string => {
     const headerRow = headers.join(',');
     const dataRows = data.map(item => {
       return headers.map(header => {
@@ -79,16 +82,16 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
   };
 
   // Parse CSV content
-  const parseCSV = (content: string): any[] => {
+  const parseCSV = (content: string): ImportData[] => {
     const lines = content.trim().split('\n');
     if (lines.length < 2) return [];
 
     const headers = lines[0].split(',').map(h => h.trim());
-    const data = [];
+    const data: ImportData[] = [];
 
     for (let i = 1; i < lines.length; i++) {
       const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
-      const row: any = {};
+      const row: ImportData = {};
       headers.forEach((header, index) => {
         const value = values[index];
         // Convert to appropriate type
@@ -109,10 +112,10 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
   };
 
   // Validate imported data
-  const validateData = (data: any[]): ImportPreview => {
-    const valid: any[] = [];
-    const invalid: Array<{ row: number; data: any; errors: string[] }> = [];
-    const duplicates: Array<{ row: number; data: any; existing: any }> = [];
+  const validateData = (data: ImportData[]): ImportPreview => {
+    const valid: ImportData[] = [];
+    const invalid: Array<{ row: number; data: ImportData; errors: string[] }> = [];
+    const duplicates: Array<{ row: number; data: ImportData; existing: ImportData }> = [];
 
     data.forEach((item, index) => {
       const errors: string[] = [];

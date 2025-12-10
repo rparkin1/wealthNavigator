@@ -33,7 +33,7 @@ interface UpcomingTransaction {
 
 export const RecurringTransactionsManager: React.FC = () => {
   const [transactions, setTransactions] = useState<RecurringTransactionResponse[]>([]);
-  const [upcoming, setUpcoming] = useState<UpcomingTransaction[]>([]);
+  const [, setUpcoming] = useState<UpcomingTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -170,7 +170,8 @@ export const RecurringTransactionsManager: React.FC = () => {
 
   const handleGenerateNow = async (id: string) => {
     try {
-      // TODO: Replace with actual API call
+      // TODO: Replace with actual API call using id
+      console.log('Generating entry for transaction:', id);
       alert('Entry generated! (This will call the API in production)');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate entry');

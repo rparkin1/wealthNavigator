@@ -25,7 +25,7 @@ export interface UserSettingsProps {
 }
 
 export function UserSettings({ userId }: UserSettingsProps) {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [_profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);

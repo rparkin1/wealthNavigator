@@ -72,10 +72,29 @@ export function VisualizationPanel({ visualizations }: VisualizationPanelProps) 
   );
 }
 
+// Visualization data types
+type ChartData = Record<string, number | string> | Array<Record<string, number | string>>;
+type ChartConfig = Record<string, unknown>;
+
+interface PortfolioProjection {
+  year: number;
+  median: number;
+  p10: number;
+  p25: number;
+  p75: number;
+  p90: number;
+}
+
+interface FanChartData {
+  portfolio_projections?: PortfolioProjection[];
+  goal_amount?: number;
+  [key: string]: unknown;
+}
+
 interface VisualizationRendererProps {
   type: string;
-  data: any;
-  config: any;
+  data: ChartData;
+  config: ChartConfig;
 }
 
 function VisualizationRenderer({ type, data, config }: VisualizationRendererProps) {
@@ -102,10 +121,10 @@ function VisualizationRenderer({ type, data, config }: VisualizationRendererProp
 }
 
 // Simple chart components using HTML/CSS (no external library needed)
-function PieChartPlaceholder({ data }: { data: any; config: any }) {
+function PieChartPlaceholder({ data }: { data: ChartData; config: ChartConfig }) {
   // Calculate total and percentages
   const entries = Object.entries(data);
-  const total = entries.reduce((sum, [_, value]) => sum + (Number(value) || 0), 0);
+  const total = entries.reduce((sum, [, value]) => sum + (Number(value) || 0), 0);
 
   // Colors for segments
   const colors = [
@@ -162,7 +181,7 @@ function PieChartPlaceholder({ data }: { data: any; config: any }) {
   );
 }
 
-function LineChartPlaceholder({ data }: { data: any; config: any }) {
+function LineChartPlaceholder({ data }: { data: ChartData; config: ChartConfig }) {
   return (
     <div className="bg-gray-50 rounded-lg p-8 text-center">
       <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -177,10 +196,10 @@ function LineChartPlaceholder({ data }: { data: any; config: any }) {
   );
 }
 
-function BarChartPlaceholder({ data }: { data: any; config: any }) {
+function BarChartPlaceholder({ data }: { data: ChartData; config: ChartConfig }) {
   // Calculate max value for scaling
   const entries = Object.entries(data);
-  const maxValue = Math.max(...entries.map(([_, value]) => Number(value) || 0));
+  const maxValue = Math.max(...entries.map(([, value]) => Number(value) || 0));
 
   // Colors for bars
   const colors = [
@@ -223,13 +242,13 @@ function BarChartPlaceholder({ data }: { data: any; config: any }) {
   );
 }
 
-function FanChartReal({ data, config }: { data: any; config: any }) {
+function FanChartReal({ data, config }: { data: FanChartData; config: ChartConfig }) {
   // Transform backend data format to FanChart component format
   if (!data || !data.portfolio_projections) {
     return <FanChartFallback data={data} />;
   }
 
-  const projections = data.portfolio_projections.map((proj: any) => ({
+  const projections = data.portfolio_projections.map((proj) => ({
     year: proj.year,
     median: proj.median,
     p10: proj.p10,
@@ -252,7 +271,7 @@ function FanChartReal({ data, config }: { data: any; config: any }) {
   );
 }
 
-function FanChartFallback({ data }: { data: any }) {
+function FanChartFallback({ data }: { data: FanChartData }) {
   return (
     <div className="bg-gray-50 rounded-lg p-8 text-center">
       <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -268,7 +287,7 @@ function FanChartFallback({ data }: { data: any }) {
   );
 }
 
-function TableRenderer({ data }: { data: any; config: any }) {
+function TableRenderer({ data }: { data: ChartData; config: ChartConfig }) {
   if (!Array.isArray(data) || data.length === 0) {
     return <JsonRenderer data={data} />;
   }
@@ -306,7 +325,7 @@ function TableRenderer({ data }: { data: any; config: any }) {
   );
 }
 
-function JsonRenderer({ data }: { data: any }) {
+function JsonRenderer({ data }: { data: ChartData | FanChartData }) {
   return (
     <pre className="text-xs bg-gray-50 p-4 rounded border border-gray-200 overflow-x-auto">
       {JSON.stringify(data, null, 2)}

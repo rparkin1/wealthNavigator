@@ -48,7 +48,7 @@ export function LongevityConfigurator({
     calculateLongevity();
   }, [assumptions]);
 
-  const updateAssumption = (key: keyof LongevityAssumptions, value: any) => {
+  const updateAssumption = (key: keyof LongevityAssumptions, value: string | number | boolean) => {
     setAssumptions(prev => ({ ...prev, [key]: value }));
   };
 
@@ -59,7 +59,7 @@ export function LongevityConfigurator({
       female: 87
     };
 
-    let base = baseByGender[assumptions.gender];
+    const base = baseByGender[assumptions.gender];
 
     // Adjust for health status
     const healthAdjustments = {
