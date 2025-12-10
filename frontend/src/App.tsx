@@ -52,6 +52,32 @@ const PlaidDashboard = lazy(() =>
   import('./components/plaid/PlaidDashboard').then(m => ({ default: m.PlaidDashboard }))
 );
 
+// Section 6: What-If Analysis & Scenarios
+const WhatIfSliders = lazy(() =>
+  import('./components/simulation/WhatIfSliders').then(m => ({ default: m.WhatIfSliders }))
+);
+const QuickWhatIf = lazy(() =>
+  import('./components/simulation/QuickWhatIf').then(m => ({ default: m.QuickWhatIf }))
+);
+const DistributionHistogram = lazy(() =>
+  import('./components/simulation/DistributionHistogram').then(m => ({ default: m.DistributionHistogram }))
+);
+const TornadoDiagram = lazy(() =>
+  import('./components/analysis/TornadoDiagram').then(m => ({ default: m.TornadoDiagram }))
+);
+const ScenarioComparison = lazy(() =>
+  import('./components/simulation/ScenarioComparison').then(m => ({ default: m.ScenarioComparison }))
+);
+const LifeEventManager = lazy(() =>
+  import('./components/lifeEvents/LifeEventManager').then(m => ({ default: m.LifeEventManager }))
+);
+const HistoricalScenarioPlayer = lazy(() =>
+  import('./components/scenarios/HistoricalScenarioPlayer').then(m => ({ default: m.HistoricalScenarioPlayer }))
+);
+const CustomScenarioBuilder = lazy(() =>
+  import('./components/scenarios/CustomScenarioBuilder').then(m => ({ default: m.CustomScenarioBuilder }))
+);
+
 type View =
   | 'home'
   | 'chat'
@@ -63,7 +89,10 @@ type View =
   | 'retirement'
   | 'plaid'
   | 'data-entry'
-  | 'settings';
+  | 'settings'
+  | 'what-if'
+  | 'life-events'
+  | 'scenarios';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('home');
@@ -183,6 +212,33 @@ function App() {
             </Suspense>
           </>
         );
+      case 'what-if':
+        return (
+          <>
+            <div className="px-6 pt-4">
+              <Breadcrumbs items={[{ label: 'Home', onClick: () => setCurrentView('home') }, { label: 'What-If Analysis' }]} />
+            </div>
+            <WhatIfAnalysisView userId={userId} />
+          </>
+        );
+      case 'life-events':
+        return (
+          <>
+            <div className="px-6 pt-4">
+              <Breadcrumbs items={[{ label: 'Home', onClick: () => setCurrentView('home') }, { label: 'Life Events' }]} />
+            </div>
+            <LifeEventsView />
+          </>
+        );
+      case 'scenarios':
+        return (
+          <>
+            <div className="px-6 pt-4">
+              <Breadcrumbs items={[{ label: 'Home', onClick: () => setCurrentView('home') }, { label: 'Scenarios' }]} />
+            </div>
+            <ScenariosView />
+          </>
+        );
       case 'home':
       default:
         return <HomeView onStartChat={() => setCurrentView('chat')} onNavigate={(view) => setCurrentView(view)} />;
@@ -192,7 +248,7 @@ function App() {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'budget' || currentView === 'recurring' || currentView === 'plaid' || currentView === 'data-entry') ? (
+      {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'budget' || currentView === 'recurring' || currentView === 'plaid' || currentView === 'data-entry' || currentView === 'what-if' || currentView === 'life-events' || currentView === 'scenarios') ? (
         sidebarOpen && (
           <aside className="w-64 transition-all duration-300 bg-white border-r border-gray-200 overflow-hidden">
           <div className="p-4">
@@ -302,6 +358,44 @@ function App() {
                 🏦 Bank Connections
               </button>
             </div>
+
+            <div className="px-4 py-2 mt-6">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Analysis & Scenarios
+              </h3>
+            </div>
+            <div className="mt-2 space-y-1 px-2">
+              <button
+                onClick={() => setCurrentView('what-if')}
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                  currentView === 'what-if'
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                🔮 What-If Analysis
+              </button>
+              <button
+                onClick={() => setCurrentView('life-events')}
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                  currentView === 'life-events'
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                📅 Life Events
+              </button>
+              <button
+                onClick={() => setCurrentView('scenarios')}
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                  currentView === 'scenarios'
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                📊 Historical Scenarios
+              </button>
+            </div>
           </nav>
         </aside>
         )
@@ -309,7 +403,7 @@ function App() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement') && (
+        {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'what-if' || currentView === 'life-events' || currentView === 'scenarios') && (
           <header className="flex-none bg-white border-b border-gray-200 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
@@ -467,6 +561,106 @@ function HomeView({ onStartChat, onNavigate }: { onStartChat: () => void; onNavi
               </p>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WhatIfAnalysisView({ userId }: { userId: string }) {
+  const mockBaseValues = {
+    monthlyContribution: 1000,
+    expectedReturnStocks: 0.08,
+    expectedReturnBonds: 0.04,
+    inflationRate: 0.03,
+    retirementAge: 65,
+    lifeExpectancy: 90,
+  };
+
+  return (
+    <div className="h-full overflow-y-auto p-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">What-If Analysis</h2>
+          <p className="text-gray-600">
+            Explore different financial scenarios with interactive sliders and Monte Carlo simulations.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <Suspense fallback={<div>Loading...</div>}>
+            <WhatIfSliders
+              goalId="test-goal-123"
+              baseValues={mockBaseValues}
+              onAdjustmentsChange={(adjustments) => {
+                console.log('Adjustments changed:', adjustments);
+              }}
+            />
+          </Suspense>
+
+          <Suspense fallback={<div>Loading...</div>}>
+            <QuickWhatIf
+              onScenarioSelect={(scenario) => {
+                console.log('Scenario selected:', scenario);
+              }}
+            />
+          </Suspense>
+
+          <Suspense fallback={<div>Loading...</div>}>
+            <DistributionHistogram />
+          </Suspense>
+
+          <Suspense fallback={<div>Loading...</div>}>
+            <TornadoDiagram />
+          </Suspense>
+
+          <div className="md:col-span-2">
+            <Suspense fallback={<div>Loading...</div>}>
+              <ScenarioComparison />
+            </Suspense>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LifeEventsView() {
+  return (
+    <ErrorBoundary fallback={<LoadingView message="Loading life events..." />}>
+      <Suspense fallback={<LoadingView message="Loading life events..." />}>
+        <LifeEventManager />
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+
+function ScenariosView() {
+  return (
+    <div className="h-full overflow-y-auto p-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Historical Market Scenarios</h2>
+          <p className="text-gray-600">
+            See how your portfolio would perform during major historical market events.
+          </p>
+        </div>
+
+        <div className="grid gap-6">
+          <Suspense fallback={<div>Loading...</div>}>
+            <HistoricalScenarioPlayer />
+          </Suspense>
+
+          <Suspense fallback={<div>Loading...</div>}>
+            <CustomScenarioBuilder />
+          </Suspense>
+        </div>
+
+        <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
+          <p className="text-sm text-green-800">
+            <strong>Backend API Ready:</strong> Historical scenarios API with 6 endpoints operational at{' '}
+            <code>/api/v1/historical-scenarios/*</code>
+          </p>
         </div>
       </div>
     </div>
