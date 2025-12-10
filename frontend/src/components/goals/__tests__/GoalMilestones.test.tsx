@@ -72,7 +72,7 @@ describe('MilestoneManager', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Manage Milestones')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Milestones' })).toBeInTheDocument();
     });
 
     await waitFor(() => {
@@ -109,14 +109,14 @@ describe('MilestoneManager', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Manage Milestones')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Milestones' })).toBeInTheDocument();
     });
 
-    const addButton = screen.getByRole('button', { name: /Add Milestone/ });
+    const addButton = screen.getByRole('button', { name: /\+ Add Milestone/ });
     fireEvent.click(addButton);
 
     await waitFor(() => {
-      expect(screen.getByLabelText(/Milestone Title/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Title \*/)).toBeInTheDocument();
     });
   });
 
@@ -141,12 +141,12 @@ describe('MilestoneManager', () => {
     );
 
     await waitFor(() => {
-      const addButton = screen.getByRole('button', { name: /Add Milestone/ });
+      const addButton = screen.getByRole('button', { name: /\+ Add Milestone/ });
       fireEvent.click(addButton);
     });
 
     // Fill form
-    const titleInput = screen.getByLabelText(/Milestone Title/);
+    const titleInput = screen.getByLabelText(/Title \*/);
     fireEvent.change(titleInput, { target: { value: 'New Milestone' } });
 
     const amountInput = screen.getByLabelText(/Target Amount/);
@@ -156,7 +156,7 @@ describe('MilestoneManager', () => {
     fireEvent.change(dateInput, { target: { value: '2030-01-01' } });
 
     // Submit
-    const submitButton = screen.getByRole('button', { name: /Create Milestone/ });
+    const submitButton = screen.getByRole('button', { name: /^Create$/ });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -226,11 +226,11 @@ describe('MilestoneManager', () => {
     });
 
     // Click complete button for first milestone
-    const completeButtons = screen.getAllByRole('button', { name: /Complete/ });
+    const completeButtons = screen.getAllByTitle('Mark as completed');
     fireEvent.click(completeButtons[0]);
 
     await waitFor(() => {
-      expect(milestoneApi.completeMilestone).toHaveBeenCalledWith('milestone-1');
+      expect(milestoneApi.completeMilestone).toHaveBeenCalledWith('goal-1', 'milestone-1');
     });
   });
 
@@ -257,7 +257,7 @@ describe('MilestoneManager', () => {
     fireEvent.click(deleteButtons[0]);
 
     await waitFor(() => {
-      expect(milestoneApi.deleteMilestone).toHaveBeenCalledWith('milestone-1');
+      expect(milestoneApi.deleteMilestone).toHaveBeenCalledWith('goal-1', 'milestone-1');
     });
   });
 });
@@ -317,7 +317,7 @@ describe('MilestoneTimeline', () => {
     render(<MilestoneTimeline goal={mockGoal} />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Completed/)).toBeInTheDocument();
+      expect(screen.getAllByText(/Completed/).length).toBeGreaterThan(0);
     });
   });
 
@@ -489,8 +489,8 @@ describe('UpcomingMilestones', () => {
     render(<UpcomingMilestones userId="user-1" onMilestoneClick={mockOnMilestoneClick} />);
 
     await waitFor(() => {
-      expect(screen.getByText(/6d/)).toBeInTheDocument(); // Red urgency
-      expect(screen.getByText(/16d/)).toBeInTheDocument(); // Blue urgency
+      expect(screen.getAllByText(/6d/).length).toBeGreaterThan(0); // Red urgency
+      expect(screen.getAllByText(/16d/).length).toBeGreaterThan(0); // Blue urgency
     });
   });
 
@@ -593,8 +593,10 @@ describe('MilestoneNotifications', () => {
     // Click to collapse overdue section
     const overdueButton = screen.getByRole('button', { name: /Overdue/ });
     fireEvent.click(overdueButton);
+    expect(screen.queryByText('Overdue Milestone')).not.toBeInTheDocument();
 
-    // Milestone should still be visible (controlled by CSS, not removal from DOM)
+    // Expand again
+    fireEvent.click(overdueButton);
     expect(screen.getByText('Overdue Milestone')).toBeInTheDocument();
   });
 

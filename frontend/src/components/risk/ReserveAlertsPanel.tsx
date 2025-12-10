@@ -143,6 +143,7 @@ export const ReserveAlertsPanel: React.FC<ReserveAlertsPanelProps> = ({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                     <span style={{ fontSize: '20px' }}>{getSeverityIcon(alert.severity)}</span>
                     <div
+                      data-testid={`reserve-alert-title-${index}`}
                       style={{
                         fontSize: compact ? '14px' : '16px',
                         fontWeight: 600,

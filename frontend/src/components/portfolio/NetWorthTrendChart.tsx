@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart, ReferenceLine } from 'recharts';
 
 export interface NetWorthDataPoint {
   date: string;
@@ -14,6 +14,7 @@ export interface NetWorthDataPoint {
   totalAssets: number;
   totalLiabilities: number;
   liquidNetWorth?: number;
+  movingAverage?: number;
   assetsByClass?: {
     cash: number;
     stocks: number;
@@ -23,11 +24,22 @@ export interface NetWorthDataPoint {
   };
 }
 
+export interface Milestone {
+  date: string;
+  label: string;
+  value: number;
+  type: 'goal' | 'event' | 'achievement';
+}
+
 interface NetWorthTrendChartProps {
   data: NetWorthDataPoint[];
   height?: number;
   showAssetBreakdown?: boolean;
   showLiquidNetWorth?: boolean;
+  showMovingAverage?: boolean;
+  showMilestones?: boolean;
+  milestones?: Milestone[];
+  viewMode?: 'line' | 'area' | 'stacked';
   timeframe?: '1M' | '3M' | '6M' | '1Y' | '3Y' | '5Y' | 'ALL';
 }
 
@@ -36,6 +48,10 @@ export const NetWorthTrendChart: React.FC<NetWorthTrendChartProps> = ({
   height = 400,
   showAssetBreakdown = false,
   showLiquidNetWorth = false,
+  showMovingAverage = false,
+  showMilestones = false,
+  milestones = [],
+  viewMode = 'line',
   timeframe = '1Y',
 }) => {
   // Filter data based on timeframe
@@ -200,7 +216,96 @@ export const NetWorthTrendChart: React.FC<NetWorthTrendChartProps> = ({
 
       {/* Chart */}
       <ResponsiveContainer width="100%" height={height}>
-        {showAssetBreakdown ? (
+        {viewMode === 'stacked' && showAssetBreakdown ? (
+          <AreaChart data={filteredData}>
+            <defs>
+              <linearGradient id="colorCash" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                <stop offset="95%" stopColor="#10b981" stopOpacity={0.3}/>
+              </linearGradient>
+              <linearGradient id="colorStocks" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.3}/>
+              </linearGradient>
+              <linearGradient id="colorBonds" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+              </linearGradient>
+              <linearGradient id="colorRealEstate" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8}/>
+                <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.3}/>
+              </linearGradient>
+              <linearGradient id="colorOther" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.8}/>
+                <stop offset="95%" stopColor="#94a3b8" stopOpacity={0.3}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis
+              dataKey="date"
+              tickFormatter={formatDate}
+              stroke="#9ca3af"
+              style={{ fontSize: '12px' }}
+            />
+            <YAxis
+              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+              stroke="#9ca3af"
+              style={{ fontSize: '12px' }}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend />
+            <Area
+              type="monotone"
+              dataKey="assetsByClass.cash"
+              stackId="1"
+              stroke="#10b981"
+              fill="url(#colorCash)"
+              name="Cash"
+            />
+            <Area
+              type="monotone"
+              dataKey="assetsByClass.stocks"
+              stackId="1"
+              stroke="#3b82f6"
+              fill="url(#colorStocks)"
+              name="Stocks"
+            />
+            <Area
+              type="monotone"
+              dataKey="assetsByClass.bonds"
+              stackId="1"
+              stroke="#8b5cf6"
+              fill="url(#colorBonds)"
+              name="Bonds"
+            />
+            <Area
+              type="monotone"
+              dataKey="assetsByClass.realEstate"
+              stackId="1"
+              stroke="#f59e0b"
+              fill="url(#colorRealEstate)"
+              name="Real Estate"
+            />
+            <Area
+              type="monotone"
+              dataKey="assetsByClass.other"
+              stackId="1"
+              stroke="#94a3b8"
+              fill="url(#colorOther)"
+              name="Other"
+            />
+            {/* Milestones */}
+            {showMilestones && milestones.map((milestone, idx) => (
+              <ReferenceLine
+                key={idx}
+                x={milestone.date}
+                stroke="#ef4444"
+                strokeDasharray="3 3"
+                label={{ value: milestone.label, position: 'top', fill: '#ef4444', fontSize: 12 }}
+              />
+            ))}
+          </AreaChart>
+        ) : viewMode === 'area' ? (
           <AreaChart data={filteredData}>
             <defs>
               <linearGradient id="colorNetWorth" x1="0" y1="0" x2="0" y2="1">
@@ -229,6 +334,27 @@ export const NetWorthTrendChart: React.FC<NetWorthTrendChartProps> = ({
               fill="url(#colorNetWorth)"
               name="Net Worth"
             />
+            {showMovingAverage && (
+              <Area
+                type="monotone"
+                dataKey="movingAverage"
+                stroke="#8b5cf6"
+                fill="none"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                name="Moving Average"
+              />
+            )}
+            {/* Milestones */}
+            {showMilestones && milestones.map((milestone, idx) => (
+              <ReferenceLine
+                key={idx}
+                x={milestone.date}
+                stroke="#ef4444"
+                strokeDasharray="3 3"
+                label={{ value: milestone.label, position: 'top', fill: '#ef4444', fontSize: 12 }}
+              />
+            ))}
           </AreaChart>
         ) : (
           <LineChart data={filteredData}>
@@ -282,6 +408,27 @@ export const NetWorthTrendChart: React.FC<NetWorthTrendChartProps> = ({
                 name="Liquid Net Worth"
               />
             )}
+            {showMovingAverage && (
+              <Line
+                type="monotone"
+                dataKey="movingAverage"
+                stroke="#8b5cf6"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={false}
+                name="Moving Average"
+              />
+            )}
+            {/* Milestones */}
+            {showMilestones && milestones.map((milestone, idx) => (
+              <ReferenceLine
+                key={idx}
+                x={milestone.date}
+                stroke="#ef4444"
+                strokeDasharray="3 3"
+                label={{ value: milestone.label, position: 'top', fill: '#ef4444', fontSize: 12 }}
+              />
+            ))}
           </LineChart>
         )}
       </ResponsiveContainer>

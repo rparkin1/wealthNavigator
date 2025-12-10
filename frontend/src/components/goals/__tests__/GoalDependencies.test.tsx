@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { GoalDependencyGraph } from '../GoalDependencyGraph';
 import { DependencyEditor } from '../DependencyEditor';
 import { SequentialGoalPlanner } from '../SequentialGoalPlanner';
@@ -163,7 +163,7 @@ describe('DependencyEditor', () => {
       />
     );
 
-    expect(screen.getByText('Create Dependency')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Create Dependency/ })).toBeInTheDocument();
     expect(screen.getByLabelText(/Source Goal/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Target Goal/)).toBeInTheDocument();
   });
@@ -245,7 +245,7 @@ describe('DependencyEditor', () => {
     expect(mockOnSave).toHaveBeenCalled();
   });
 
-  it('prevents self-dependency', async () => {
+  it('prevents self-dependency', () => {
     render(
       <DependencyEditor
         goals={mockGoals}
@@ -254,22 +254,20 @@ describe('DependencyEditor', () => {
       />
     );
 
-    // Select same goal for both source and target
+    // Select same goal for both source and target (target option should be removed)
     const sourceSelect = screen.getByLabelText(/Source Goal/);
     fireEvent.change(sourceSelect, { target: { value: 'goal-1' } });
 
     const targetSelect = screen.getByLabelText(/Target Goal/);
-    fireEvent.change(targetSelect, { target: { value: 'goal-1' } });
+    expect(within(targetSelect).queryByText('Retirement')).not.toBeInTheDocument();
 
-    // Submit form
-    const submitButton = screen.getByRole('button', { name: /Create Dependency/ });
-    fireEvent.click(submitButton);
+    // Selecting source removes that goal from target options
+    fireEvent.change(targetSelect, { target: { value: 'goal-2' } });
 
-    await waitFor(() => {
-      expect(screen.getByText(/cannot depend on itself/)).toBeInTheDocument();
-    });
-
-    expect(mockOnSave).not.toHaveBeenCalled();
+    const updatedSourceOptions = within(sourceSelect).queryAllByRole('option');
+    expect(updatedSourceOptions.some(option => option.textContent?.includes('College Fund'))).toBe(
+      false
+    );
   });
 });
 
@@ -349,8 +347,8 @@ describe('SequentialGoalPlanner', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('College Fund')).toBeInTheDocument();
-      expect(screen.getByText('Retirement')).toBeInTheDocument();
+      expect(screen.getAllByRole('heading', { name: 'College Fund' }).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('heading', { name: 'Retirement' }).length).toBeGreaterThan(0);
     });
   });
 
@@ -502,12 +500,22 @@ describe('DependencyValidator', () => {
     // Initially should not validate
     expect(dependencyApi.validateDependencies).not.toHaveBeenCalled();
 
-    // Click revalidate button
-    const button = screen.getByRole('button', { name: /Revalidate/ });
-    fireEvent.click(button);
+    // Run initial validation manually
+    const runButton = screen.getByRole('button', { name: /Validate Dependencies/ });
+    fireEvent.click(runButton);
 
     await waitFor(() => {
-      expect(dependencyApi.validateDependencies).toHaveBeenCalled();
+      expect(dependencyApi.validateDependencies).toHaveBeenCalledTimes(1);
+    });
+
+    vi.mocked(dependencyApi.validateDependencies).mockClear();
+
+    // Re-run via revalidate button
+    const revalidateButton = await screen.findByRole('button', { name: /Revalidate/ });
+    fireEvent.click(revalidateButton);
+
+    await waitFor(() => {
+      expect(dependencyApi.validateDependencies).toHaveBeenCalledTimes(1);
     });
   });
 });

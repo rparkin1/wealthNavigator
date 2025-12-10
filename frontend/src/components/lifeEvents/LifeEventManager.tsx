@@ -62,7 +62,7 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
   const [filterType, setFilterType] = useState<string | null>(null);
-  const [filterEnabled, setFilterEnabled] = useState<boolean | null>(true);
+  const [filterEnabled, setFilterEnabled] = useState<boolean | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'timeline'>('list');
 
   useEffect(() => {
@@ -432,8 +432,10 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
                     </button>
                     <button
                       onClick={() => handleSimulate(event)}
-                      disabled={!event.goal_id}
-                      className="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      aria-disabled={!event.goal_id}
+                      className={`px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200 ${
+                        !event.goal_id ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                     >
                       Simulate
                     </button>
