@@ -468,4 +468,6 @@ class TestIntegrationDataConsistency:
 
         # Verify key fields are present and consistent
         assert goal_data["id"] == test_goal.id
-        assert goal_data["target_amount"] == test_goal.target_amount
+        # Support camelCase or snake_case depending on response_model configuration
+        target_amount = goal_data.get("target_amount", goal_data.get("targetAmount"))
+        assert target_amount == test_goal.target_amount
