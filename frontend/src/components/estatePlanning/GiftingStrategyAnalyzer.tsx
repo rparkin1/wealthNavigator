@@ -75,8 +75,9 @@ const GiftingStrategyAnalyzer: React.FC = () => {
       <div className="input-form">
         <div className="form-row">
           <div className="form-group">
-            <label>Current Estate Value</label>
+            <label htmlFor="giftingEstateValue">Current Estate Value</label>
             <input
+              id="giftingEstateValue"
               type="number"
               name="estateValue"
               value={form.estateValue}
@@ -87,8 +88,9 @@ const GiftingStrategyAnalyzer: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label>Annual Gift Amount</label>
+            <label htmlFor="annualGiftAmount">Annual Gift Amount</label>
             <input
+              id="annualGiftAmount"
               type="number"
               name="annualGiftAmount"
               value={form.annualGiftAmount}
@@ -101,8 +103,9 @@ const GiftingStrategyAnalyzer: React.FC = () => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Years of Gifting</label>
+            <label htmlFor="yearsOfGifting">Years of Gifting</label>
             <input
+              id="yearsOfGifting"
               type="number"
               name="years"
               value={form.years}
@@ -113,8 +116,9 @@ const GiftingStrategyAnalyzer: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label>Expected Annual Return</label>
+            <label htmlFor="giftingExpectedReturn">Expected Annual Return</label>
             <input
+              id="giftingExpectedReturn"
               type="number"
               name="expectedReturn"
               value={form.expectedReturn}

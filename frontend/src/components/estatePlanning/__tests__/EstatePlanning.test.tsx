@@ -56,7 +56,7 @@ describe('Estate Tax Projection', () => {
     render(<EstateTaxProjection />);
 
     expect(screen.getByLabelText(/Estate Value/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/State/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^State$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Marital Status/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Life Insurance Value/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Charitable Donations/i)).toBeInTheDocument();
@@ -90,7 +90,7 @@ describe('Estate Tax Projection', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Estate Tax Calculation Results')).toBeInTheDocument();
-      expect(screen.getByText(/\$5,000,000/)).toBeInTheDocument();
+      expect(screen.getAllByText(/\$5,000,000/)[0]).toBeInTheDocument();
     });
   });
 
