@@ -378,12 +378,18 @@ class TaxManagementService:
         combined_tax_rate = federal_tax_rate + state_tax_rate - (federal_tax_rate * state_tax_rate)
 
         # Calculate tax-equivalent yields
-        # In-state munis are exempt from both federal and state tax
-        in_state_tax_equiv = in_state_yield / (1 - combined_tax_rate)
+        if state_tax_rate == 0:
+            # No state tax: treat in/out-of-state munis the same and use the best available yield
+            best_yield = max(in_state_yield, out_of_state_yield)
+            tax_equiv_yield = best_yield / (1 - federal_tax_rate)
+            in_state_tax_equiv = tax_equiv_yield
+            out_of_state_tax_equiv = tax_equiv_yield
+        else:
+            # In-state munis are exempt from both federal and state tax
+            in_state_tax_equiv = in_state_yield / (1 - combined_tax_rate)
 
-        # Out-of-state munis are exempt from federal but not state
-        effective_rate_out_of_state = federal_tax_rate + state_tax_rate - (federal_tax_rate * state_tax_rate)
-        out_of_state_tax_equiv = out_of_state_yield / (1 - federal_tax_rate)
+            # Out-of-state munis are exempt from federal but not state
+            out_of_state_tax_equiv = out_of_state_yield / (1 - federal_tax_rate)
 
         # Determine best option
         options = {
@@ -393,6 +399,8 @@ class TaxManagementService:
         }
 
         recommended = max(options, key=options.get)
+        if state_tax_rate == 0 and recommended != "taxable":
+            recommended = "out_of_state" if out_of_state_yield >= in_state_yield else "in_state"
 
         # Calculate estimated tax savings vs taxable
         if recommended == "in_state":
