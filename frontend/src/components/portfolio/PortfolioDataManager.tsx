@@ -494,23 +494,31 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
               console.log('[PortfolioDataManager] Starting holdings import with', data.length, 'rows');
               console.log('[PortfolioDataManager] Sample row:', data[0]);
 
-              // Validate account references
+              // Validate account references (match by ID or name, like backend does)
               const accountIds = new Set(accounts.map(a => a.id));
+              const accountNames = new Set(accounts.map(a => a.name));
               const orphanedHoldings: string[] = [];
 
               data.forEach(item => {
-                if (item.account_id && !accountIds.has(item.account_id as string)) {
-                  orphanedHoldings.push(`${item.ticker} (account_id: ${item.account_id})`);
+                if (item.account_id) {
+                  const accountRef = String(item.account_id);
+                  // Check if account_id matches either an account ID or account name
+                  const hasMatch = accountIds.has(accountRef) || accountNames.has(accountRef);
+
+                  if (!hasMatch) {
+                    orphanedHoldings.push(`${item.ticker} (account_id: ${item.account_id})`);
+                  }
                 }
               });
 
               // Warn about orphaned holdings
               if (orphanedHoldings.length > 0) {
                 const proceed = confirm(
-                  `⚠️ Warning: ${orphanedHoldings.length} holding(s) reference non-existent accounts:\n\n` +
+                  `⚠️ Warning: ${orphanedHoldings.length} holding(s) reference accounts that don't exist:\n\n` +
                   `${orphanedHoldings.slice(0, 5).join('\n')}` +
                   `${orphanedHoldings.length > 5 ? `\n...and ${orphanedHoldings.length - 5} more` : ''}\n\n` +
-                  `These holdings will be imported but won't be linked to any account.\n\n` +
+                  `The system tried to match by both account ID and account name, but couldn't find these accounts.\n\n` +
+                  `These holdings will still be sent to the backend, but may not be imported if the accounts don't exist.\n\n` +
                   `Import accounts first, then import holdings. Continue anyway?`
                 );
                 if (!proceed) return;

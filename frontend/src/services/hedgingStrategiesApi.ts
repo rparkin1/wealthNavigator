@@ -36,6 +36,26 @@ export async function getHedgingRecommendations(
 }
 
 /**
+ * Get hedging strategy recommendations using real portfolio data from database (Plaid)
+ * Automatically fetches portfolio, calculates risk, and recommends hedging strategies
+ */
+export async function getHedgingRecommendationsAuto(): Promise<HedgingRecommendation> {
+  const response = await fetch(`${API_BASE_URL}${API_PREFIX}/hedging-strategies-auto`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get hedging recommendations');
+  }
+
+  return response.json();
+}
+
+/**
  * Get all hedging education content
  */
 export async function getHedgingEducation(): Promise<HedgingEducationContent> {

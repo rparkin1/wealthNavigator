@@ -259,16 +259,20 @@ async def bulk_create_holdings(
     - Returns created holdings with IDs
     """
     try:
-        # Get user's portfolio to validate accounts
+        # Get or create portfolio for user
         portfolio_query = select(Portfolio).where(Portfolio.user_id == request.user_id)
         result = await db.execute(portfolio_query)
         portfolio = result.scalar_one_or_none()
 
         if not portfolio:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No portfolio found for user {request.user_id}"
+            # Create default portfolio for user
+            portfolio = Portfolio(
+                user_id=request.user_id,
+                name="Primary Portfolio"
             )
+            db.add(portfolio)
+            await db.flush()  # Get portfolio ID
+            logger.info(f"Created new portfolio {portfolio.id} for user {request.user_id}")
 
         # Get all accounts for this portfolio (ID and name for lookup)
         accounts_query = select(Account).where(Account.portfolio_id == portfolio.id)

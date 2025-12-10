@@ -258,6 +258,63 @@ class HoldingsListResponse(BaseModel):
     total: int
 
 
+# Investment Transactions
+class PlaidInvestmentTransactionResponse(BaseModel):
+    """Response model for an investment transaction"""
+    id: str
+    account_id: str
+    investment_transaction_id: str
+    security_id: Optional[str]
+    ticker_symbol: Optional[str]
+    date: date
+    name: str
+    amount: float
+    quantity: Optional[float]
+    price: Optional[float]
+    fees: Optional[float]
+    type: str
+    subtype: Optional[str]
+    iso_currency_code: Optional[str]
+    user_category: Optional[str]
+    user_notes: Optional[str]
+    is_excluded: bool
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class InvestmentTransactionsSyncRequest(BaseModel):
+    """Request to sync investment transactions"""
+    item_id: Optional[str] = None  # If None, sync all investment items
+    start_date: Optional[date] = None  # Default: 90 days ago
+    end_date: Optional[date] = None  # Default: today
+
+
+class InvestmentTransactionsSyncResponse(BaseModel):
+    """Response from syncing investment transactions"""
+    transactions_added: int
+    securities_count: int
+    total_transactions: int
+
+
+class InvestmentTransactionsListRequest(BaseModel):
+    """Request to list investment transactions"""
+    account_id: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    transaction_type: Optional[str] = None  # buy, sell, dividend, etc.
+    ticker: Optional[str] = None
+    limit: int = Field(default=50, ge=1, le=500)
+    offset: int = Field(default=0, ge=0)
+
+
+class InvestmentTransactionsListResponse(BaseModel):
+    """Response containing list of investment transactions"""
+    transactions: List[PlaidInvestmentTransactionResponse]
+    total: int
+
+
 # Item Management
 class PlaidItemResponse(BaseModel):
     """Response model for a Plaid item"""

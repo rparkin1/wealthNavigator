@@ -6,8 +6,11 @@
 import { useState, useCallback } from 'react';
 import {
   assessRisk,
+  assessRiskAuto,
   runStressTest,
+  runStressTestAuto,
   getHedgingRecommendations,
+  getHedgingRecommendationsAuto,
   runMonteCarloStress,
   getStressScenarios,
   healthCheck,
@@ -33,6 +36,7 @@ export interface UseRiskManagementResult {
   loadingRisk: boolean;
   riskError: string | null;
   assessPortfolioRisk: (request: RiskAssessmentRequest) => Promise<void>;
+  assessPortfolioRiskAuto: (expectedReturn?: number, volatility?: number) => Promise<void>;
   clearRiskResult: () => void;
 
   // Stress Testing
@@ -40,6 +44,7 @@ export interface UseRiskManagementResult {
   loadingStress: boolean;
   stressError: string | null;
   performStressTest: (request: StressTestRequest) => Promise<void>;
+  performStressTestAuto: (scenarios?: string[], includeAllPresets?: boolean) => Promise<void>;
   clearStressResult: () => void;
 
   // Hedging Strategies
@@ -47,6 +52,7 @@ export interface UseRiskManagementResult {
   loadingHedging: boolean;
   hedgingError: string | null;
   fetchHedgingStrategies: (request: HedgingRequest) => Promise<void>;
+  fetchHedgingStrategiesAuto: () => Promise<void>;
   clearHedgingResult: () => void;
 
   // Monte Carlo Simulation
@@ -129,6 +135,21 @@ export function useRiskManagement(): UseRiskManagementResult {
     }
   }, []);
 
+  const assessPortfolioRiskAuto = useCallback(async (expectedReturn: number = 0.08, volatility: number = 0.15) => {
+    setLoadingRisk(true);
+    setRiskError(null);
+    try {
+      const result = await assessRiskAuto(expectedReturn, volatility);
+      setRiskResult(result);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to assess risk';
+      setRiskError(message);
+      console.error('Risk assessment (auto) error:', error);
+    } finally {
+      setLoadingRisk(false);
+    }
+  }, []);
+
   const clearRiskResult = useCallback(() => {
     setRiskResult(null);
     setRiskError(null);
@@ -151,6 +172,21 @@ export function useRiskManagement(): UseRiskManagementResult {
     }
   }, []);
 
+  const performStressTestAuto = useCallback(async (scenarios?: string[], includeAllPresets: boolean = true) => {
+    setLoadingStress(true);
+    setStressError(null);
+    try {
+      const result = await runStressTestAuto(scenarios, includeAllPresets);
+      setStressResult(result);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to run stress test';
+      setStressError(message);
+      console.error('Stress test (auto) error:', error);
+    } finally {
+      setLoadingStress(false);
+    }
+  }, []);
+
   const clearStressResult = useCallback(() => {
     setStressResult(null);
     setStressError(null);
@@ -168,6 +204,21 @@ export function useRiskManagement(): UseRiskManagementResult {
       const message = error instanceof Error ? error.message : 'Failed to fetch hedging strategies';
       setHedgingError(message);
       console.error('Hedging strategies error:', error);
+    } finally {
+      setLoadingHedging(false);
+    }
+  }, []);
+
+  const fetchHedgingStrategiesAuto = useCallback(async () => {
+    setLoadingHedging(true);
+    setHedgingError(null);
+    try {
+      const result = await getHedgingRecommendationsAuto();
+      setHedgingResult(result);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch hedging strategies';
+      setHedgingError(message);
+      console.error('Hedging strategies (auto) error:', error);
     } finally {
       setLoadingHedging(false);
     }
@@ -274,6 +325,7 @@ export function useRiskManagement(): UseRiskManagementResult {
     loadingRisk,
     riskError,
     assessPortfolioRisk,
+    assessPortfolioRiskAuto,
     clearRiskResult,
 
     // Stress Testing
@@ -281,6 +333,7 @@ export function useRiskManagement(): UseRiskManagementResult {
     loadingStress,
     stressError,
     performStressTest,
+    performStressTestAuto,
     clearStressResult,
 
     // Hedging Strategies
@@ -288,6 +341,7 @@ export function useRiskManagement(): UseRiskManagementResult {
     loadingHedging,
     hedgingError,
     fetchHedgingStrategies,
+    fetchHedgingStrategiesAuto,
     clearHedgingResult,
 
     // Monte Carlo Simulation

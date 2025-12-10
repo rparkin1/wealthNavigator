@@ -1,11 +1,28 @@
 /**
  * Plaid Link Singleton Manager
  * Ensures only one Plaid Link script is loaded globally
+ * Handles React StrictMode double-mounting
  */
 
 let plaidScriptLoaded = false;
 let plaidScriptLoading = false;
+let plaidInstanceCreated = false;
 const plaidScriptCallbacks: Array<() => void> = [];
+
+/**
+ * Check if Plaid Link is already initialized
+ */
+export function isPlaidInitialized(): boolean {
+  return plaidInstanceCreated || !!document.querySelector('script[src*="plaid.com/link"]');
+}
+
+/**
+ * Mark Plaid as initialized (called by PlaidLinkButton)
+ */
+export function markPlaidInitialized(): void {
+  plaidInstanceCreated = true;
+  plaidScriptLoaded = true;
+}
 
 /**
  * Ensures Plaid Link script is loaded only once
@@ -56,5 +73,6 @@ export function ensurePlaidScript(): Promise<void> {
 export function resetPlaidScript() {
   plaidScriptLoaded = false;
   plaidScriptLoading = false;
+  plaidInstanceCreated = false;
   plaidScriptCallbacks.length = 0;
 }

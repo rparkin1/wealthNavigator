@@ -5,10 +5,15 @@ Emergency fund and safety reserve monitoring
 REQ-RISK-012: Reserve monitoring API endpoints
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 from typing import Optional, List
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.database import get_db
+from app.api.deps import get_current_user
+from app.models.user import User
+from app.services.portfolio_data_service import get_financial_snapshot
 from app.services.reserve_monitoring_service import (
     ReserveMonitoringService,
     ReserveMonitoringResult
@@ -133,6 +138,64 @@ async def monitor_reserves(request: ReserveMonitoringRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get(
+    "/monitor-auto",
+    response_model=ReserveMonitoringResult,
+    summary="Auto monitor reserves from database",
+    description="Automatically fetch financial data from database and monitor reserves"
+)
+async def monitor_reserves_auto(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Monitor emergency fund reserves using real financial data from database.
+
+    Automatically fetches:
+    - Current reserves from DEPOSITORY accounts (checking, savings)
+    - Monthly expenses from budget entries
+    - Monthly income from budget entries
+    - User preferences (dependents, etc.)
+
+    Then performs comprehensive reserve analysis with alerts and recommendations.
+
+    **Advantages:**
+    - No manual data entry required
+    - Always uses current financial state
+    - Consistent with database values
+    """
+    try:
+        # Fetch real financial data from database
+        financial_data = await get_financial_snapshot(
+            user_id=current_user.id,
+            db=db
+        )
+
+        if financial_data["monthly_expenses"] == 0:
+            raise HTTPException(
+                status_code=404,
+                detail="No expense data found. Please add budget entries first."
+            )
+
+        # Perform reserve monitoring with real data
+        service = ReserveMonitoringService()
+        result = service.monitor_reserves(
+            current_reserves=financial_data["current_reserves"],
+            monthly_expenses=financial_data["monthly_expenses"],
+            monthly_income=financial_data["monthly_income"],
+            has_dependents=financial_data["has_dependents"],
+            income_stability="stable",  # Could be stored in user preferences
+            job_security="secure"       # Could be stored in user preferences
+        )
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Reserve monitoring failed: {str(e)}")
 
 
 @router.post(

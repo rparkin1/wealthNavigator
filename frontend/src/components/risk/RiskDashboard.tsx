@@ -18,11 +18,12 @@ import { DiversificationAnalysisDashboard } from './DiversificationAnalysisDashb
 import { HedgingStrategyDashboard } from '../hedging/HedgingStrategyDashboard';
 
 export interface RiskDashboardProps {
-  portfolioValue: number;
-  allocation: Record<string, number>;
+  portfolioValue?: number;
+  allocation?: Record<string, number>;
   expectedReturn?: number;
   volatility?: number;
   onHedgingSelected?: (strategyType: string) => void;
+  usePlaidData?: boolean; // New prop to control whether to use Plaid data
 }
 
 export const RiskDashboard: React.FC<RiskDashboardProps> = ({
@@ -31,16 +32,19 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
   expectedReturn = 0.08,
   volatility = 0.15,
   onHedgingSelected,
+  usePlaidData = true, // Default to using Plaid data
 }) => {
   const {
     riskResult,
     loadingRisk,
     riskError,
     assessPortfolioRisk,
+    assessPortfolioRiskAuto,
     stressResult,
     loadingStress,
     stressError,
     performStressTest,
+    performStressTestAuto,
     scenarios,
     loadStressScenarios,
   } = useRiskManagement();
@@ -59,7 +63,11 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
 
   // Run initial risk assessment
   useEffect(() => {
-    if (portfolioValue && Object.keys(allocation).length > 0) {
+    if (usePlaidData) {
+      // Use Plaid data automatically
+      assessPortfolioRiskAuto(expectedReturn, volatility);
+    } else if (portfolioValue && allocation && Object.keys(allocation).length > 0) {
+      // Use manual data if provided
       assessPortfolioRisk({
         portfolio_value: portfolioValue,
         allocation,
@@ -67,14 +75,20 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
         volatility,
       });
     }
-  }, [portfolioValue, allocation, expectedReturn, volatility, assessPortfolioRisk]);
+  }, [usePlaidData, portfolioValue, allocation, expectedReturn, volatility, assessPortfolioRisk, assessPortfolioRiskAuto]);
 
   const handleStressTest = () => {
-    performStressTest({
-      portfolio_value: portfolioValue,
-      allocation,
-      scenarios: selectedScenarios,
-    });
+    if (usePlaidData) {
+      // Use Plaid data automatically
+      performStressTestAuto(selectedScenarios, true);
+    } else if (portfolioValue && allocation) {
+      // Use manual data if provided
+      performStressTest({
+        portfolio_value: portfolioValue,
+        allocation,
+        scenarios: selectedScenarios,
+      });
+    }
   };
 
   const handleScenarioToggle = (scenarioKey: string) => {
@@ -709,6 +723,7 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
           <HedgingStrategyDashboard
             portfolioValue={portfolioValue}
             allocation={allocation}
+            usePlaidData={usePlaidData}
             riskMetrics={{
               annual_volatility: volatility,
               beta: riskResult.metrics.beta,

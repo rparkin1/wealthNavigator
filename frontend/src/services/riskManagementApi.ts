@@ -183,6 +183,33 @@ export async function assessRisk(
 }
 
 /**
+ * Assess portfolio risk using real portfolio data from database (Plaid)
+ */
+export async function assessRiskAuto(
+  expectedReturn: number = 0.08,
+  volatility: number = 0.15
+): Promise<RiskAssessmentResult> {
+  const params = new URLSearchParams({
+    expected_return: expectedReturn.toString(),
+    volatility: volatility.toString(),
+  });
+
+  const response = await fetch(`${API_BASE_URL}${API_PREFIX}/assess-risk-auto?${params.toString()}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to assess risk');
+  }
+
+  return response.json();
+}
+
+/**
  * Run stress test suite
  */
 export async function runStressTest(
@@ -205,6 +232,34 @@ export async function runStressTest(
 }
 
 /**
+ * Run stress test using real portfolio data from database (Plaid)
+ */
+export async function runStressTestAuto(
+  scenarios?: string[],
+  includeAllPresets: boolean = true
+): Promise<StressTestingSuite> {
+  const params = new URLSearchParams();
+  if (scenarios) {
+    scenarios.forEach(s => params.append('scenarios', s));
+  }
+  params.append('include_all_presets', includeAllPresets.toString());
+
+  const response = await fetch(`${API_BASE_URL}${API_PREFIX}/stress-test-auto?${params.toString()}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to run stress test');
+  }
+
+  return response.json();
+}
+
+/**
  * Get hedging strategy recommendations
  */
 export async function getHedgingRecommendations(
@@ -216,6 +271,25 @@ export async function getHedgingRecommendations(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to get hedging recommendations');
+  }
+
+  return response.json();
+}
+
+/**
+ * Get hedging strategy recommendations using real portfolio data from database (Plaid)
+ */
+export async function getHedgingRecommendationsAuto(): Promise<HedgingRecommendation> {
+  const response = await fetch(`${API_BASE_URL}${API_PREFIX}/hedging-strategies-auto`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
 
   if (!response.ok) {
@@ -554,6 +628,26 @@ export async function analyzeDiversification(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to analyze diversification');
+  }
+
+  return response.json();
+}
+
+/**
+ * Analyze portfolio diversification using real portfolio data from database (Plaid)
+ * Automatically fetches holdings and performs diversification analysis
+ */
+export async function analyzeDiversificationAuto(): Promise<DiversificationAnalysisResult> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/diversification/analyze`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
 
   if (!response.ok) {

@@ -13,6 +13,7 @@ import InAppDocumentation from './components/help/InAppDocumentation';
 import { SkipLink } from './components/common/SkipLink';
 import { useOnboarding } from './hooks/useOnboarding';
 import { useGoals } from './hooks/useGoals';
+import { usePortfolioData } from './hooks/usePortfolioData';
 import './index.css';
 
 // Lazy load components for better error isolation
@@ -170,6 +171,9 @@ function App() {
 
   // Fetch goals for sensitivity analysis
   const { goals } = useGoals({ userId });
+
+  // Fetch real portfolio data from Plaid integration
+  const { summary, detailed, financialSnapshot, loading: portfolioLoading } = usePortfolioData(userId);
 
   // Onboarding state
   const {
@@ -351,11 +355,25 @@ function App() {
             </div>
             <ErrorBoundary fallback={<LoadingView message="Loading hedging strategies..." />}>
               <Suspense fallback={<LoadingView message="Loading hedging strategies..." />}>
-                <HedgingStrategyDashboard
-                  portfolioValue={500000}
-                  allocation={{ stocks: 0.7, bonds: 0.3 }}
-                  riskMetrics={{ volatility: 0.15, beta: 1.1 }}
-                />
+                {portfolioLoading ? (
+                  <LoadingView message="Loading portfolio data..." />
+                ) : summary ? (
+                  <HedgingStrategyDashboard
+                    portfolioValue={summary.total_value}
+                    allocation={summary.allocation}
+                    riskMetrics={{ volatility: 0.15, beta: 1.1 }}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-96 text-gray-500">
+                    <p className="text-lg mb-4">No portfolio data found. Please add holdings first.</p>
+                    <button
+                      onClick={() => setCurrentView('portfolio-data')}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      Go to Portfolio Data
+                    </button>
+                  </div>
+                )}
               </Suspense>
             </ErrorBoundary>
           </>
@@ -406,12 +424,15 @@ function App() {
             </div>
             <ErrorBoundary fallback={<LoadingView message="Loading risk management..." />}>
               <Suspense fallback={<LoadingView message="Loading risk management..." />}>
-                <RiskDashboard
-                  portfolioValue={500000}
-                  allocation={{ stocks: 0.6, bonds: 0.3, cash: 0.1 }}
-                  expectedReturn={0.08}
-                  volatility={0.15}
-                />
+                {portfolioLoading ? (
+                  <LoadingView message="Loading portfolio data..." />
+                ) : (
+                  <RiskDashboard
+                    usePlaidData={true}
+                    expectedReturn={0.08}
+                    volatility={0.15}
+                  />
+                )}
               </Suspense>
             </ErrorBoundary>
           </>
@@ -424,14 +445,28 @@ function App() {
             </div>
             <ErrorBoundary fallback={<LoadingView message="Loading reserve monitoring..." />}>
               <Suspense fallback={<LoadingView message="Loading reserve monitoring..." />}>
-                <ReserveMonitoringDashboard
-                  currentReserves={25000}
-                  monthlyExpenses={5000}
-                  monthlyIncome={8000}
-                  hasDependents={true}
-                  incomeStability="stable"
-                  jobSecurity="secure"
-                />
+                {portfolioLoading ? (
+                  <LoadingView message="Loading financial data..." />
+                ) : financialSnapshot ? (
+                  <ReserveMonitoringDashboard
+                    currentReserves={financialSnapshot.current_reserves}
+                    monthlyExpenses={financialSnapshot.monthly_expenses}
+                    monthlyIncome={financialSnapshot.monthly_income}
+                    hasDependents={financialSnapshot.has_dependents}
+                    incomeStability="stable"
+                    jobSecurity="secure"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-96 text-gray-500">
+                    <p className="text-lg mb-4">No financial data found. Please add budget information first.</p>
+                    <button
+                      onClick={() => setCurrentView('budget')}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      Go to Budget
+                    </button>
+                  </div>
+                )}
               </Suspense>
             </ErrorBoundary>
           </>
@@ -444,10 +479,34 @@ function App() {
             </div>
             <ErrorBoundary fallback={<LoadingView message="Loading diversification analysis..." />}>
               <Suspense fallback={<LoadingView message="Loading diversification analysis..." />}>
-                <DiversificationAnalysisDashboard
-                  portfolioValue={500000}
-                  holdings={[]}
-                />
+                {portfolioLoading ? (
+                  <LoadingView message="Loading portfolio data..." />
+                ) : detailed ? (
+                  <DiversificationAnalysisDashboard
+                    portfolioValue={detailed.summary.total_value}
+                    holdings={detailed.holdings.map(h => ({
+                      symbol: h.symbol,
+                      name: h.name,
+                      value: h.value,
+                      weight: h.weight,
+                      sector: 'Unknown', // TODO: Add sector data to backend
+                      geography: 'Unknown', // TODO: Add geography data to backend
+                      asset_class: h.asset_class,
+                      security_type: h.security_type as 'stock' | 'etf' | 'mutual_fund' | 'bond' | 'other',
+                      manager: 'Unknown', // TODO: Add manager data to backend
+                    }))}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-96 text-gray-500">
+                    <p className="text-lg mb-4">No holdings data found. Please add holdings first.</p>
+                    <button
+                      onClick={() => setCurrentView('portfolio-data')}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      Go to Portfolio Data
+                    </button>
+                  </div>
+                )}
               </Suspense>
             </ErrorBoundary>
           </>
