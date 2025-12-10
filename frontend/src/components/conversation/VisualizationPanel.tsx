@@ -6,6 +6,7 @@
 
 import { useState } from 'react';
 import { type VisualizationEvent } from '../../services/streaming';
+import { FanChart } from '../simulation/FanChart';
 
 interface VisualizationPanelProps {
   visualizations: VisualizationEvent[];
@@ -90,7 +91,7 @@ function VisualizationRenderer({ type, data, config }: VisualizationRendererProp
       return <BarChartPlaceholder data={data} config={config} />;
 
     case 'fan_chart':
-      return <FanChartPlaceholder data={data} config={config} />;
+      return <FanChartReal data={data} config={config} />;
 
     case 'table':
       return <TableRenderer data={data} config={config} />;
@@ -222,7 +223,36 @@ function BarChartPlaceholder({ data }: { data: any; config: any }) {
   );
 }
 
-function FanChartPlaceholder({ data }: { data: any; config: any }) {
+function FanChartReal({ data, config }: { data: any; config: any }) {
+  // Transform backend data format to FanChart component format
+  if (!data || !data.portfolio_projections) {
+    return <FanChartFallback data={data} />;
+  }
+
+  const projections = data.portfolio_projections.map((proj: any) => ({
+    year: proj.year,
+    median: proj.median,
+    p10: proj.p10,
+    p25: proj.p25,
+    p75: proj.p75,
+    p90: proj.p90
+  }));
+
+  const goalAmount = data.goal_amount || config?.goalAmount;
+  const title = config?.title || 'Monte Carlo Portfolio Projections';
+
+  return (
+    <FanChart
+      projections={projections}
+      goalAmount={goalAmount}
+      title={title}
+      width={800}
+      height={500}
+    />
+  );
+}
+
+function FanChartFallback({ data }: { data: any }) {
   return (
     <div className="bg-gray-50 rounded-lg p-8 text-center">
       <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -230,7 +260,8 @@ function FanChartPlaceholder({ data }: { data: any; config: any }) {
       </svg>
       <p className="text-sm font-medium text-gray-900">Fan Chart</p>
       <p className="text-xs text-gray-500 mt-1">Monte Carlo simulation results</p>
-      <pre className="mt-4 text-left text-xs bg-white p-4 rounded border border-gray-200 overflow-x-auto">
+      <p className="text-xs text-red-600 mt-2">Waiting for simulation data...</p>
+      <pre className="mt-4 text-left text-xs bg-white p-4 rounded border border-gray-200 overflow-x-auto max-h-64">
         {JSON.stringify(data, null, 2)}
       </pre>
     </div>
