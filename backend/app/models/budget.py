@@ -103,10 +103,10 @@ class BudgetEntry(Base):
     __tablename__ = "budget_entries"
 
     # Primary key
-    id = Column(PostgreSQL_UUID(as_uuid=True), primary_key=True, default=uuid4, index=True)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid4()), index=True)
 
     # User relationship
-    user_id = Column(PostgreSQL_UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False, index=True)
 
     # Budget entry details
     category = Column(Enum(BudgetCategory), nullable=False, index=True)
@@ -132,7 +132,7 @@ class BudgetEntry(Base):
     deleted_at = Column(DateTime, nullable=True)  # Soft delete
 
     # Recurring transaction tracking
-    recurring_transaction_id = Column(PostgreSQL_UUID(as_uuid=True), ForeignKey("recurring_transactions.id"), nullable=True, index=True)
+    recurring_transaction_id = Column(String(36), ForeignKey("recurring_transactions.id"), nullable=True, index=True)
 
     # Relationships
     user = relationship("User", back_populates="budget_entries")
@@ -209,10 +209,10 @@ class BudgetAnalysis(Base):
     __tablename__ = "budget_analyses"
 
     # Primary key
-    id = Column(PostgreSQL_UUID(as_uuid=True), primary_key=True, default=uuid4, index=True)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid4()), index=True)
 
     # User relationship
-    user_id = Column(PostgreSQL_UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False, index=True)
 
     # Analysis details
     analysis_type = Column(String(50), nullable=False)  # "suggestions", "patterns", "health"
