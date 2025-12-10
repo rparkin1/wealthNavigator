@@ -45,12 +45,15 @@ async def health_check():
 
 # Import and include routers
 from app.api.threads import router as threads_router
+from app.api.chat import router as chat_router
+from app.api.goals import router as goals_router
+
 app.include_router(threads_router, prefix=settings.API_V1_PREFIX)
+app.include_router(chat_router, prefix=f"{settings.API_V1_PREFIX}/chat", tags=["chat"])
+app.include_router(goals_router, prefix=f"{settings.API_V1_PREFIX}/goals", tags=["goals"])
 
 # Additional routers will be added as we build them
-# from app.api import chat, goals, portfolio
-# app.include_router(chat.router, prefix=f"{settings.API_V1_PREFIX}/chat", tags=["chat"])
-# app.include_router(goals.router, prefix=f"{settings.API_V1_PREFIX}/goals", tags=["goals"])
+# from app.api import portfolio
 # app.include_router(portfolio.router, prefix=f"{settings.API_V1_PREFIX}/portfolio", tags=["portfolio"])
 
 
