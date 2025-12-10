@@ -76,12 +76,33 @@ class ESGConstraints(BaseModel):
     allow_not_rated: bool = True
 
 
+class ESGTradeOffAnalysis(BaseModel):
+    """Analysis of ESG constraint trade-offs"""
+    impact_on_expected_return: float  # Expected return impact (negative = drag)
+    impact_on_risk: float  # Risk/volatility impact
+    impact_on_diversification: float  # Diversification score (0-1)
+    num_assets_excluded: int
+    explanation: str
+
+
+class ESGAlternative(BaseModel):
+    """Alternative asset suggestion"""
+    asset_code: str
+    asset_name: str
+    esg_rating: str
+    why_recommended: str
+    expected_return: float
+    volatility: float
+
+
 class ESGScreeningResult(BaseModel):
     """ESG screening result"""
     eligible_assets: List[str]
     excluded_assets: Dict[str, str]  # {asset_code: reason}
     portfolio_esg_score: float
     recommendations: List[str]
+    trade_off_analysis: Optional[ESGTradeOffAnalysis] = None  # NEW
+    alternative_suggestions: List[ESGAlternative] = []  # NEW
 
 
 # ESG profiles for asset classes in library
@@ -221,19 +242,23 @@ class ESGScreener:
     def screen_assets(
         self,
         asset_codes: List[str],
-        constraints: ESGConstraints
+        constraints: ESGConstraints,
+        include_trade_off_analysis: bool = True,
+        include_alternatives: bool = True
     ) -> ESGScreeningResult:
         """
         Screen asset classes based on ESG constraints.
 
-        REQ-PORT-011: Constraint definition (ESG/ethical screening)
+        REQ-PORT-011: Constraint definition (ESG/ethical screening with trade-offs)
 
         Args:
             asset_codes: List of asset codes to screen
             constraints: ESG constraints to apply
+            include_trade_off_analysis: Include trade-off analysis
+            include_alternatives: Include alternative suggestions
 
         Returns:
-            Screening result with eligible assets
+            Screening result with eligible assets, trade-offs, and alternatives
         """
         eligible_assets = []
         excluded_assets = {}
@@ -260,11 +285,31 @@ class ESGScreener:
             constraints
         )
 
+        # NEW: Trade-off analysis
+        trade_off_analysis = None
+        if include_trade_off_analysis:
+            trade_off_analysis = self._analyze_trade_offs(
+                asset_codes,
+                eligible_assets,
+                excluded_assets,
+                constraints
+            )
+
+        # NEW: Alternative suggestions
+        alternative_suggestions = []
+        if include_alternatives:
+            alternative_suggestions = self._suggest_alternatives(
+                excluded_assets,
+                constraints
+            )
+
         return ESGScreeningResult(
             eligible_assets=eligible_assets,
             excluded_assets=excluded_assets,
             portfolio_esg_score=portfolio_esg_score,
-            recommendations=recommendations
+            recommendations=recommendations,
+            trade_off_analysis=trade_off_analysis,
+            alternative_suggestions=alternative_suggestions
         )
 
     def _check_asset_eligibility(
@@ -438,6 +483,220 @@ class ESGScreener:
                 comparison["best_overall"] = asset_code
 
         return comparison
+
+    def _analyze_trade_offs(
+        self,
+        all_assets: List[str],
+        eligible_assets: List[str],
+        excluded_assets: Dict[str, str],
+        constraints: ESGConstraints
+    ) -> ESGTradeOffAnalysis:
+        """
+        Analyze trade-offs of ESG constraints.
+
+        REQ-PORT-011: Explaining trade-offs of constraints
+
+        Returns:
+            Trade-off analysis
+        """
+        from app.services.portfolio.asset_class_library import ASSET_CLASS_LIBRARY
+
+        # Calculate impact on expected return
+        all_returns = []
+        eligible_returns = []
+
+        for asset_code in all_assets:
+            asset = ASSET_CLASS_LIBRARY.get(asset_code)
+            if asset:
+                all_returns.append(asset.expected_return)
+                if asset_code in eligible_assets:
+                    eligible_returns.append(asset.expected_return)
+
+        avg_all_return = sum(all_returns) / len(all_returns) if all_returns else 0
+        avg_eligible_return = sum(eligible_returns) / len(eligible_returns) if eligible_returns else 0
+        return_impact = avg_eligible_return - avg_all_return
+
+        # Calculate impact on risk/volatility
+        all_vols = []
+        eligible_vols = []
+
+        for asset_code in all_assets:
+            asset = ASSET_CLASS_LIBRARY.get(asset_code)
+            if asset:
+                all_vols.append(asset.volatility)
+                if asset_code in eligible_assets:
+                    eligible_vols.append(asset.volatility)
+
+        avg_all_vol = sum(all_vols) / len(all_vols) if all_vols else 0
+        avg_eligible_vol = sum(eligible_vols) / len(eligible_vols) if eligible_vols else 0
+        risk_impact = avg_eligible_vol - avg_all_vol
+
+        # Calculate diversification impact
+        diversification_score = len(eligible_assets) / len(all_assets) if all_assets else 0
+
+        # Generate explanation
+        explanation = self._generate_trade_off_explanation(
+            return_impact,
+            risk_impact,
+            diversification_score,
+            len(excluded_assets),
+            constraints
+        )
+
+        return ESGTradeOffAnalysis(
+            impact_on_expected_return=round(return_impact, 4),
+            impact_on_risk=round(risk_impact, 4),
+            impact_on_diversification=round(diversification_score, 2),
+            num_assets_excluded=len(excluded_assets),
+            explanation=explanation
+        )
+
+    def _generate_trade_off_explanation(
+        self,
+        return_impact: float,
+        risk_impact: float,
+        diversification_score: float,
+        num_excluded: int,
+        constraints: ESGConstraints
+    ) -> str:
+        """Generate plain language trade-off explanation"""
+
+        explanation = f"""**Impact of Your ESG Constraints:**
+
+**Expected Return**: Your ESG criteria {'reduce' if return_impact < 0 else 'increase' if return_impact > 0 else 'have minimal impact on'} expected returns by approximately **{abs(return_impact):.2%}** annually. """
+
+        if return_impact < -0.01:
+            explanation += "This is because some excluded assets (like energy stocks) have historically provided strong returns. However, this trade-off aligns your investments with your values."
+        elif return_impact > 0.01:
+            explanation += "This is because ESG-focused funds often avoid underperforming sectors and emphasize quality companies."
+        else:
+            explanation += "ESG investing can maintain similar returns to non-ESG approaches with proper diversification."
+
+        explanation += f"""
+
+**Risk Level**: Your constraints {'increase' if risk_impact > 0 else 'decrease' if risk_impact < 0 else 'maintain'} portfolio volatility by approximately **{abs(risk_impact):.2%}**. """
+
+        if abs(risk_impact) > 0.01:
+            explanation += "This reflects changes in sector exposure from your ESG filters."
+        else:
+            explanation += "Your ESG criteria don't significantly alter your risk profile."
+
+        explanation += f"""
+
+**Diversification**: You're working with **{diversification_score:.0%}** of the available asset universe ({num_excluded} assets excluded). """
+
+        if diversification_score < 0.50:
+            explanation += "⚠️ **SIGNIFICANT IMPACT**: Your strict criteria substantially limit diversification. Consider:\n" \
+                          "  - Relaxing some constraints\n" \
+                          "  - Focusing on your highest-priority ESG values\n" \
+                          "  - Accepting 'average' rated assets instead of requiring 'leader' ratings"
+        elif diversification_score < 0.75:
+            explanation += "**MODERATE IMPACT**: Your constraints reduce but don't eliminate diversification. This is a reasonable trade-off for values-aligned investing."
+        else:
+            explanation += "**MINIMAL IMPACT**: Your ESG criteria still allow for strong diversification across asset classes."
+
+        explanation += f"""
+
+**Bottom Line**: {self._get_bottom_line_message(return_impact, risk_impact, diversification_score)}"""
+
+        return explanation
+
+    def _get_bottom_line_message(
+        self,
+        return_impact: float,
+        risk_impact: float,
+        diversification_score: float
+    ) -> str:
+        """Get bottom line message about trade-offs"""
+
+        if diversification_score < 0.50:
+            return "Your ESG criteria are very restrictive and significantly impact portfolio construction. Consider if all constraints are necessary."
+        elif abs(return_impact) > 0.02 or abs(risk_impact) > 0.02:
+            return "Your ESG criteria have a meaningful but manageable impact on returns and risk. This is a reasonable trade-off for values-aligned investing."
+        else:
+            return "Your ESG criteria allow you to invest according to your values with minimal impact on expected returns and risk. Well-balanced approach!"
+
+    def _suggest_alternatives(
+        self,
+        excluded_assets: Dict[str, str],
+        constraints: ESGConstraints
+    ) -> List[ESGAlternative]:
+        """
+        Suggest alternative assets to replace excluded ones.
+
+        REQ-PORT-011: Suggesting alternatives to meet user values
+
+        Returns:
+            List of alternative asset suggestions
+        """
+        from app.services.portfolio.asset_class_library import ASSET_CLASS_LIBRARY
+
+        alternatives = []
+
+        # If fossil fuels excluded, suggest ESG/green alternatives
+        if ExclusionCriteria.FOSSIL_FUELS in constraints.exclusions:
+            if "ENERGY" in excluded_assets:
+                alternatives.append(ESGAlternative(
+                    asset_code="US_ESG",
+                    asset_name="US ESG Equity",
+                    esg_rating="LEADER",
+                    why_recommended="Excludes fossil fuels while maintaining diversified equity exposure. "
+                                   "Focuses on companies with strong environmental practices.",
+                    expected_return=0.09,
+                    volatility=0.16
+                ))
+                alternatives.append(ESGAlternative(
+                    asset_code="GREEN_BOND",
+                    asset_name="Green Bonds",
+                    esg_rating="LEADER",
+                    why_recommended="Fixed income alternative that funds environmental projects. "
+                                   "Provides stable income while supporting clean energy transition.",
+                    expected_return=0.04,
+                    volatility=0.06
+                ))
+
+        # If requiring high ESG ratings, suggest leader-rated assets
+        if constraints.minimum_esg_rating == ESGRating.LEADER:
+            leader_assets = [
+                ("US_ESG", "US ESG Equity", "Broad US equity exposure with ESG focus"),
+                ("INTL_ESG", "International ESG Equity", "International diversification with ESG criteria"),
+                ("GREEN_BOND", "Green Bonds", "Fixed income focused on environmental projects")
+            ]
+
+            for asset_code, name, reason in leader_assets:
+                if asset_code not in excluded_assets:
+                    asset = ASSET_CLASS_LIBRARY.get(asset_code)
+                    if asset:
+                        alternatives.append(ESGAlternative(
+                            asset_code=asset_code,
+                            asset_name=name,
+                            esg_rating="LEADER",
+                            why_recommended=reason,
+                            expected_return=asset.expected_return,
+                            volatility=asset.volatility
+                        ))
+
+        # If many assets excluded, suggest broad ESG funds
+        if len(excluded_assets) > len(excluded_assets) * 0.5:  # >50% excluded
+            alternatives.append(ESGAlternative(
+                asset_code="US_ESG",
+                asset_name="US ESG Equity",
+                esg_rating="LEADER",
+                why_recommended="Broad diversification while meeting multiple ESG criteria. "
+                               "Good core holding for restrictive ESG constraints.",
+                expected_return=0.09,
+                volatility=0.16
+            ))
+
+        # Remove duplicates
+        seen = set()
+        unique_alternatives = []
+        for alt in alternatives:
+            if alt.asset_code not in seen:
+                seen.add(alt.asset_code)
+                unique_alternatives.append(alt)
+
+        return unique_alternatives[:5]  # Return top 5 alternatives
 
 
 def create_esg_preset(preset_name: str) -> ESGConstraints:

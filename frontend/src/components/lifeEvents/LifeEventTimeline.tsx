@@ -15,9 +15,10 @@ interface LifeEventTimelineProps {
   currentYear?: number;
   width?: number;
   height?: number;
+  onEventClick?: (id: string) => void;
 }
 
-export function LifeEventTimeline({ events, currentYear = 2025, width = 800, height = 200 }: LifeEventTimelineProps) {
+export function LifeEventTimeline({ events, currentYear = 2025, width = 800, height = 200, onEventClick }: LifeEventTimelineProps) {
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
@@ -47,26 +48,29 @@ export function LifeEventTimeline({ events, currentYear = 2025, width = 800, hei
     g.append('text').attr('x', x(currentYear)).attr('y', -10).attr('text-anchor', 'middle')
       .attr('fill', '#3b82f6').attr('font-weight', 'bold').text('Today');
 
-    events.forEach((event, i) => {
-      const laneIndex = eventTypes.indexOf(event.type);
+    events.forEach((ev) => {
+      const laneIndex = eventTypes.indexOf(ev.type);
       const yPos = laneIndex * laneHeight + laneHeight / 3;
 
       g.append('rect')
-        .attr('x', x(event.year))
+        .attr('x', x(ev.year))
         .attr('y', yPos)
-        .attr('width', Math.max(5, x(event.year + event.duration) - x(event.year)))
+        .attr('width', Math.max(5, x(ev.year + ev.duration) - x(ev.year)))
         .attr('height', laneHeight / 3)
-        .attr('fill', event.enabled ? '#10b981' : '#9ca3af')
+        .attr('fill', ev.enabled ? '#10b981' : '#9ca3af')
         .attr('opacity', 0.7)
-        .attr('rx', 3);
+        .attr('rx', 3)
+        .style('cursor', onEventClick ? 'pointer' : 'default')
+        .on('click', () => onEventClick?.(ev.id));
 
       g.append('text')
-        .attr('x', x(event.year) + 5)
+        .attr('x', x(ev.year) + 5)
         .attr('y', yPos + laneHeight / 6)
         .attr('dy', '0.35em')
         .attr('font-size', '11px')
         .attr('fill', '#fff')
-        .text(event.name);
+        .text(ev.name)
+        .style('pointer-events', 'none');
     });
 
     g.append('g').attr('transform', 'translate(0,' + innerHeight + ')')
@@ -81,7 +85,7 @@ export function LifeEventTimeline({ events, currentYear = 2025, width = 800, hei
         .attr('fill', '#6b7280')
         .text(type);
     });
-  }, [events, currentYear, width, height]);
+  }, [events, currentYear, width, height, onEventClick]);
 
   return (
     <div className="card">
