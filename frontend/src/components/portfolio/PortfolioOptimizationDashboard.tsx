@@ -17,6 +17,8 @@ import type {
   Goal,
   MultiLevelOptimizationRequest,
 } from '../../services/portfolioOptimizationApi';
+import { FactorAttributionAnalysis } from './FactorAttributionAnalysis';
+import { CAPMAnalysis } from './CAPMAnalysis';
 
 export const PortfolioOptimizationDashboard: React.FC = () => {
   const {
@@ -35,7 +37,7 @@ export const PortfolioOptimizationDashboard: React.FC = () => {
     fetchAlerts,
   } = usePortfolioOptimization();
 
-  const [selectedTab, setSelectedTab] = useState<'optimize' | 'insights' | 'alerts'>('optimize');
+  const [selectedTab, setSelectedTab] = useState<'optimize' | 'insights' | 'alerts' | 'factor' | 'capm'>('optimize');
   const [riskTolerance, setRiskTolerance] = useState(0.6);
   const [timeHorizon, setTimeHorizon] = useState(20);
 
@@ -133,6 +135,18 @@ export const PortfolioOptimizationDashboard: React.FC = () => {
           onClick={() => setSelectedTab('alerts')}
         >
           Alerts ({alerts.length})
+        </button>
+        <button
+          className={selectedTab === 'factor' ? 'active' : ''}
+          onClick={() => setSelectedTab('factor')}
+        >
+          Factor Attribution
+        </button>
+        <button
+          className={selectedTab === 'capm' ? 'active' : ''}
+          onClick={() => setSelectedTab('capm')}
+        >
+          CAPM Analysis
         </button>
       </div>
 
@@ -326,6 +340,20 @@ export const PortfolioOptimizationDashboard: React.FC = () => {
               <p>No alerts. Your portfolio is well-optimized!</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Factor Attribution Tab */}
+      {selectedTab === 'factor' && (
+        <div className="factor-section">
+          <FactorAttributionAnalysis demoMode={true} />
+        </div>
+      )}
+
+      {/* CAPM Analysis Tab */}
+      {selectedTab === 'capm' && (
+        <div className="capm-section">
+          <CAPMAnalysis demoMode={true} />
         </div>
       )}
 
