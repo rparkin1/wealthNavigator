@@ -106,6 +106,47 @@ class ConflictCheckResponse(BaseModel):
 
 # Endpoints
 
+@router.get(
+    "",
+    response_model=List[DependencyResponse],
+    summary="Get all goal dependencies"
+)
+async def get_all_dependencies(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get all goal dependencies for the current user.
+
+    Returns a list of all dependency relationships between the user's goals.
+    """
+    from sqlalchemy import select
+    from app.models.goal import Goal
+
+    # Query all goals with dependencies for the current user
+    result = await db.execute(
+        select(Goal).where(
+            Goal.user_id == current_user.id,
+            Goal.depends_on_goal_id.isnot(None)
+        )
+    )
+    goals_with_dependencies = result.scalars().all()
+
+    # Convert to response format
+    dependencies = []
+    for goal in goals_with_dependencies:
+        dependencies.append(
+            DependencyResponse(
+                goal_id=goal.id,
+                depends_on_goal_id=goal.depends_on_goal_id,
+                dependency_type=goal.dependency_type.value if goal.dependency_type else "unknown",
+                status=goal.status or "active"
+            )
+        )
+
+    return dependencies
+
+
 @router.post(
     "/{goal_id}/dependencies",
     response_model=DependencyResponse,

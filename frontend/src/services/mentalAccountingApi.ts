@@ -18,6 +18,7 @@ import type {
 } from '../types/mentalAccounting';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const BASE_PATH = '/api/v1/goal-planning/mental-accounting';
 
 /**
  * Create a mental account bucket for a goal
@@ -26,7 +27,7 @@ export async function createMentalAccountBucket(
   request: CreateBucketRequest
 ): Promise<MentalAccountBucket> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/mental-accounting/create-bucket`,
+    `${API_BASE_URL}${BASE_PATH}/create-bucket`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -57,7 +58,7 @@ export async function getAllMentalAccounts(
   });
 
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/mental-accounting/users/${userId}/all-buckets?${params}`,
+    `${API_BASE_URL}${BASE_PATH}/users/${userId}/all-buckets?${params}`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -87,7 +88,7 @@ export async function getGoalMentalAccount(
   });
 
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/mental-accounting/${goalId}/bucket?${params}`,
+    `${API_BASE_URL}${BASE_PATH}/${goalId}/bucket?${params}`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -110,7 +111,7 @@ export async function allocateAccountToGoal(
   request: AllocateAccountRequest
 ): Promise<AccountAllocation> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/mental-accounting/allocate-account`,
+    `${API_BASE_URL}${BASE_PATH}/allocate-account`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -134,7 +135,7 @@ export async function analyzeRebalancingNeeds(
   request: AnalyzeRebalancingRequest
 ): Promise<RebalancingAnalysis> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/mental-accounting/analyze-rebalancing`,
+    `${API_BASE_URL}${BASE_PATH}/analyze-rebalancing`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -158,7 +159,7 @@ export async function projectMentalAccountGrowth(
   request: ProjectGrowthRequest
 ): Promise<GrowthProjection> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/mental-accounting/project-growth`,
+    `${API_BASE_URL}${BASE_PATH}/project-growth`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -182,7 +183,7 @@ export async function getMentalAccountingDashboard(
   userId: string
 ): Promise<MentalAccountingDashboard> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/mental-accounting/dashboard?user_id=${userId}`,
+    `${API_BASE_URL}${BASE_PATH}/dashboard?user_id=${userId}`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },

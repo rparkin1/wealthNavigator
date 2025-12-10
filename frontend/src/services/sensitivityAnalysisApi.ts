@@ -5,7 +5,7 @@
  * tornado diagrams, heat maps, threshold analysis, and break-even calculations.
  */
 
-import api from './api';
+import { apiClient } from './api';
 import type {
   OneWaySensitivityRequest,
   OneWaySensitivityResult,
@@ -47,7 +47,7 @@ export const sensitivityAnalysisApi = {
   async oneWaySensitivity(
     request: OneWaySensitivityRequest
   ): Promise<OneWaySensitivityResult> {
-    const response = await api.post<OneWaySensitivityResult>(
+    const response = await apiClient.post<OneWaySensitivityResult>(
       `${BASE_URL}/one-way`,
       request
     );
@@ -78,7 +78,7 @@ export const sensitivityAnalysisApi = {
   async twoWaySensitivity(
     request: TwoWaySensitivityRequest
   ): Promise<TwoWaySensitivityResult> {
-    const response = await api.post<TwoWaySensitivityResult>(
+    const response = await apiClient.post<TwoWaySensitivityResult>(
       `${BASE_URL}/two-way`,
       request
     );
@@ -107,7 +107,7 @@ export const sensitivityAnalysisApi = {
   async thresholdAnalysis(
     request: ThresholdAnalysisRequest
   ): Promise<ThresholdAnalysisResult> {
-    const response = await api.post<ThresholdAnalysisResult>(
+    const response = await apiClient.post<ThresholdAnalysisResult>(
       `${BASE_URL}/threshold`,
       request
     );
@@ -138,7 +138,7 @@ export const sensitivityAnalysisApi = {
   async breakEvenAnalysis(
     request: BreakEvenAnalysisRequest
   ): Promise<BreakEvenAnalysisResult> {
-    const response = await api.post<BreakEvenAnalysisResult>(
+    const response = await apiClient.post<BreakEvenAnalysisResult>(
       `${BASE_URL}/break-even`,
       request
     );
@@ -160,7 +160,7 @@ export const sensitivityAnalysisApi = {
    * ```
    */
   async getSupportedVariables(): Promise<SupportedVariablesResponse> {
-    const response = await api.get<SupportedVariablesResponse>(
+    const response = await apiClient.get<SupportedVariablesResponse>(
       `${BASE_URL}/supported-variables`
     );
     return response.data;
@@ -174,7 +174,7 @@ export const sensitivityAnalysisApi = {
    * @returns Service health status
    */
   async healthCheck(): Promise<{ service: string; status: string; features: string[] }> {
-    const response = await api.get<{ service: string; status: string; features: string[] }>(
+    const response = await apiClient.get<{ service: string; status: string; features: string[] }>(
       `${BASE_URL}/health`
     );
     return response.data;

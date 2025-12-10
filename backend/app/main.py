@@ -65,12 +65,12 @@ from app.api.v1.endpoints.goal_funding import router as goal_funding_router
 from app.api.v1.endpoints.mental_accounting import router as mental_accounting_router
 from app.api.v1.endpoints.portfolio_optimization import router as portfolio_optimization_router
 from app.api.v1.endpoints.risk_management import router as risk_management_router
+from app.api.v1.endpoints.diversification import router as diversification_router
 from app.api.v1.endpoints.reserve_monitoring import router as reserve_monitoring_router
 from app.api.v1.endpoints.tax_management import router as tax_management_router
 from app.api.v1.endpoints.estate_planning import router as estate_planning_router
 from app.api.v1.endpoints.insurance_optimization import router as insurance_optimization_router
-# TEMPORARILY DISABLED - import error with MonteCarloEngine
-# from app.api.v1.endpoints.sensitivity_analysis import router as sensitivity_analysis_router
+from app.api.v1.endpoints.sensitivity_analysis import router as sensitivity_analysis_router
 
 app.include_router(threads_router, prefix=settings.API_V1_PREFIX)
 app.include_router(chat_router, prefix=f"{settings.API_V1_PREFIX}/chat", tags=["chat"])
@@ -99,6 +99,9 @@ app.include_router(portfolio_optimization_router, prefix=f"{settings.API_V1_PREF
 # Risk Management v1 endpoints
 app.include_router(risk_management_router, prefix=f"{settings.API_V1_PREFIX}/risk-management", tags=["risk-management"])
 
+# Diversification Analysis v1 endpoints
+app.include_router(diversification_router, prefix=f"{settings.API_V1_PREFIX}/diversification", tags=["risk-management", "diversification"])
+
 # Reserve Monitoring v1 endpoints
 app.include_router(reserve_monitoring_router, prefix=settings.API_V1_PREFIX, tags=["reserve-monitoring"])
 
@@ -112,8 +115,7 @@ app.include_router(estate_planning_router, prefix=settings.API_V1_PREFIX, tags=[
 app.include_router(insurance_optimization_router, prefix=settings.API_V1_PREFIX, tags=["insurance-optimization"])
 
 # Sensitivity Analysis v1 endpoints
-# TEMPORARILY DISABLED - import error with MonteCarloEngine
-# app.include_router(sensitivity_analysis_router, prefix=settings.API_V1_PREFIX, tags=["sensitivity-analysis"])
+app.include_router(sensitivity_analysis_router, prefix=settings.API_V1_PREFIX, tags=["sensitivity-analysis"])
 
 # Section 6: What-If Analysis & Scenario Planning - NEW!
 from app.api.v1 import life_events, historical_scenarios
