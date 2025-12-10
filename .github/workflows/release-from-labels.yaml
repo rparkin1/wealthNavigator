@@ -1,0 +1,125 @@
+name: Release from PR labels
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write   # needed to push tags and create releases
+  pull-requests: read
+
+jobs:
+  determine-version:
+    name: Determine next version from labels
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.semver.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # we need history & tags
+
+      - name: Get last tag
+        id: last_tag
+        run: |
+          if git describe --tags --abbrev=0 >/dev/null 2>&1; then
+            echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+          else
+            echo "tag=0.0.0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get merged PRs since last tag
+        id: prs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          from="${{ steps.last_tag.outputs.tag }}"
+          if [ "$from" = "0.0.0" ]; then
+            range=""
+          else
+            range="${from}..HEAD"
+          fi
+
+          # Get merged PR numbers from commit messages like "Merge pull request #123"
+          prs=$(git log --oneline $range | sed -n 's/.*#\([0-9]\+\).*/\1/p' | sort -u)
+          echo "prs=$prs" >> $GITHUB_OUTPUT
+
+      - name: Decide highest-impact label
+        id: impact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PRS: ${{ steps.prs.outputs.prs }}
+        run: |
+          impact="patch"  # default
+          for pr in $PRS; do
+            labels=$(gh pr view "$pr" --repo "$REPO" --json labels --jq '.labels[].name')
+            if echo "$labels" | grep -q "Version: Major"; then
+              impact="major"
+              break
+            elif echo "$labels" | grep -q "Version: Minor"; then
+              [ "$impact" = "patch" ] && impact="minor"
+            fi
+          done
+          echo "impact=$impact" >> $GITHUB_OUTPUT
+
+      - name: Compute new semantic version
+        id: semver
+        run: |
+          last="${{ steps.last_tag.outputs.tag }}"
+          last="${last#v}"  # strip optional v
+          major=$(echo "$last" | cut -d. -f1)
+          minor=$(echo "$last" | cut -d. -f2)
+          patch=$(echo "$last" | cut -d. -f3)
+
+          impact="${{ steps.impact.outputs.impact }}"
+          case "$impact" in
+            major)
+              major=$((major + 1))
+              minor=0
+              patch=0
+              ;;
+            minor)
+              minor=$((minor + 1))
+              patch=0
+              ;;
+            patch)
+              patch=$((patch + 1))
+              ;;
+          esac
+
+          version="$major.$minor.$patch"
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+  create-release:
+    name: Create tag and GitHub Release
+    needs: determine-version
+    runs-on: ubuntu-latest
+    if: needs.determine-version.outputs.new_version != ''
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set version env
+        run: echo "VERSION=${{ needs.determine-version.outputs.new_version }}" >> $GITHUB_ENV
+
+      - name: Create git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "v${{ env.VERSION }}"
+          release_name: "Release v${{ env.VERSION }}"
+          body: |
+            Automated release from PR labels.
