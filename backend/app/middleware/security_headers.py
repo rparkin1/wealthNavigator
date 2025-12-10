@@ -60,13 +60,17 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
         # Permissions Policy - Disable unnecessary browser features
+        # Note: Allow accelerometer and encrypted-media for Plaid Link fraud detection
+        # Syntax: feature=(self) allows same-origin, feature=() blocks all
         permissions_directives = [
             "geolocation=()",
             "microphone=()",
             "camera=()",
             "payment=()",
             "usb=()",
-            "magnetometer=()"
+            "magnetometer=()",
+            "accelerometer=(self)",  # Required for Plaid fraud detection
+            "encrypted-media=(self)"  # Required for Plaid fraud detection
         ]
         response.headers["Permissions-Policy"] = ", ".join(permissions_directives)
 
