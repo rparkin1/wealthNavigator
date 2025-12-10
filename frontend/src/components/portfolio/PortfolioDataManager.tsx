@@ -415,14 +415,14 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
 
               // Transform CSV snake_case to camelCase
               const accountsToCreate = data.map(item => ({
-                id: item.id as string || undefined,
-                name: item.name as string,
-                account_type: item.account_type as string,
-                institution: item.institution as string,
-                account_number: item.account_number as string || undefined,
-                balance: item.balance as number,
-                opened: item.opened as string || undefined,
-                notes: item.notes as string || undefined,
+                id: item.id ? String(item.id) : undefined,
+                name: String(item.name),
+                account_type: String(item.account_type),
+                institution: String(item.institution),
+                account_number: item.account_number ? String(item.account_number) : undefined,
+                balance: Number(item.balance) || 0,
+                opened: item.opened ? String(item.opened) : undefined,
+                notes: item.notes ? String(item.notes) : undefined,
               }));
 
               // Persist to database via API
@@ -518,17 +518,17 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
 
               // Transform for API
               const holdingsToCreate = data.map(item => ({
-                id: item.id as string || undefined,
-                ticker: item.ticker as string,
-                name: item.name as string,
-                security_type: item.security_type as string,
-                shares: item.shares as number,
-                cost_basis: item.cost_basis as number,
-                current_value: item.current_value as number,
-                purchase_date: item.purchase_date as string || undefined,
-                account_id: item.account_id as string,
-                asset_class: item.asset_class as string || undefined,
-                expense_ratio: item.expense_ratio as number || undefined,
+                id: item.id ? String(item.id) : undefined,
+                ticker: String(item.ticker),
+                name: String(item.name),
+                security_type: String(item.security_type),
+                shares: Number(item.shares) || 0,
+                cost_basis: Number(item.cost_basis) || 0,
+                current_value: Number(item.current_value) || 0,
+                purchase_date: item.purchase_date ? String(item.purchase_date) : undefined,
+                account_id: String(item.account_id),
+                asset_class: item.asset_class ? String(item.asset_class) : undefined,
+                expense_ratio: item.expense_ratio ? Number(item.expense_ratio) : undefined,
               }));
 
               // Persist to database via API
@@ -546,7 +546,21 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
 
                 if (!response.ok) {
                   const errorData = await response.json();
-                  throw new Error(errorData.detail || 'Failed to save holdings to database');
+                  console.error('[PortfolioDataManager] Holdings API Error Response:', errorData);
+
+                  // Handle validation errors (422) - format as readable string
+                  if (response.status === 422 && Array.isArray(errorData.detail)) {
+                    const validationErrors = errorData.detail
+                      .map((err: any) => `${err.loc.join('.')}: ${err.msg}`)
+                      .join('; ');
+                    throw new Error(`Validation failed: ${validationErrors}`);
+                  }
+
+                  // Handle other errors
+                  const errorMessage = typeof errorData.detail === 'string'
+                    ? errorData.detail
+                    : JSON.stringify(errorData.detail);
+                  throw new Error(errorMessage || 'Failed to save holdings to database');
                 }
 
                 const result = await response.json();
