@@ -62,6 +62,11 @@ const HedgingStrategyDashboard = lazy(() =>
   import('./components/hedging/HedgingStrategyDashboard').then(m => ({ default: m.HedgingStrategyDashboard }))
 );
 
+// Insurance Optimization
+const InsuranceOptimizationDashboard = lazy(() =>
+  import('./components/insurance/InsuranceOptimizationDashboard').then(m => ({ default: m.default }))
+);
+
 // Plaid Integration
 const PlaidDashboard = lazy(() =>
   import('./components/plaid/PlaidDashboard').then(m => ({ default: m.PlaidDashboard }))
@@ -115,6 +120,7 @@ type View =
   | 'tax'
   | 'estate-planning'
   | 'hedging'
+  | 'insurance'
   | 'plaid'
   | 'data-entry'
   | 'settings'
@@ -277,6 +283,19 @@ function App() {
             </ErrorBoundary>
           </>
         );
+      case 'insurance':
+        return (
+          <>
+            <div className="px-6 pt-4">
+              <Breadcrumbs items={[{ label: 'Home', onClick: () => setCurrentView('home') }, { label: 'Insurance Optimization' }]} />
+            </div>
+            <ErrorBoundary fallback={<LoadingView message="Loading insurance optimization..." />}>
+              <Suspense fallback={<LoadingView message="Loading insurance optimization..." />}>
+                <InsuranceOptimizationDashboard userId={userId} />
+              </Suspense>
+            </ErrorBoundary>
+          </>
+        );
       case '529-calculator':
         return (
           <>
@@ -351,7 +370,7 @@ function App() {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'education' || currentView === '529-calculator' || currentView === 'tax' || currentView === 'estate-planning' || currentView === 'hedging' || currentView === 'budget' || currentView === 'recurring' || currentView === 'plaid' || currentView === 'data-entry' || currentView === 'what-if' || currentView === 'life-events' || currentView === 'scenarios') ? (
+      {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'education' || currentView === '529-calculator' || currentView === 'tax' || currentView === 'estate-planning' || currentView === 'hedging' || currentView === 'insurance' || currentView === 'budget' || currentView === 'recurring' || currentView === 'plaid' || currentView === 'data-entry' || currentView === 'what-if' || currentView === 'life-events' || currentView === 'scenarios') ? (
         sidebarOpen && (
           <aside className="w-64 transition-all duration-300 bg-white border-r border-gray-200 overflow-hidden">
           <div className="p-4">
@@ -491,6 +510,16 @@ function App() {
                 🛡️ Hedging Strategies
               </button>
               <button
+                onClick={() => setCurrentView('insurance')}
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                  currentView === 'insurance'
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                🏥 Insurance Optimization
+              </button>
+              <button
                 onClick={() => setCurrentView('plaid')}
                 className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
                   currentView === 'plaid'
@@ -546,7 +575,7 @@ function App() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'tax' || currentView === 'estate-planning' || currentView === 'hedging' || currentView === 'what-if' || currentView === 'life-events' || currentView === 'scenarios') && (
+        {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'tax' || currentView === 'estate-planning' || currentView === 'hedging' || currentView === 'insurance' || currentView === 'what-if' || currentView === 'life-events' || currentView === 'scenarios') && (
           <header className="flex-none bg-white border-b border-gray-200 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
@@ -1070,6 +1099,34 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
               </div>
               <button className="w-full btn-primary">
                 Explore Hedging
+              </button>
+            </div>
+          </div>
+
+          {/* Insurance Optimization */}
+          <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('insurance')}>
+            <div className="text-center">
+              <div className="text-5xl mb-4">🏥</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Insurance Optimization</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Optimize your insurance coverage with comprehensive analysis for life, disability, and long-term care.
+              </p>
+              <div className="text-left space-y-2 mb-4">
+                <div className="flex items-start text-sm">
+                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-gray-700">Life insurance needs calculator</span>
+                </div>
+                <div className="flex items-start text-sm">
+                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-gray-700">Disability coverage analyzer</span>
+                </div>
+                <div className="flex items-start text-sm">
+                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-gray-700">Long-term care planning</span>
+                </div>
+              </div>
+              <button className="w-full btn-primary">
+                Optimize Coverage
               </button>
             </div>
           </div>
