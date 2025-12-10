@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useTaxManagement, MuniOptimizationParams } from '@/hooks/useTaxManagement';
+import { useTaxManagement } from '@/hooks/useTaxManagement';
+import type { MuniOptimizationParams } from '@/hooks/useTaxManagement';
 import { formatCurrency, formatPercentage, getStateName } from '@/services/taxManagementApi';
 
 // ==================== Types ====================

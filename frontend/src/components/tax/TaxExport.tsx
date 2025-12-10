@@ -4,7 +4,8 @@
  */
 
 import React, { useState } from 'react';
-import { useTaxManagement, TaxExportParams } from '@/hooks/useTaxManagement';
+import { useTaxManagement } from '@/hooks/useTaxManagement';
+import type { TaxExportParams } from '@/hooks/useTaxManagement';
 import { downloadTaxExport, getExportFormatName } from '@/services/taxManagementApi';
 
 // ==================== Types ====================
