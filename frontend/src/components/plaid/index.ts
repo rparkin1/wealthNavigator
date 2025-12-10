@@ -7,3 +7,4 @@ export { PlaidLinkButton } from './PlaidLinkButton';
 export { ConnectedAccounts } from './ConnectedAccounts';
 export { TransactionsList } from './TransactionsList';
 export { InvestmentHoldings } from './InvestmentHoldings';
+export { InvestmentTransactionsList } from './InvestmentTransactionsList';

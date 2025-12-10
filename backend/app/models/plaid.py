@@ -279,3 +279,75 @@ class PlaidHolding(Base, TimestampMixin):
 
     def __repr__(self) -> str:
         return f"<PlaidHolding(id={self.id}, ticker={self.ticker_symbol}, quantity={self.quantity})>"
+
+
+class PlaidInvestmentTransaction(Base, TimestampMixin):
+    """Represents an investment transaction from Plaid (buy, sell, dividend, etc.)"""
+
+    __tablename__ = "plaid_investment_transactions"
+
+    # Primary key
+    id: Mapped[str] = mapped_column(
+        String(36),
+        primary_key=True,
+        default=lambda: str(uuid.uuid4())
+    )
+
+    # Foreign keys
+    account_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("plaid_accounts.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    user_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+
+    # Plaid identifiers
+    investment_transaction_id: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+
+    # Security reference (nullable for cash transactions)
+    security_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    ticker_symbol: Mapped[Optional[str]] = mapped_column(String(20), nullable=True, index=True)
+
+    # Transaction details
+    date: Mapped[date_type] = mapped_column(Date, nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(500), nullable=False)
+    amount: Mapped[float] = mapped_column(Float, nullable=False)  # Total amount (positive = out, negative = in)
+
+    # Investment-specific fields
+    quantity: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # Number of shares
+    price: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # Price per share
+    fees: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # Transaction fees
+
+    # Transaction type and subtype
+    type: Mapped[str] = mapped_column(String(50), nullable=False)  # buy, sell, cancel, cash, fee, transfer
+    subtype: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)  # More specific categorization
+
+    # Currency
+    iso_currency_code: Mapped[Optional[str]] = mapped_column(String(3), nullable=True, default="USD")
+    unofficial_currency_code: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+
+    # User modifications
+    user_category: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    user_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    is_excluded: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # Relationships
+    account: Mapped["PlaidAccount"] = relationship("PlaidAccount")
+    user: Mapped["User"] = relationship("User", back_populates="plaid_investment_transactions")
+
+    # Indexes for common queries
+    __table_args__ = (
+        Index("ix_plaid_inv_transactions_user_date", "user_id", "date"),
+        Index("ix_plaid_inv_transactions_account_date", "account_id", "date"),
+        Index("ix_plaid_inv_transactions_user_type", "user_id", "type"),
+        Index("ix_plaid_inv_transactions_ticker", "ticker_symbol"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<PlaidInvestmentTransaction(id={self.id}, type={self.type}, ticker={self.ticker_symbol}, amount=${self.amount})>"

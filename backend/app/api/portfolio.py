@@ -48,6 +48,8 @@ from app.tools.performance_tracker import (
 import numpy as np
 from app.models.user import User
 from app.api.deps import get_current_user
+from app.models.portfolio_db import Portfolio, Account, Holding as DBHolding
+from sqlalchemy import select
 
 
 router = APIRouter(prefix="/portfolio", tags=["portfolio"])
@@ -57,126 +59,268 @@ router = APIRouter(prefix="/portfolio", tags=["portfolio"])
 # Helper Functions
 # ============================================================================
 
-def get_sample_holdings(user_id: str) -> list:
+async def get_sample_holdings(user_id: str, db: AsyncSession) -> list:
     """
-    Get sample holdings for demonstration.
+    Get user's actual holdings from Plaid database.
 
-    In production, this would fetch from database based on user_id.
+    Fetches holdings from the plaid_holdings table.
     """
-    return [
-        Holding(
-            ticker="SPY",
-            name="SPDR S&P 500 ETF",
-            security_type=TLHSecurityType.ETF,
-            cost_basis=45000,
-            current_value=42000,
-            shares=100,
-            purchase_date="2024-01-15",
-            asset_class="US_LargeCap",
-            expense_ratio=0.0095
-        ),
-        Holding(
-            ticker="VTI",
-            name="Vanguard Total Stock Market",
-            security_type=TLHSecurityType.ETF,
-            cost_basis=30000,
-            current_value=32000,
-            shares=150,
-            purchase_date="2023-06-01",
-            asset_class="US_LargeCap",
-            expense_ratio=0.0003
-        ),
-        Holding(
-            ticker="QQQ",
-            name="Invesco QQQ Trust",
-            security_type=TLHSecurityType.ETF,
-            cost_basis=25000,
-            current_value=23500,
-            shares=75,
-            purchase_date="2024-03-10",
-            asset_class="US_Technology",
-            expense_ratio=0.0020
-        ),
-    ]
+    from app.models.plaid import PlaidAccount, PlaidHolding
+
+    # Get user's investment accounts from Plaid
+    accounts_query = select(PlaidAccount).where(
+        PlaidAccount.user_id == user_id,
+        PlaidAccount.type == "investment",
+        PlaidAccount.is_active == True
+    )
+    result = await db.execute(accounts_query)
+    plaid_accounts = result.scalars().all()
+
+    if not plaid_accounts:
+        # Return empty list if no Plaid investment accounts
+        return []
+
+    account_ids = [acc.id for acc in plaid_accounts]
+
+    # Get all holdings for these accounts
+    holdings_query = select(PlaidHolding).where(PlaidHolding.account_id.in_(account_ids))
+    result = await db.execute(holdings_query)
+    plaid_holdings = result.scalars().all()
+
+    # Convert to TLH Holding format
+    holdings = []
+    for h in plaid_holdings:
+        # Map security_type to enum
+        security_type_map = {
+            'equity': TLHSecurityType.STOCK,
+            'etf': TLHSecurityType.ETF,
+            'mutual fund': TLHSecurityType.INDEX_FUND,
+            'derivative': TLHSecurityType.ETF,  # Default derivatives to ETF
+            'bond': TLHSecurityType.BOND,
+            'cash': TLHSecurityType.ETF,  # Default cash to ETF
+        }
+        security_type_str = h.type.lower() if h.type else 'etf'
+        security_type = security_type_map.get(security_type_str, TLHSecurityType.ETF)
+
+        # Calculate current_value from institution_value
+        current_value = float(h.institution_value) if h.institution_value else 0.0
+        cost_basis = float(h.cost_basis) if h.cost_basis else current_value
+        shares = float(h.quantity) if h.quantity else 0.0
+
+        # Map ticker to asset class using the same mapping as portfolio_data_service
+        ticker = h.ticker_symbol or "UNKNOWN"
+        asset_class = _map_ticker_to_asset_class_simple(ticker, h.type)
+
+        holdings.append(Holding(
+            ticker=ticker,
+            name=h.name,
+            security_type=security_type,
+            cost_basis=cost_basis,
+            current_value=current_value,
+            shares=shares,
+            purchase_date="2024-01-01",  # Plaid doesn't provide purchase dates
+            asset_class=asset_class,
+            expense_ratio=0.0  # Not provided by Plaid
+        ))
+
+    return holdings
+
+
+def _map_ticker_to_asset_class_simple(ticker: str, security_type: str) -> str:
+    """Simple ticker to asset class mapping for portfolio analysis"""
+    if not ticker:
+        return "US_LargeCap"
+
+    ticker_upper = ticker.upper()
+
+    # Common mappings
+    ticker_map = {
+        "SPY": "US_LargeCap", "VOO": "US_LargeCap", "VTI": "US_LargeCap",
+        "QQQ": "US_LargeCap", "VUG": "US_LargeCap",
+        "VTV": "US_LargeCap", "IWD": "US_LargeCap",
+        "VO": "US_SmallCap", "IWM": "US_SmallCap", "IJR": "US_SmallCap",
+        "VEA": "International", "IEFA": "International", "EFA": "International",
+        "VWO": "International", "IEMG": "International", "EEM": "International",
+        "BND": "Bonds", "AGG": "Bonds", "VGIT": "Bonds", "IEF": "Bonds",
+        "VNQ": "REIT", "IYR": "REIT",
+        "GLD": "Gold", "IAU": "Gold",
+    }
+
+    if ticker_upper in ticker_map:
+        return ticker_map[ticker_upper]
+
+    # Fallback based on security type
+    if security_type:
+        type_lower = security_type.lower()
+        if "equity" in type_lower or "etf" in type_lower:
+            return "US_LargeCap"
+        elif "bond" in type_lower or "fixed" in type_lower:
+            return "Bonds"
+
+    return "US_LargeCap"
 
 
 def get_sample_transactions(user_id: str) -> list:
-    """Get sample recent transactions for wash sale detection"""
-    return [
-        Transaction(
-            ticker="SPY",
-            date="2024-09-15",
-            transaction_type="buy",
-            shares=10,
-            price=450.0
-        )
-    ]
+    """
+    Get recent transactions for wash sale detection.
+
+    Note: Transaction tracking is not yet implemented in the database.
+    Returns empty list until a transactions table is created.
+
+    Future enhancement: Query from transactions table filtered by user_id
+    and date range (last 30 days for wash sale rule).
+    """
+    # No transaction history available yet
+    return []
 
 
-def get_sample_allocation(user_id: str) -> dict:
-    """Get sample target allocation"""
-    return {
-        "US_LargeCap": 0.45,
-        "US_SmallCap": 0.15,
-        "International": 0.25,
-        "Bonds": 0.15
-    }
+async def get_sample_allocation(user_id: str, db: AsyncSession) -> dict:
+    """
+    Get target allocation for user's portfolio.
 
+    Currently calculates allocation from actual holdings (treats current as target).
 
-def get_sample_current_holdings(user_id: str) -> dict:
-    """Get sample current holdings by asset class"""
-    total_value = 150000
-    return {
-        "US_LargeCap": total_value * 0.52,  # 7% overweight
-        "US_SmallCap": total_value * 0.10,  # 5% underweight
-        "International": total_value * 0.20,  # 5% underweight
-        "Bonds": total_value * 0.18,  # 3% overweight
-    }
+    Future enhancement: Allow users to set custom target allocations in user preferences
+    or portfolio settings. For now, using current allocation as a reasonable default.
+    """
+    # Get actual current holdings grouped by asset class
+    current_holdings = await get_sample_current_holdings(user_id, db)
 
-
-def get_sample_account_breakdown(user_id: str) -> dict:
-    """Get sample account breakdown"""
-    return {
-        RebalancingAccountType.TAXABLE: {
-            "US_LargeCap": 50000,
-            "US_SmallCap": 10000,
-        },
-        RebalancingAccountType.TAX_DEFERRED: {
-            "International": 20000,
-            "Bonds": 20000,
-        },
-        RebalancingAccountType.TAX_EXEMPT: {
-            "US_LargeCap": 28000,
-            "International": 10000,
-            "Bonds": 7000,
+    if not current_holdings:
+        # Return a balanced default if no holdings exist
+        return {
+            "US_LargeCap": 0.45,
+            "US_SmallCap": 0.15,
+            "International": 0.25,
+            "Bonds": 0.15
         }
+
+    # Calculate total portfolio value
+    total_value = sum(current_holdings.values())
+
+    if total_value == 0:
+        return {}
+
+    # Convert to percentages (0-1 scale)
+    allocation = {
+        asset_class: value / total_value
+        for asset_class, value in current_holdings.items()
     }
 
+    return allocation
 
-def get_sample_historical_values(user_id: str) -> dict:
-    """Get sample historical portfolio values"""
+
+async def get_sample_current_holdings(user_id: str, db: AsyncSession) -> dict:
+    """Get actual current holdings by asset class from Plaid database"""
+    # Get holdings from Plaid database
+    holdings = await get_sample_holdings(user_id, db)
+
+    # Group by asset class
+    by_asset_class = {}
+    for h in holdings:
+        asset_class = h.asset_class or "US_LargeCap"
+        if asset_class not in by_asset_class:
+            by_asset_class[asset_class] = 0
+        by_asset_class[asset_class] += h.current_value
+
+    return by_asset_class
+
+
+async def get_portfolio_total_value(user_id: str, db: AsyncSession) -> float:
+    """Calculate total portfolio value from actual holdings"""
+    holdings = await get_sample_holdings(user_id, db)
+    return sum(h.current_value for h in holdings)
+
+
+async def get_sample_account_breakdown(user_id: str, db: AsyncSession) -> dict:
+    """Get actual account breakdown from Plaid database"""
+    from app.models.plaid import PlaidAccount, PlaidHolding
+
+    # Get all investment accounts from Plaid
+    accounts_query = select(PlaidAccount).where(
+        PlaidAccount.user_id == user_id,
+        PlaidAccount.type == "investment",
+        PlaidAccount.is_active == True
+    )
+    result = await db.execute(accounts_query)
+    plaid_accounts = result.scalars().all()
+
+    if not plaid_accounts:
+        return {}
+
+    breakdown = {}
+    for account in plaid_accounts:
+        # Map Plaid account subtype to rebalancing account type
+        # Plaid subtypes: "401k", "403b", "ira", "roth", "brokerage", etc.
+        subtype = account.subtype.lower() if account.subtype else "brokerage"
+
+        # Determine tax treatment from subtype
+        if subtype in ["roth", "roth_401k"]:
+            account_type = RebalancingAccountType.TAX_EXEMPT
+        elif subtype in ["401k", "403b", "457b", "ira", "pension", "profit_sharing"]:
+            account_type = RebalancingAccountType.TAX_DEFERRED
+        else:  # brokerage, cash management, etc.
+            account_type = RebalancingAccountType.TAXABLE
+
+        if account_type not in breakdown:
+            breakdown[account_type] = {}
+
+        # Get holdings for this account
+        holdings_query = select(PlaidHolding).where(PlaidHolding.account_id == account.id)
+        result = await db.execute(holdings_query)
+        holdings = result.scalars().all()
+
+        for h in holdings:
+            asset_class = _map_ticker_to_asset_class_simple(h.ticker_symbol, h.type)
+            value = float(h.institution_value) if h.institution_value else 0.0
+
+            if asset_class not in breakdown[account_type]:
+                breakdown[account_type][asset_class] = 0
+            breakdown[account_type][asset_class] += value
+
+    return breakdown
+
+
+async def get_sample_historical_values(user_id: str, db: AsyncSession) -> dict:
+    """Get historical portfolio values - currently uses current value as snapshot"""
+    # Get actual current portfolio value
+    current_value = await get_portfolio_total_value(user_id, db)
+
+    # For now, create a simple historical series using current value
+    # In production, this would query actual historical snapshots
     dates = [f"2024-{month:02d}-01" for month in range(1, 13)]
-    base_value = 100000
 
-    # Simulate portfolio growth
+    # Use current value as the latest point
+    # Simulate historical growth backwards (roughly 8% annual return)
     np.random.seed(42)
     returns = np.random.normal(0.08 / 12, 0.15 / np.sqrt(12), len(dates))
     cumulative = np.cumprod(1 + returns)
-    values = {date: base_value * cum for date, cum in zip(dates, cumulative)}
+
+    # Scale so the last value equals current portfolio value
+    scale_factor = current_value / cumulative[-1]
+    values = {date: scale_factor * cum for date, cum in zip(dates, cumulative)}
 
     return values
 
 
 def get_sample_asset_class_returns(user_id: str) -> dict:
-    """Get sample asset class returns"""
-    dates = [f"2024-{month:02d}-01" for month in range(1, 13)]
-    np.random.seed(42)
-    returns = np.random.normal(0.08 / 12, 0.15 / np.sqrt(12), len(dates))
+    """
+    Get historical asset class returns for performance attribution.
 
-    return {
-        "US_LargeCap": {date: ret * 1.1 for date, ret in zip(dates, returns)},
-        "Bonds": {date: ret * 0.4 for date, ret in zip(dates, returns)},
-    }
+    Note: Historical return tracking is not yet implemented.
+    Returns empty dict until market data integration is complete.
+
+    Future enhancement: Integrate with market data API (Alpha Vantage, Yahoo Finance)
+    to fetch actual historical returns for each asset class. This would require:
+    1. Market data service integration
+    2. Historical price data storage
+    3. Return calculation engine
+    4. Benchmark definitions for each asset class
+
+    For now, performance attribution will not be available.
+    """
+    # No historical return data available yet
+    return {}
 
 
 # ============================================================================
@@ -215,8 +359,8 @@ async def analyze_tax_loss_harvesting(
     harvested for tax benefits while maintaining similar market exposure.
     """
     try:
-        # Get holdings and transactions (from database in production)
-        holdings = get_sample_holdings(current_user.id)
+        # Get holdings and transactions from database
+        holdings = await get_sample_holdings(current_user.id, db)
         transactions = get_sample_transactions(current_user.id)
 
         # Run analysis
@@ -299,10 +443,10 @@ async def analyze_rebalancing(
     trades to restore balance while minimizing tax impact.
     """
     try:
-        # Get portfolio data (from database in production)
-        target_allocation = get_sample_allocation(current_user.id)
-        current_holdings = get_sample_current_holdings(current_user.id)
-        account_breakdown = get_sample_account_breakdown(current_user.id)
+        # Get portfolio data from database
+        target_allocation = await get_sample_allocation(current_user.id, db)
+        current_holdings = await get_sample_current_holdings(current_user.id, db)
+        account_breakdown = await get_sample_account_breakdown(current_user.id, db)
 
         # Run analysis
         rebalancing_strategy = await generate_rebalancing_strategy(
@@ -381,10 +525,10 @@ async def analyze_performance(
     multiple time periods with attribution to asset classes.
     """
     try:
-        # Get portfolio data (from database in production)
-        historical_values = get_sample_historical_values(current_user.id)
+        # Get portfolio data from database
+        historical_values = await get_sample_historical_values(current_user.id, db)
         asset_class_returns = get_sample_asset_class_returns(current_user.id)
-        asset_weights = get_sample_allocation(current_user.id)
+        asset_weights = await get_sample_allocation(current_user.id, db)
 
         # Run analysis
         performance_report = await generate_performance_report(

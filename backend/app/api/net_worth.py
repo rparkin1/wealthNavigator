@@ -16,6 +16,7 @@ import numpy as np
 from app.api.deps import get_current_user, get_db
 from app.models.user import User
 from app.models.budget import BudgetEntry, BudgetType
+from app.models.portfolio_db import Portfolio, Account, Holding
 from app.schemas.net_worth import (
     NetWorthDataPoint,
     NetWorthSummary,
@@ -27,28 +28,140 @@ router = APIRouter(prefix="/net-worth", tags=["net-worth"])
 
 # ==================== Helper Functions ====================
 
-def calculate_asset_breakdown(user_id: str) -> dict:
+async def calculate_asset_breakdown(user_id: str, db: AsyncSession) -> dict:
     """
-    Calculate asset breakdown by class.
-    In production, this would query actual holdings from database.
+    Calculate asset breakdown by class from Plaid holdings.
     """
-    # Mock data - replace with actual database queries
-    return {
-        "cash": 50000,
-        "stocks": 150000,
-        "bonds": 75000,
-        "realEstate": 300000,
-        "other": 25000,
-    }
+    from app.models.plaid import PlaidAccount, PlaidHolding
+
+    # Get user's investment accounts from Plaid
+    accounts_query = select(PlaidAccount).where(
+        PlaidAccount.user_id == user_id,
+        PlaidAccount.is_active == True
+    )
+    result = await db.execute(accounts_query)
+    plaid_accounts = result.scalars().all()
+
+    if not plaid_accounts:
+        return {}
+
+    # Separate investment and cash accounts
+    investment_account_ids = [acc.id for acc in plaid_accounts if acc.type == "investment"]
+    cash_account_ids = [acc.id for acc in plaid_accounts if acc.type == "depository"]
+
+    breakdown = {}
+
+    # Add cash from depository accounts
+    for acc in plaid_accounts:
+        if acc.type == "depository" and acc.current_balance:
+            if "cash" not in breakdown:
+                breakdown["cash"] = 0
+            breakdown["cash"] += float(acc.current_balance)
+
+    # Get all holdings from investment accounts and group by asset class
+    if investment_account_ids:
+        holdings_query = select(PlaidHolding).where(PlaidHolding.account_id.in_(investment_account_ids))
+        result = await db.execute(holdings_query)
+        plaid_holdings = result.scalars().all()
+
+        # Asset class mapping (normalize names for frontend)
+        # Map Plaid security types and our ticker mappings to standard categories
+        asset_class_map = {
+            "us_lc_blend": "stocks",
+            "us_lc_growth": "stocks",
+            "us_lc_value": "stocks",
+            "us_mc_blend": "stocks",
+            "us_sc_blend": "stocks",
+            "us_largecap": "stocks",
+            "us_smallcap": "stocks",
+            "intl_dev_blend": "stocks",
+            "em_blend": "stocks",
+            "international": "stocks",
+            "us_treasury_short": "bonds",
+            "us_treasury_inter": "bonds",
+            "us_treasury_long": "bonds",
+            "us_corp_ig": "bonds",
+            "us_corp_hy": "bonds",
+            "muni_inter": "bonds",
+            "tips": "bonds",
+            "bonds": "bonds",
+            "us_reit": "realEstate",
+            "intl_reit": "realEstate",
+            "reit": "realEstate",
+            "gold": "other",
+            "commodity_broad": "other",
+            "energy": "other",
+        }
+
+        for holding in plaid_holdings:
+            # Get value
+            value = float(holding.institution_value) if holding.institution_value else 0.0
+
+            if value <= 0:
+                continue
+
+            # Determine asset class from ticker or type
+            ticker = (holding.ticker_symbol or "").upper()
+            security_type = (holding.type or "").lower()
+
+            # Try to map based on ticker first (using simplified mapping)
+            asset_class = None
+            if ticker in ["SPY", "VOO", "VTI", "QQQ", "VUG", "VTV", "IWD", "VO", "IWM", "IJR"]:
+                asset_class = "stocks"
+            elif ticker in ["VEA", "IEFA", "EFA", "VWO", "IEMG", "EEM"]:
+                asset_class = "stocks"
+            elif ticker in ["BND", "AGG", "VGIT", "IEF", "TLT", "LQD", "HYG", "MUB", "TIP"]:
+                asset_class = "bonds"
+            elif ticker in ["VNQ", "IYR", "VNQI"]:
+                asset_class = "realEstate"
+            elif ticker in ["GLD", "IAU", "DBC", "USO"]:
+                asset_class = "other"
+            else:
+                # Fallback to security type
+                if "equity" in security_type or "stock" in security_type:
+                    asset_class = "stocks"
+                elif "bond" in security_type or "fixed" in security_type:
+                    asset_class = "bonds"
+                elif "mutual" in security_type or "etf" in security_type:
+                    asset_class = "stocks"  # Most mutual funds and ETFs are equity
+                else:
+                    asset_class = "other"
+
+            if asset_class not in breakdown:
+                breakdown[asset_class] = 0
+            breakdown[asset_class] += value
+
+    return breakdown
 
 
-def calculate_liabilities(user_id: str) -> float:
+async def calculate_liabilities(user_id: str, db: AsyncSession) -> float:
     """
-    Calculate total liabilities.
-    In production, this would query actual liabilities from database.
+    Calculate total liabilities from Plaid credit card and loan accounts.
+
+    Sums balances from credit and loan type accounts.
+    For Plaid credit accounts, positive balances represent debt owed.
     """
-    # Mock data - replace with actual database queries
-    return 250000  # Mortgage + other debts
+    from app.models.plaid import PlaidAccount
+
+    # Get all credit and loan accounts from Plaid
+    credit_accounts_query = select(PlaidAccount).where(
+        and_(
+            PlaidAccount.user_id == user_id,
+            PlaidAccount.type.in_(["credit", "loan"]),
+            PlaidAccount.is_active == True
+        )
+    )
+    result = await db.execute(credit_accounts_query)
+    credit_accounts = result.scalars().all()
+
+    # Sum up credit balances (positive balances = debt owed)
+    # For credit accounts, current_balance is typically positive for debt
+    total_liabilities = sum(
+        float(account.current_balance) if account.current_balance and account.current_balance > 0 else 0
+        for account in credit_accounts
+    )
+
+    return total_liabilities
 
 
 async def generate_historical_data(
@@ -60,11 +173,13 @@ async def generate_historical_data(
     """
     Generate historical net worth data points.
 
-    In production, this would:
-    1. Query portfolio snapshots from database
+    Currently uses current holdings as the latest snapshot and simulates
+    historical values with realistic growth patterns.
+
+    In the future, this could:
+    1. Query actual portfolio snapshots from database
     2. Aggregate account balances over time
     3. Include Plaid transaction history
-    4. Calculate asset class breakdowns
     """
     # Default to last year if no dates provided
     if not end_date:
@@ -72,55 +187,72 @@ async def generate_historical_data(
     if not start_date:
         start_date = end_date - timedelta(days=365)
 
-    # Generate mock data (replace with actual database queries)
+    # Get current actual values from database
+    current_assets_by_class = await calculate_asset_breakdown(user_id, db)
+    current_liabilities = await calculate_liabilities(user_id, db)
+
+    if not current_assets_by_class:
+        # No data yet - return empty list
+        return []
+
+    # Calculate current totals
+    current_total_assets = sum(current_assets_by_class.values())
+    current_net_worth = current_total_assets - current_liabilities
+
+    # Calculate liquid net worth (excluding real estate)
+    current_liquid_net_worth = (
+        current_assets_by_class.get("cash", 0) +
+        current_assets_by_class.get("stocks", 0) +
+        current_assets_by_class.get("bonds", 0) +
+        current_assets_by_class.get("other", 0) -
+        current_liabilities
+    )
+
+    # Generate historical series scaling backwards from current values
     data_points = []
-    current_date = start_date
-    base_net_worth = 350000
+    days = (end_date - start_date).days
 
-    # Simulate daily net worth with some randomness
+    # Use consistent seed for reproducible results
     np.random.seed(42)
-    days = (end_date - current_date).days
-    daily_returns = np.random.normal(0.0003, 0.01, days)  # ~11% annual return with volatility
+    # Simulate ~8% annual return with 15% volatility
+    daily_returns = np.random.normal(0.08 / 365, 0.15 / np.sqrt(365), days)
 
-    current_net_worth = base_net_worth
+    # Calculate cumulative growth factors
+    cumulative_growth = np.cumprod(1 + daily_returns)
+
+    # Scale so the last value equals current net worth
+    scale_factor = current_net_worth / cumulative_growth[-1] if cumulative_growth[-1] != 0 else 1
 
     for i in range(days):
-        # Apply daily return
-        current_net_worth *= (1 + daily_returns[i])
+        # Scale net worth based on simulated growth
+        historical_net_worth = scale_factor * cumulative_growth[i]
+        historical_assets = historical_net_worth + current_liabilities
 
-        # Calculate components
-        total_assets = current_net_worth + 250000  # Add back liabilities
-        total_liabilities = 250000 * (0.99 ** (i / 365))  # Decreasing debt
-
-        # Asset breakdown (proportional to total assets)
-        asset_multiplier = total_assets / 600000
+        # Scale asset classes proportionally
+        asset_scale = historical_assets / current_total_assets if current_total_assets > 0 else 0
         assets_by_class = {
-            "cash": 50000 * asset_multiplier,
-            "stocks": 150000 * asset_multiplier * (1 + daily_returns[i] * 2),  # Stocks more volatile
-            "bonds": 75000 * asset_multiplier * (1 + daily_returns[i] * 0.3),  # Bonds less volatile
-            "realEstate": 300000 * (1.0005 ** (i / 365)),  # Slow steady growth
-            "other": 25000 * asset_multiplier,
+            key: value * asset_scale for key, value in current_assets_by_class.items()
         }
 
-        # Liquid net worth (excluding real estate)
+        # Liquid net worth
         liquid_net_worth = (
-            assets_by_class["cash"] +
-            assets_by_class["stocks"] +
-            assets_by_class["bonds"] +
-            assets_by_class["other"] -
-            total_liabilities
+            assets_by_class.get("cash", 0) +
+            assets_by_class.get("stocks", 0) +
+            assets_by_class.get("bonds", 0) +
+            assets_by_class.get("other", 0) -
+            current_liabilities
         )
 
         point = NetWorthDataPoint(
-            date=(current_date + timedelta(days=i)).strftime("%Y-%m-%d"),
-            totalNetWorth=current_net_worth,
-            totalAssets=total_assets,
-            totalLiabilities=total_liabilities,
+            date=(start_date + timedelta(days=i)).strftime("%Y-%m-%d"),
+            totalNetWorth=historical_net_worth,
+            totalAssets=historical_assets,
+            totalLiabilities=current_liabilities,
             liquidNetWorth=liquid_net_worth,
             assetsByClass=assets_by_class,
         )
 
-        # Add data points (weekly to reduce data size)
+        # Add data points weekly to reduce data size
         if i % 7 == 0 or i == days - 1:
             data_points.append(point)
 
