@@ -31,10 +31,10 @@ class RecurringTransaction(Base):
     __tablename__ = "recurring_transactions"
 
     # Primary key
-    id = Column(PostgreSQL_UUID(as_uuid=True), primary_key=True, default=uuid4, index=True)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid4()), index=True)
 
     # User relationship
-    user_id = Column(PostgreSQL_UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False, index=True)
 
     # Template details (same as BudgetEntry)
     category = Column(Enum(BudgetCategory), nullable=False)

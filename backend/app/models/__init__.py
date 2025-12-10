@@ -5,6 +5,8 @@ All SQLAlchemy models for the WealthNavigator AI platform.
 """
 
 from .base import Base, TimestampMixin, SoftDeleteMixin
+from .budget import BudgetEntry, BudgetAnalysis, BudgetType, BudgetCategory, Frequency, ExtractionMethod
+from .recurring_transaction import RecurringTransaction, RecurrenceStatus
 from .user import User
 from .thread_db import Thread, Message, MessageRole
 from .goal import Goal, GoalCategory, GoalPriority
@@ -19,6 +21,18 @@ __all__ = [
 
     # User
     "User",
+
+    # Budget
+    "BudgetEntry",
+    "BudgetAnalysis",
+    "BudgetType",
+    "BudgetCategory",
+    "Frequency",
+    "ExtractionMethod",
+
+    # Recurring Transactions
+    "RecurringTransaction",
+    "RecurrenceStatus",
 
     # Threads
     "Thread",
