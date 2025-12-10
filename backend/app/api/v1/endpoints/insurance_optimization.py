@@ -15,7 +15,7 @@ from datetime import datetime
 
 from ....services.insurance.insurance_optimization_service import InsuranceOptimizationService
 
-router = APIRouter(prefix="/api/v1/insurance-optimization", tags=["insurance_optimization"])
+router = APIRouter(prefix="/insurance-optimization", tags=["insurance_optimization"])
 
 
 # Request/Response Models
