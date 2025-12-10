@@ -61,3 +61,12 @@ class MockEventSource {
 }
 
 globalThis.EventSource = MockEventSource as any;
+
+// Mock ResizeObserver for Recharts
+class MockResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+global.ResizeObserver = MockResizeObserver as any;
