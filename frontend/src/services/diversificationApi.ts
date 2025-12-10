@@ -370,5 +370,3 @@ export function getDiversificationScoreDisplay(score: number): {
     };
   }
 }
-
-export { DiversificationApiError };
