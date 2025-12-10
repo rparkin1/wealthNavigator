@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.goal import Goal
 from app.services.portfolio.sensitivity_analyzer import SensitivityAnalyzer
-from app.tools.monte_carlo_engine import MonteCarloEngine
+from app.services.portfolio.monte_carlo_engine import MonteCarloEngine
 
 router = APIRouter(prefix="/sensitivity-analysis", tags=["Sensitivity Analysis"])
 
