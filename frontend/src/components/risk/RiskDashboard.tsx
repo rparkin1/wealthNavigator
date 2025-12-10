@@ -700,10 +700,10 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
           <div style={{ padding: '24px' }}>
             <DiversificationAnalysisDashboard
               portfolioValue={portfolioValue}
-              holdings={Object.entries(allocation).map(([assetClass, weight]) => ({
+              holdings={Object.entries(allocation || {}).map(([assetClass, weight]) => ({
                 symbol: assetClass,
                 name: assetClass.replace(/_/g, ' '),
-                value: portfolioValue * weight,
+                value: (portfolioValue || 0) * weight,
                 weight: weight,
                 asset_class: assetClass,
                 sector: undefined,
