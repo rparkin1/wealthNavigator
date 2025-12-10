@@ -8,7 +8,8 @@ REQ-SENSITIVITY-001: Advanced sensitivity analysis endpoints
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 from typing import List, Dict, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.core.database import get_db
 from app.models.goal import Goal
@@ -61,15 +62,17 @@ class BreakEvenAnalysisRequest(BaseModel):
 
 # ==================== Helper Functions ====================
 
-def get_sensitivity_analyzer(db: Session = Depends(get_db)) -> SensitivityAnalyzer:
+def get_sensitivity_analyzer(db: AsyncSession = Depends(get_db)) -> SensitivityAnalyzer:
     """Create sensitivity analyzer instance"""
     mc_engine = MonteCarloEngine()
     return SensitivityAnalyzer(monte_carlo_engine=mc_engine)
 
 
-async def get_goal_by_id(goal_id: str, db: Session) -> Goal:
+async def get_goal_by_id(goal_id: str, db: AsyncSession) -> Goal:
     """Fetch goal by ID"""
-    goal = db.query(Goal).filter(Goal.id == goal_id).first()
+    stmt = select(Goal).where(Goal.id == goal_id)
+    result = await db.execute(stmt)
+    goal = result.scalar_one_or_none()
     if not goal:
         raise HTTPException(status_code=404, detail=f"Goal {goal_id} not found")
     return goal
@@ -95,7 +98,7 @@ async def get_goal_by_id(goal_id: str, db: Session) -> Goal:
 )
 async def one_way_sensitivity(
     request: OneWaySensitivityRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     One-way sensitivity analysis (tornado diagram).
@@ -175,7 +178,7 @@ async def one_way_sensitivity(
 )
 async def two_way_sensitivity(
     request: TwoWaySensitivityRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     Two-way sensitivity analysis (heat map).
@@ -253,7 +256,7 @@ async def two_way_sensitivity(
 )
 async def threshold_analysis(
     request: ThresholdAnalysisRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     Threshold analysis to find required variable value.
@@ -331,7 +334,7 @@ async def threshold_analysis(
 )
 async def break_even_analysis(
     request: BreakEvenAnalysisRequest,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     Break-even analysis showing required variable combinations.

@@ -37,6 +37,18 @@ if settings.RATE_LIMIT_ENABLED:
     app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
     logger.info("Rate limiting enabled")
 
+# Configure CORS (MUST be added first so it executes before security middleware)
+# Use explicit origins from settings with credentials support
+cors_config = {
+    "allow_origins": settings.CORS_ORIGINS,
+    "allow_credentials": True,
+    "allow_methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    "allow_headers": ["*"],
+}
+
+app.add_middleware(CORSMiddleware, **cors_config)
+logger.info(f"CORS middleware enabled with origins: {settings.CORS_ORIGINS}")
+
 # Add security middleware (order matters!)
 # 1. Input validation (first line of defense)
 app.add_middleware(InputValidationMiddleware)
@@ -49,25 +61,6 @@ logger.info("CSRF protection middleware enabled")
 # 3. Security headers (production hardening)
 app.add_middleware(SecurityHeadersMiddleware)
 logger.info("Security headers middleware enabled")
-
-# Configure CORS
-cors_config = {
-    "allow_credentials": True,
-    "allow_methods": ["*"],
-    "allow_headers": ["*"],
-}
-
-# Production CORS - strict origins only
-if settings.PLAID_ENV == "production":
-    cors_config["allow_origins"] = settings.CORS_ORIGINS
-    logger.info(f"Production CORS configured with origins: {settings.CORS_ORIGINS}")
-else:
-    # Development CORS - more permissive
-    cors_config["allow_origins"] = settings.CORS_ORIGINS
-    cors_config["allow_origin_regex"] = r"^https?://localhost(?::\d+)?$"
-    logger.info("Development CORS configured")
-
-app.add_middleware(CORSMiddleware, **cors_config)
 
 
 @app.on_event("startup")
@@ -126,6 +119,7 @@ from app.api.v1.endpoints.ai_goal_assistance import router as ai_goal_assistance
 from app.api.v1.endpoints.goal_funding import router as goal_funding_router
 from app.api.v1.endpoints.mental_accounting import router as mental_accounting_router
 from app.api.v1.endpoints.portfolio_optimization import router as portfolio_optimization_router
+from app.api.v1.endpoints.portfolio_data import router as portfolio_data_router
 from app.api.v1.endpoints.risk_management import router as risk_management_router
 from app.api.v1.endpoints.diversification import router as diversification_router
 from app.api.v1.endpoints.reserve_monitoring import router as reserve_monitoring_router
@@ -137,7 +131,7 @@ from app.api.v1.endpoints.enhanced_performance import router as enhanced_perform
 from app.api.v1.endpoints.custom_reports import router as custom_reports_router
 from app.api.v1.endpoints.auth import router as auth_router
 from app.api.v1.endpoints.privacy import router as privacy_router
-from app.api.v1.endpoints.mfa import router as mfa_router
+# from app.api.v1.endpoints.mfa import router as mfa_router  # Temporarily disabled - missing pyotp dependency
 from app.api.v1.endpoints.performance_metrics import router as performance_metrics_router
 
 # Authentication endpoints (no prefix, auth handles its own /auth prefix)
@@ -147,7 +141,7 @@ app.include_router(auth_router, prefix=settings.API_V1_PREFIX)
 app.include_router(privacy_router, prefix=settings.API_V1_PREFIX)
 
 # Multi-Factor Authentication endpoints
-app.include_router(mfa_router, prefix=settings.API_V1_PREFIX)
+# app.include_router(mfa_router, prefix=settings.API_V1_PREFIX)  # Temporarily disabled
 
 # Core endpoints
 app.include_router(threads_router, prefix=settings.API_V1_PREFIX)
@@ -177,6 +171,9 @@ app.include_router(mental_accounting_router, prefix=f"{settings.API_V1_PREFIX}/g
 
 # Portfolio Optimization v1 endpoints
 app.include_router(portfolio_optimization_router, prefix=f"{settings.API_V1_PREFIX}/portfolio-optimization", tags=["portfolio-optimization"])
+
+# Portfolio Data Management v1 endpoints (accounts and holdings)
+app.include_router(portfolio_data_router, prefix=settings.API_V1_PREFIX, tags=["portfolio-data"])
 
 # Risk Management v1 endpoints
 app.include_router(risk_management_router, prefix=f"{settings.API_V1_PREFIX}/risk-management", tags=["risk-management"])

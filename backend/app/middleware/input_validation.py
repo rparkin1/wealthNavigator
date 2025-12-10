@@ -60,8 +60,8 @@ class InputValidationMiddleware(BaseHTTPMiddleware):
                 }
             )
 
-        # Skip validation for GET requests (no body)
-        if request.method == "GET":
+        # Skip validation for safe methods (no body)
+        if request.method in ["GET", "HEAD", "OPTIONS"]:
             return await call_next(request)
 
         # Read and validate request body for POST/PUT/PATCH

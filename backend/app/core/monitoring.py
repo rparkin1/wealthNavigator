@@ -3,14 +3,19 @@ Monitoring and Error Tracking Configuration
 Integrates Sentry for error tracking and performance monitoring
 """
 
-import sentry_sdk
-from sentry_sdk.integrations.fastapi import FastApiIntegration
-from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
-from sentry_sdk.integrations.redis import RedisIntegration
-from sentry_sdk.integrations.logging import LoggingIntegration
 import logging
 import os
 from typing import Optional
+
+try:
+    import sentry_sdk
+    from sentry_sdk.integrations.fastapi import FastApiIntegration
+    from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+    from sentry_sdk.integrations.redis import RedisIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+    SENTRY_AVAILABLE = True
+except ImportError:
+    SENTRY_AVAILABLE = False
 
 from app.core.config import settings
 
@@ -23,6 +28,10 @@ def init_sentry() -> None:
 
     Only initializes in production or if SENTRY_DSN is explicitly set
     """
+    if not SENTRY_AVAILABLE:
+        logger.info("Sentry SDK not installed - error tracking disabled")
+        return
+
     sentry_dsn = os.getenv("SENTRY_DSN")
 
     if not sentry_dsn:
@@ -143,7 +152,7 @@ def capture_exception(exception: Exception, **kwargs) -> None:
         exception: The exception to capture
         **kwargs: Additional context to include
     """
-    if sentry_sdk.Hub.current.client:
+    if SENTRY_AVAILABLE and sentry_sdk.Hub.current.client:
         sentry_sdk.capture_exception(exception, **kwargs)
     else:
         # Fallback to logging if Sentry is not configured
@@ -159,7 +168,7 @@ def capture_message(message: str, level: str = "info", **kwargs) -> None:
         level: Severity level (debug, info, warning, error, fatal)
         **kwargs: Additional context to include
     """
-    if sentry_sdk.Hub.current.client:
+    if SENTRY_AVAILABLE and sentry_sdk.Hub.current.client:
         sentry_sdk.capture_message(message, level=level, **kwargs)
     else:
         # Fallback to logging if Sentry is not configured
@@ -175,7 +184,7 @@ def set_user_context(user_id: str, email: Optional[str] = None, **kwargs) -> Non
         email: User email (optional)
         **kwargs: Additional user context
     """
-    if sentry_sdk.Hub.current.client:
+    if SENTRY_AVAILABLE and sentry_sdk.Hub.current.client:
         sentry_sdk.set_user({
             "id": user_id,
             "email": email,
@@ -191,7 +200,7 @@ def set_tag(key: str, value: str) -> None:
         key: Tag key
         value: Tag value
     """
-    if sentry_sdk.Hub.current.client:
+    if SENTRY_AVAILABLE and sentry_sdk.Hub.current.client:
         sentry_sdk.set_tag(key, value)
 
 
@@ -203,5 +212,5 @@ def set_context(name: str, context: dict) -> None:
         name: Context name
         context: Context data
     """
-    if sentry_sdk.Hub.current.client:
+    if SENTRY_AVAILABLE and sentry_sdk.Hub.current.client:
         sentry_sdk.set_context(name, context)
