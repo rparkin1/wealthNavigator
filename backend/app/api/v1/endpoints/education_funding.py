@@ -485,3 +485,112 @@ async def suggest_savings_vehicle(
     )
 
     return recommendation
+
+
+class GrandparentCoordinationRequest(BaseModel):
+    """Request model for grandparent contribution coordination"""
+    child_name: str
+    parent_monthly_contribution: float = Field(..., ge=0)
+    grandparent_annual_contribution: float = Field(..., ge=0)
+    target_amount: float = Field(..., gt=0)
+    current_savings: float = Field(default=0, ge=0)
+    years_until_college: int = Field(..., gt=0)
+    expected_return: float = Field(default=0.06, ge=0, le=0.20)
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "child_name": "Emma",
+                "parent_monthly_contribution": 500.0,
+                "grandparent_annual_contribution": 10000.0,
+                "target_amount": 200000.0,
+                "current_savings": 15000.0,
+                "years_until_college": 10,
+                "expected_return": 0.06
+            }
+        }
+
+
+class MultiChildGrandparentRequest(BaseModel):
+    """Request model for multi-child optimization with grandparents"""
+    children: List[ChildEducation] = Field(..., min_length=1)
+    parent_monthly_savings: float = Field(..., gt=0)
+    grandparent_annual_budget: float = Field(..., ge=0)
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "children": [
+                    {"name": "Emma", "age": 10, "education_type": "public_in_state", "years_of_support": 4},
+                    {"name": "Liam", "age": 7, "education_type": "private", "years_of_support": 4}
+                ],
+                "parent_monthly_savings": 2000.0,
+                "grandparent_annual_budget": 20000.0
+            }
+        }
+
+
+@router.post(
+    "/coordinate-grandparents",
+    summary="Coordinate education funding with grandparent contributions"
+)
+async def coordinate_grandparent_contributions(
+    request: GrandparentCoordinationRequest,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Coordinate education funding strategy with grandparent contributions.
+    Implements REQ-GOAL-013: Grandparent contribution coordination.
+
+    Features:
+    - Combined contribution projection
+    - Gift tax considerations (annual exclusion: $18,000)
+    - 5-year accelerated contribution strategy
+    - FAFSA impact analysis
+    - Tax optimization recommendations
+
+    Returns coordinated strategy with shortfall/surplus analysis.
+    """
+    strategy = EducationFundingService.coordinate_grandparent_contributions(
+        child_name=request.child_name,
+        parent_monthly_contribution=request.parent_monthly_contribution,
+        grandparent_annual_contribution=request.grandparent_annual_contribution,
+        target_amount=request.target_amount,
+        current_savings=request.current_savings,
+        years_until_college=request.years_until_college,
+        expected_return=request.expected_return
+    )
+
+    return strategy
+
+
+@router.post(
+    "/optimize-multi-child-grandparents",
+    summary="Optimize funding across multiple children with grandparents"
+)
+async def optimize_multi_child_with_grandparents(
+    request: MultiChildGrandparentRequest,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Optimize education funding allocation across multiple children
+    with coordinated grandparent contributions.
+
+    Enhanced version that:
+    - Allocates parent monthly savings across children
+    - Allocates grandparent annual budget across children
+    - Coordinates contributions for optimal tax treatment
+    - Analyzes if each child is on track
+    - Provides recommendations for adjustments
+
+    Returns comprehensive allocation strategy with coordination analysis.
+    """
+    children_list = [child.dict() for child in request.children]
+
+    strategy = EducationFundingService.optimize_multi_child_with_grandparents(
+        children=children_list,
+        parent_monthly_savings=request.parent_monthly_savings,
+        grandparent_annual_budget=request.grandparent_annual_budget
+    )
+
+    return strategy

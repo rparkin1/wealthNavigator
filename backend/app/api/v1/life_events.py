@@ -444,7 +444,7 @@ async def get_event_templates(
     query = select(EventTemplate)
 
     if event_type:
-        query = query.filter(EventTemplate.event_type == event_type.value)
+        query = query.where(EventTemplate.event_type == event_type.value)
 
     query = query.order_by(EventTemplate.usage_count.desc())
     result = await db.execute(query)

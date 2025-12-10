@@ -21,7 +21,13 @@ from app.services.risk.stress_testing import (
 )
 from app.services.risk.hedging_strategies import (
     HedgingService,
-    HedgingRecommendation
+    HedgingRecommendation,
+    HedgingObjectives
+)
+from app.services.risk.hedging_education import (
+    HedgingEducationService,
+    HedgingEducationContent,
+    HedgingEducationTopic
 )
 
 router = APIRouter(prefix="/risk-management", tags=["Risk Management"])
@@ -53,6 +59,7 @@ class HedgingRequest(BaseModel):
     allocation: Dict[str, float]
     risk_metrics: Dict
     market_conditions: Optional[Dict] = None
+    objectives: Optional[HedgingObjectives] = None
 
 
 class MonteCarloStressRequest(BaseModel):
@@ -273,7 +280,8 @@ async def recommend_hedging(request: HedgingRequest):
             portfolio_value=request.portfolio_value,
             allocation=request.allocation,
             risk_metrics=request.risk_metrics,
-            market_conditions=request.market_conditions
+            market_conditions=request.market_conditions,
+            objectives=request.objectives
         )
 
         return result
@@ -387,6 +395,63 @@ async def health_check():
 
 
 @router.get(
+    "/hedging-education",
+    response_model=HedgingEducationContent,
+    summary="Get hedging education content",
+    description="Get comprehensive educational content about hedging strategies",
+    tags=["Hedging", "Education"]
+)
+async def get_hedging_education():
+    """
+    Get comprehensive hedging education content.
+
+    **REQ-RISK-007:** Hedging education
+
+    ## Topics Covered
+    - When to use hedging strategies
+    - Costs and trade-offs
+    - Hedging vs insurance
+    - Long-term impact on returns
+    - Alternatives to hedging
+
+    ## Returns
+    Complete educational content with examples, key points, and common mistakes.
+    """
+    try:
+        service = HedgingEducationService()
+        return service.get_all_education_content()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get(
+    "/hedging-education/{topic_name}",
+    response_model=HedgingEducationTopic,
+    summary="Get specific hedging education topic",
+    description="Get detailed education content for a specific hedging topic",
+    tags=["Hedging", "Education"]
+)
+async def get_hedging_education_topic(topic_name: str):
+    """
+    Get specific hedging education topic.
+
+    **Available Topics:**
+    - `when_to_hedge`: When hedging is appropriate vs inappropriate
+    - `costs_and_tradeoffs`: Costs and trade-offs of hedging
+    - `hedging_vs_insurance`: Difference between hedging and insurance
+    - `long_term_impact`: Long-term impact on portfolio returns
+    - `alternatives`: Alternatives to hedging (cash reserves, diversification)
+    """
+    try:
+        service = HedgingEducationService()
+        return service.get_topic(topic_name)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get(
     "/summary",
     summary="Service summary",
     description="Get service capabilities summary"
@@ -399,11 +464,23 @@ async def service_summary():
         "features": [
             "Comprehensive risk assessment (20+ metrics)",
             "Stress testing with 7 historical scenarios",
-            "Hedging strategy recommendations (7 types)",
+            "Hedging strategy recommendations (8 types)",
+            "User-specified hedging objectives",
+            "Hedging education content",
             "Monte Carlo simulation",
             "Real-time risk monitoring"
         ],
-        "api_endpoints": 6,
+        "api_endpoints": 8,
+        "hedging_strategies": [
+            "Protective Put",
+            "Covered Call",
+            "Collar",
+            "Put Spread",
+            "Tail Risk Hedge",
+            "Diversification",
+            "Volatility Hedge (VIX)",
+            "Inverse ETF"
+        ],
         "metrics_available": [
             "VaR (95%, 99%)",
             "CVaR (Expected Shortfall)",

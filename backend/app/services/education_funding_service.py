@@ -431,3 +431,242 @@ class EducationFundingService:
                     "No tax advantages",
                 ],
             }
+
+    @classmethod
+    def coordinate_grandparent_contributions(
+        cls,
+        child_name: str,
+        parent_monthly_contribution: float,
+        grandparent_annual_contribution: float,
+        target_amount: float,
+        current_savings: float,
+        years_until_college: int,
+        expected_return: float = 0.06,
+    ) -> Dict:
+        """
+        Coordinate education funding with grandparent contributions.
+        Implements REQ-GOAL-013: Grandparent contribution coordination.
+
+        Args:
+            child_name: Name of child
+            parent_monthly_contribution: Parent's monthly 529 contribution
+            grandparent_annual_contribution: Grandparent's annual gift
+            target_amount: Total education funding goal
+            current_savings: Current 529 balance
+            years_until_college: Years until funds needed
+            expected_return: Expected annual return
+
+        Returns:
+            Coordinated contribution strategy with tax optimization
+        """
+        if years_until_college <= 0:
+            return {
+                "strategy": "college_imminent",
+                "recommendation": "College starting soon - contributions should be made directly to expenses",
+                "parent_monthly": parent_monthly_contribution,
+                "grandparent_annual": grandparent_annual_contribution,
+                "total_projected": current_savings,
+            }
+
+        # Calculate future value of all contributions
+        months = years_until_college * 12
+        monthly_rate = expected_return / 12
+
+        # Future value of current savings
+        fv_current = current_savings * ((1 + monthly_rate) ** months)
+
+        # Future value of parent contributions (monthly annuity)
+        if parent_monthly_contribution > 0:
+            fv_parent = parent_monthly_contribution * (
+                (((1 + monthly_rate) ** months) - 1) / monthly_rate
+            )
+        else:
+            fv_parent = 0
+
+        # Future value of grandparent contributions (annual annuity)
+        # Assuming contributions are made at the beginning of each year
+        if grandparent_annual_contribution > 0:
+            annual_rate = expected_return
+            fv_grandparent = grandparent_annual_contribution * (
+                (((1 + annual_rate) ** years_until_college) - 1) / annual_rate
+            ) * (1 + annual_rate)
+        else:
+            fv_grandparent = 0
+
+        total_projected = fv_current + fv_parent + fv_grandparent
+
+        # Check if on track
+        shortfall = max(0, target_amount - total_projected)
+        surplus = max(0, total_projected - target_amount)
+
+        # Tax considerations for grandparent gifts
+        # Annual gift tax exclusion is $18,000 per person (2024)
+        annual_gift_tax_exclusion = 18000
+        grandparent_gift_tax_free = grandparent_annual_contribution <= annual_gift_tax_exclusion
+
+        # 5-year accelerated 529 contribution option
+        max_5year_contribution = annual_gift_tax_exclusion * 5
+        can_use_5year_election = grandparent_annual_contribution <= max_5year_contribution
+
+        # Generate recommendation
+        if shortfall > 0:
+            additional_monthly_needed = shortfall * monthly_rate / (
+                ((1 + monthly_rate) ** months) - 1
+            )
+            recommendation = f"Projected shortfall of ${shortfall:,.0f}. Consider increasing parent contribution by ${additional_monthly_needed:,.2f}/month or increasing grandparent contribution."
+        elif surplus > target_amount * 0.1:
+            recommendation = f"Projected surplus of ${surplus:,.0f}. Consider reallocating excess to other financial goals or younger children."
+        else:
+            recommendation = f"On track to meet education goal! Projected balance: ${total_projected:,.0f}"
+
+        # Tax optimization tips
+        tax_tips = []
+        if not grandparent_gift_tax_free:
+            tax_tips.append(
+                f"Grandparent contribution exceeds annual gift tax exclusion (${annual_gift_tax_exclusion:,}). Consider reducing to avoid gift tax filing requirement."
+            )
+        if can_use_5year_election and grandparent_annual_contribution > annual_gift_tax_exclusion:
+            tax_tips.append(
+                f"Consider 5-year election: Contribute up to ${max_5year_contribution:,} in one year and elect to spread over 5 years for gift tax purposes."
+            )
+        if grandparent_gift_tax_free:
+            tax_tips.append(
+                "Grandparent contributions are within annual gift tax exclusion - no gift tax filing required."
+            )
+
+        # FAFSA impact consideration
+        fafsa_tip = "Note: Grandparent-owned 529 distributions may impact financial aid calculations. Consider timing distributions or transferring ownership to parent before FAFSA years."
+
+        return {
+            "child_name": child_name,
+            "strategy": "coordinated",
+            "parent_monthly": round(parent_monthly_contribution, 2),
+            "parent_total_contributions": round(parent_monthly_contribution * months, 2),
+            "parent_future_value": round(fv_parent, 2),
+            "grandparent_annual": round(grandparent_annual_contribution, 2),
+            "grandparent_total_contributions": round(
+                grandparent_annual_contribution * years_until_college, 2
+            ),
+            "grandparent_future_value": round(fv_grandparent, 2),
+            "current_savings_future_value": round(fv_current, 2),
+            "total_projected": round(total_projected, 2),
+            "target_amount": round(target_amount, 2),
+            "shortfall": round(shortfall, 2),
+            "surplus": round(surplus, 2),
+            "on_track": shortfall == 0,
+            "recommendation": recommendation,
+            "tax_tips": tax_tips,
+            "fafsa_consideration": fafsa_tip,
+            "gift_tax_free": grandparent_gift_tax_free,
+            "can_use_5year_election": can_use_5year_election,
+        }
+
+    @classmethod
+    def optimize_multi_child_with_grandparents(
+        cls,
+        children: List[Dict],
+        parent_monthly_savings: float,
+        grandparent_annual_budget: float,
+    ) -> Dict:
+        """
+        Optimize education funding across multiple children with grandparent contributions.
+        Enhanced version of multi-child optimization.
+
+        Args:
+            children: List of child dicts with age, education_type, years_support
+            parent_monthly_savings: Total parent monthly savings available
+            grandparent_annual_budget: Total grandparent annual contribution budget
+
+        Returns:
+            Optimized allocation strategy with grandparent coordination
+        """
+        if not children:
+            return {"allocations": {}, "grandparent_allocations": {}}
+
+        # Calculate parent allocation (same as before)
+        parent_allocations = cls.optimize_multi_child_funding(
+            children, parent_monthly_savings
+        )
+
+        # Allocate grandparent contributions based on urgency and need
+        grandparent_allocations = {}
+        priorities = []
+
+        for child in children:
+            years_until = max(0, 18 - child["age"])
+            # Higher priority for children closer to college
+            urgency_score = 1.0 / (years_until + 1)
+
+            total_need = cls.calculate_total_education_need(
+                child["education_type"],
+                child["age"],
+                18,
+                child.get("years_of_support", 4),
+            )
+
+            priorities.append({
+                "child_name": child["name"],
+                "urgency": urgency_score,
+                "total_need": total_need,
+                "priority_score": urgency_score * total_need,
+            })
+
+        # Sort by urgency (children closer to college get more)
+        priorities.sort(key=lambda x: x["urgency"], reverse=True)
+
+        # Allocate grandparent budget
+        total_priority = sum(p["priority_score"] for p in priorities)
+
+        for p in priorities:
+            if total_priority > 0:
+                grandparent_allocations[p["child_name"]] = (
+                    (p["priority_score"] / total_priority) * grandparent_annual_budget
+                )
+            else:
+                grandparent_allocations[p["child_name"]] = (
+                    grandparent_annual_budget / len(children)
+                )
+
+        # Generate combined analysis
+        combined_analysis = []
+        for child in children:
+            name = child["name"]
+            parent_monthly = parent_allocations.get(name, 0)
+            grandparent_annual = grandparent_allocations.get(name, 0)
+
+            years_until = max(0, 18 - child["age"])
+            total_need = cls.calculate_total_education_need(
+                child["education_type"],
+                child["age"],
+                18,
+                child.get("years_of_support", 4),
+            )
+
+            # Calculate if on track
+            coordination = cls.coordinate_grandparent_contributions(
+                child_name=name,
+                parent_monthly_contribution=parent_monthly,
+                grandparent_annual_contribution=grandparent_annual,
+                target_amount=total_need,
+                current_savings=child.get("current_savings", 0),
+                years_until_college=years_until,
+            )
+
+            combined_analysis.append({
+                "child": name,
+                "parent_monthly": parent_monthly,
+                "grandparent_annual": grandparent_annual,
+                "total_need": total_need,
+                "projected_total": coordination["total_projected"],
+                "on_track": coordination["on_track"],
+                "shortfall": coordination["shortfall"],
+                "recommendation": coordination["recommendation"],
+            })
+
+        return {
+            "parent_allocations": parent_allocations,
+            "grandparent_allocations": grandparent_allocations,
+            "combined_analysis": combined_analysis,
+            "total_parent_monthly": sum(parent_allocations.values()),
+            "total_grandparent_annual": sum(grandparent_allocations.values()),
+        }
