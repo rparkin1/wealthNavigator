@@ -69,8 +69,8 @@ async def bulk_create_accounts(
         for idx, account_data in enumerate(request.accounts):
             try:
                 # Create account instance
+                # Always generate new UUID, ignore any client-provided ID
                 account = Account(
-                    id=account_data.id if account_data.id else None,  # Let DB generate if not provided
                     portfolio_id=portfolio.id,
                     name=account_data.name,
                     account_type=account_data.account_type,
@@ -196,6 +196,52 @@ async def delete_account(
         )
 
 
+@router.delete("/accounts")
+async def delete_all_accounts(
+    user_id: str,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Delete all accounts and holdings for a user
+    """
+    try:
+        # Get user's portfolio
+        portfolio_query = select(Portfolio).where(Portfolio.user_id == user_id)
+        result = await db.execute(portfolio_query)
+        portfolio = result.scalar_one_or_none()
+
+        if not portfolio:
+            return {"success": True, "message": "No portfolio found", "deleted_count": 0}
+
+        # Get all accounts
+        accounts_query = select(Account).where(Account.portfolio_id == portfolio.id)
+        result = await db.execute(accounts_query)
+        accounts = result.scalars().all()
+
+        # Delete all accounts (cascade will delete holdings)
+        deleted_count = len(accounts)
+        for account in accounts:
+            await db.delete(account)
+
+        await db.commit()
+
+        logger.info(f"Deleted {deleted_count} accounts for user {user_id}")
+
+        return {
+            "success": True,
+            "message": f"Deleted {deleted_count} accounts",
+            "deleted_count": deleted_count
+        }
+
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Failed to delete all accounts: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete all accounts: {str(e)}"
+        )
+
+
 # ============================================================================
 # Holding Endpoints
 # ============================================================================
@@ -224,10 +270,14 @@ async def bulk_create_holdings(
                 detail=f"No portfolio found for user {request.user_id}"
             )
 
-        # Get all valid account IDs for this portfolio
-        accounts_query = select(Account.id).where(Account.portfolio_id == portfolio.id)
+        # Get all accounts for this portfolio (ID and name for lookup)
+        accounts_query = select(Account).where(Account.portfolio_id == portfolio.id)
         result = await db.execute(accounts_query)
-        valid_account_ids = {row[0] for row in result.all()}
+        accounts = result.scalars().all()
+
+        # Build lookup maps: by ID and by name
+        accounts_by_id = {acc.id: acc for acc in accounts}
+        accounts_by_name = {acc.name: acc for acc in accounts}
 
         # Create holdings
         created_holdings = []
@@ -235,22 +285,30 @@ async def bulk_create_holdings(
 
         for idx, holding_data in enumerate(request.holdings):
             try:
-                # Validate account exists
-                if holding_data.account_id not in valid_account_ids:
+                # Find account by ID first, then by name
+                account = accounts_by_id.get(holding_data.account_id)
+                if not account:
+                    # Try to find by name
+                    account = accounts_by_name.get(holding_data.account_id)
+
+                if not account:
                     errors.append({
                         "index": idx,
                         "ticker": holding_data.ticker,
-                        "error": f"Account {holding_data.account_id} not found"
+                        "error": f"Account {holding_data.account_id} not found (tried both ID and name)"
                     })
                     continue
 
                 # Create holding instance
+                # Always generate new UUID, ignore any client-provided ID
+                # Normalize security_type to lowercase for database enum
+                security_type_normalized = str(holding_data.security_type).lower()
+
                 holding = Holding(
-                    id=holding_data.id if holding_data.id else None,  # Let DB generate if not provided
-                    account_id=holding_data.account_id,
+                    account_id=account.id,  # Use the resolved account ID
                     ticker=holding_data.ticker,
                     name=holding_data.name,
-                    security_type=holding_data.security_type,
+                    security_type=security_type_normalized,
                     shares=holding_data.shares,
                     cost_basis=holding_data.cost_basis,
                     current_value=holding_data.current_value,

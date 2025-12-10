@@ -2,8 +2,8 @@
 Pydantic schemas for portfolio data management (accounts and holdings)
 """
 
-from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional, List
+from pydantic import BaseModel, Field, ConfigDict, field_validator
+from typing import Optional, List, Literal
 from datetime import datetime
 
 
@@ -14,12 +14,26 @@ from datetime import datetime
 class AccountBase(BaseModel):
     """Base account schema"""
     name: str = Field(..., description="Account name")
-    account_type: str = Field(..., description="Account type (taxable, tax_deferred, tax_exempt, etc.)")
+    account_type: Literal["taxable", "tax_deferred", "tax_exempt", "depository", "credit"] = Field(
+        ...,
+        description="Account type (taxable, tax_deferred, tax_exempt, depository, credit)"
+    )
     institution: str = Field(..., description="Financial institution")
     account_number: Optional[str] = Field(None, description="Account number (masked)")
     balance: float = Field(0.0, description="Current balance")
     opened: Optional[str] = Field(None, description="Date opened (YYYY-MM-DD)")
     notes: Optional[str] = Field(None, description="Additional notes")
+
+    @field_validator('account_type')
+    @classmethod
+    def validate_account_type(cls, v: str) -> str:
+        """Validate and normalize account type"""
+        valid_types = ["taxable", "tax_deferred", "tax_exempt", "depository", "credit"]
+        if v not in valid_types:
+            raise ValueError(
+                f"Invalid account_type '{v}'. Must be one of: {', '.join(valid_types)}"
+            )
+        return v
 
 
 class AccountCreate(AccountBase):
@@ -73,13 +87,30 @@ class HoldingBase(BaseModel):
     """Base holding schema"""
     ticker: str = Field(..., description="Security ticker symbol")
     name: str = Field(..., description="Security name")
-    security_type: str = Field(..., description="Security type (stock, etf, mutual_fund, bond, etc.)")
+    security_type: str = Field(
+        ...,
+        description="Security type (stock, etf, mutual_fund, bond, cash, option, future, other)"
+    )
     shares: float = Field(..., description="Number of shares")
     cost_basis: float = Field(..., description="Total cost basis")
     current_value: float = Field(..., description="Current market value")
     purchase_date: Optional[str] = Field(None, description="Purchase date (YYYY-MM-DD)")
     asset_class: Optional[str] = Field(None, description="Asset class category")
     expense_ratio: Optional[float] = Field(None, description="Expense ratio (for funds)")
+
+    @field_validator('security_type', mode='before')
+    @classmethod
+    def validate_security_type(cls, v: str) -> str:
+        """Validate and normalize security type (case-insensitive)"""
+        if not isinstance(v, str):
+            raise ValueError(f"security_type must be a string, got {type(v)}")
+        v_lower = v.lower()  # Normalize to lowercase first
+        valid_types = ["stock", "etf", "mutual_fund", "bond", "cash", "option", "future", "other"]
+        if v_lower not in valid_types:
+            raise ValueError(
+                f"Invalid security_type '{v}'. Must be one of: {', '.join(valid_types)}"
+            )
+        return v_lower  # Return normalized value
 
 
 class HoldingCreate(HoldingBase):
