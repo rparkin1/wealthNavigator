@@ -13,7 +13,7 @@ import {
   getPriorityColor,
   buildExampleHedgingRequest,
 } from '../../services/hedgingStrategiesApi';
-import {
+import type {
   HedgingRecommendation,
   HedgingRequest,
   HedgingObjectives,
