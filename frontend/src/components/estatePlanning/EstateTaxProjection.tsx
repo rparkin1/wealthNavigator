@@ -82,8 +82,9 @@ const EstateTaxProjection: React.FC = () => {
       <div className="input-form">
         <div className="form-row">
           <div className="form-group">
-            <label>Estate Value</label>
+            <label htmlFor="estateValue">Estate Value</label>
             <input
+              id="estateValue"
               type="number"
               name="estateValue"
               value={form.estateValue}
@@ -94,8 +95,13 @@ const EstateTaxProjection: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label>State</label>
-            <select name="state" value={form.state} onChange={handleInputChange}>
+            <label htmlFor="estateState">State</label>
+            <select
+              id="estateState"
+              name="state"
+              value={form.state}
+              onChange={handleInputChange}
+            >
               <option value="">No State Tax</option>
               <option value="MA">Massachusetts</option>
               <option value="NY">New York</option>
@@ -107,8 +113,9 @@ const EstateTaxProjection: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label>Marital Status</label>
+            <label htmlFor="estateMaritalStatus">Marital Status</label>
             <select
+              id="estateMaritalStatus"
               name="maritalStatus"
               value={form.maritalStatus}
               onChange={handleInputChange}
@@ -121,8 +128,9 @@ const EstateTaxProjection: React.FC = () => {
 
         <div className="form-row">
           <div className="form-group">
-            <label>Life Insurance Value</label>
+            <label htmlFor="lifeInsuranceValue">Life Insurance Value</label>
             <input
+              id="lifeInsuranceValue"
               type="number"
               name="lifeInsuranceValue"
               value={form.lifeInsuranceValue}
@@ -133,8 +141,9 @@ const EstateTaxProjection: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label>Charitable Donations</label>
+            <label htmlFor="charitableDonations">Charitable Donations</label>
             <input
+              id="charitableDonations"
               type="number"
               name="charitableDonations"
               value={form.charitableDonations}
@@ -145,8 +154,9 @@ const EstateTaxProjection: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label>Outstanding Debt</label>
+            <label htmlFor="outstandingDebt">Outstanding Debt</label>
             <input
+              id="outstandingDebt"
               type="number"
               name="debtValue"
               value={form.debtValue}
