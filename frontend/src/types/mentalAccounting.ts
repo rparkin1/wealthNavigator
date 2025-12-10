@@ -204,3 +204,23 @@ export interface AnalyzeRebalancingRequest {
   user_id: string;
   total_portfolio_value: number;
 }
+
+// Explicit type re-exports for Vite/TypeScript compatibility
+export type {
+  AccountAllocation,
+  AllMentalAccountsResponse,
+  AllocateAccountRequest,
+  AnalyzeRebalancingRequest,
+  CreateBucketRequest,
+  DashboardAlert,
+  DashboardRecommendation,
+  DedicatedAccount,
+  GrowthProjection,
+  GrowthProjectionPoint,
+  MentalAccountBucket,
+  MentalAccountingDashboard,
+  MentalAccountSummary,
+  ProjectGrowthRequest,
+  RebalancingAnalysis,
+  RebalancingRecommendation,
+};
