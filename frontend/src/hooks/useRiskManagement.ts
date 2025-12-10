@@ -12,6 +12,8 @@ import {
   getStressScenarios,
   healthCheck,
   getServiceSummary,
+} from '../services/riskManagementApi';
+import type {
   RiskAssessmentRequest,
   RiskAssessmentResult,
   StressTestRequest,

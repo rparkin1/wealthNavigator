@@ -9,15 +9,17 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  DiversificationAnalysisResult,
-  HoldingInfo,
-  ConcentrationRisk,
-  DiversificationRecommendation,
   getExampleDiversificationAnalysis,
   getDiversificationLevelColor,
   getConcentrationRiskColor,
   formatCurrency,
   formatPercentage,
+} from '../../services/riskManagementApi';
+import type {
+  DiversificationAnalysisResult,
+  HoldingInfo,
+  ConcentrationRisk,
+  DiversificationRecommendation,
 } from '../../services/riskManagementApi';
 
 export interface DiversificationDashboardProps {
