@@ -463,13 +463,13 @@ function App() {
       {/* Sidebar */}
       {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'education' || currentView === '529-calculator' || currentView === 'tax' || currentView === 'estate-planning' || currentView === 'hedging' || currentView === 'insurance' || currentView === 'risk' || currentView === 'reserves' || currentView === 'diversification' || currentView === 'sensitivity' || currentView === 'budget' || currentView === 'recurring' || currentView === 'plaid' || currentView === 'data-entry' || currentView === 'what-if' || currentView === 'life-events' || currentView === 'scenarios') ? (
         sidebarOpen && (
-          <aside className="w-64 transition-all duration-300 bg-white border-r border-gray-200 overflow-hidden">
-          <div className="p-4">
+          <aside className="w-64 transition-all duration-300 bg-white border-r border-gray-200 flex flex-col h-screen">
+          <div className="flex-none p-4">
             <h2 className="text-lg font-semibold text-gray-900">WealthNavigator AI</h2>
             <p className="text-sm text-gray-600 mt-1">Financial Planning Assistant</p>
           </div>
 
-          <nav className="mt-6">
+          <nav className="flex-1 overflow-y-auto mt-6">
             <div className="px-4 py-2">
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Navigation
