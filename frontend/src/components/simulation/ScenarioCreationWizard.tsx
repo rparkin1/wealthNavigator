@@ -43,6 +43,9 @@ export const ScenarioCreationWizard: React.FC<ScenarioCreationWizardProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createdScenarioId, setCreatedScenarioId] = useState<string | null>(null);
+  const scenarioNameId = 'scenario-name-input';
+  const scenarioDescriptionId = 'scenario-description-input';
+  const monthlyContributionId = 'scenario-monthly-contribution';
 
   const handleMethodSelection = async (method: 'manual' | 'quick') => {
     setCreationMethod(method);
@@ -149,11 +152,12 @@ export const ScenarioCreationWizard: React.FC<ScenarioCreationWizardProps> = ({
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-t-lg">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold">Create Scenario</h2>
+              <h2 className="text-2xl font-bold">Scenario Builder</h2>
               <p className="text-sm text-blue-100 mt-1">Goal: {goalTitle}</p>
             </div>
             <button
               onClick={onCancel}
+              aria-label="Close wizard"
               className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,7 +227,7 @@ export const ScenarioCreationWizard: React.FC<ScenarioCreationWizardProps> = ({
                   <div className="flex items-start gap-3">
                     <span className="text-3xl">⚡</span>
                     <div>
-                      <h4 className="font-semibold text-gray-900 group-hover:text-blue-600">
+                      <h4 tabIndex={-1} className="font-semibold text-gray-900 group-hover:text-blue-600">
                         Quick Setup
                       </h4>
                       <p className="text-sm text-gray-600 mt-1">
@@ -242,7 +246,7 @@ export const ScenarioCreationWizard: React.FC<ScenarioCreationWizardProps> = ({
                   <div className="flex items-start gap-3">
                     <span className="text-3xl">🎛️</span>
                     <div>
-                      <h4 className="font-semibold text-gray-900 group-hover:text-blue-600">
+                      <h4 tabIndex={-1} className="font-semibold text-gray-900 group-hover:text-blue-600">
                         Custom Setup
                       </h4>
                       <p className="text-sm text-gray-600 mt-1">
@@ -268,10 +272,11 @@ export const ScenarioCreationWizard: React.FC<ScenarioCreationWizardProps> = ({
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor={scenarioNameId} className="block text-sm font-medium text-gray-700 mb-2">
                     Scenario Name <span className="text-red-500">*</span>
                   </label>
                   <input
+                    id={scenarioNameId}
                     type="text"
                     value={scenarioData.name || ''}
                     onChange={e => setScenarioData({ ...scenarioData, name: e.target.value })}
@@ -281,10 +286,11 @@ export const ScenarioCreationWizard: React.FC<ScenarioCreationWizardProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor={scenarioDescriptionId} className="block text-sm font-medium text-gray-700 mb-2">
                     Description (Optional)
                   </label>
                   <textarea
+                    id={scenarioDescriptionId}
                     value={scenarioData.description || ''}
                     onChange={e => setScenarioData({ ...scenarioData, description: e.target.value })}
                     placeholder="Brief description of this scenario..."
@@ -294,15 +300,18 @@ export const ScenarioCreationWizard: React.FC<ScenarioCreationWizardProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor={monthlyContributionId} className="block text-sm font-medium text-gray-700 mb-2">
                     Monthly Contribution <span className="text-red-500">*</span>
                   </label>
                   <input
+                    id={monthlyContributionId}
                     type="number"
-                    value={scenarioData.monthly_contribution || ''}
-                    onChange={e =>
-                      setScenarioData({ ...scenarioData, monthly_contribution: parseFloat(e.target.value) })
-                    }
+                    inputMode="decimal"
+                    value={scenarioData.monthly_contribution ?? ''}
+                    onChange={e => {
+                      const value = e.target.value === '' ? undefined : parseFloat(e.target.value);
+                      setScenarioData({ ...scenarioData, monthly_contribution: value });
+                    }}
                     placeholder="1000"
                     min="0"
                     step="50"
@@ -366,6 +375,7 @@ export const ScenarioCreationWizard: React.FC<ScenarioCreationWizardProps> = ({
                       allocation: '80% stocks, 20% bonds',
                     },
                   }[risk];
+                  const riskLabel = risk.charAt(0).toUpperCase() + risk.slice(1);
 
                   return (
                     <button
@@ -381,7 +391,7 @@ export const ScenarioCreationWizard: React.FC<ScenarioCreationWizardProps> = ({
                         <span className="text-4xl">{riskData.icon}</span>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-semibold text-gray-900 capitalize">{risk}</h4>
+                            <h4 className="font-semibold text-gray-900">{riskLabel}</h4>
                             <span className={`px-3 py-1 rounded-full text-sm font-semibold bg-${riskData.color}-100 text-${riskData.color}-800`}>
                               {riskData.return} Expected Return
                             </span>
@@ -440,8 +450,10 @@ export const ScenarioCreationWizard: React.FC<ScenarioCreationWizardProps> = ({
 
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Risk Level</span>
-                  <span className="font-semibold text-gray-900 capitalize">
-                    {scenarioData.risk_level}
+                  <span className="font-semibold text-gray-900">
+                    {scenarioData.risk_level
+                      ? scenarioData.risk_level.charAt(0).toUpperCase() + scenarioData.risk_level.slice(1)
+                      : '—'}
                   </span>
                 </div>
 

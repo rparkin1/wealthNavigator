@@ -61,6 +61,7 @@ from app.api.budget import router as budget_router
 from app.api.recurring_transactions import router as recurring_router
 from app.api.retirement import router as retirement_router
 from app.api.plaid import router as plaid_router
+from app.api.net_worth import router as net_worth_router
 
 # Goal Planning API v1 endpoints
 from app.api.v1.endpoints.goal_dependencies import router as goal_dependencies_router
@@ -79,6 +80,7 @@ from app.api.v1.endpoints.tax_management import router as tax_management_router
 from app.api.v1.endpoints.estate_planning import router as estate_planning_router
 from app.api.v1.endpoints.insurance_optimization import router as insurance_optimization_router
 from app.api.v1.endpoints.sensitivity_analysis import router as sensitivity_analysis_router
+from app.api.v1.endpoints.enhanced_performance import router as enhanced_performance_router
 from app.api.v1.endpoints.auth import router as auth_router
 
 # Authentication endpoints (no prefix, auth handles its own /auth prefix)
@@ -95,6 +97,7 @@ app.include_router(budget_router, prefix=settings.API_V1_PREFIX, tags=["budget"]
 app.include_router(recurring_router, prefix=settings.API_V1_PREFIX, tags=["recurring-transactions"])
 app.include_router(retirement_router, prefix=f"{settings.API_V1_PREFIX}/retirement", tags=["retirement"])
 app.include_router(plaid_router, prefix=settings.API_V1_PREFIX, tags=["plaid"])
+app.include_router(net_worth_router, prefix=settings.API_V1_PREFIX, tags=["net-worth"])
 
 # Goal Planning v1 endpoints
 app.include_router(goal_dependencies_router, prefix=f"{settings.API_V1_PREFIX}/goal-planning/dependencies", tags=["goal-planning"])
@@ -138,6 +141,9 @@ app.include_router(estate_planning_router, prefix=settings.API_V1_PREFIX, tags=[
 
 # Insurance Optimization v1 endpoints
 app.include_router(insurance_optimization_router, prefix=settings.API_V1_PREFIX, tags=["insurance-optimization"])
+
+# Enhanced Performance Reporting v1 endpoints
+app.include_router(enhanced_performance_router, prefix=settings.API_V1_PREFIX, tags=["performance-reporting"])
 
 # Sensitivity Analysis v1 endpoints
 app.include_router(sensitivity_analysis_router, prefix=settings.API_V1_PREFIX, tags=["sensitivity-analysis"])

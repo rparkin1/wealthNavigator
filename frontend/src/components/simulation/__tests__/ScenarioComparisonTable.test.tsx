@@ -2,7 +2,7 @@
  * Tests for ScenarioComparisonTable Component
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { ScenarioComparisonTable } from '../ScenarioComparisonTable';
 import type { GoalScenario } from '../../../types/goalScenarios';
@@ -124,9 +124,13 @@ describe('ScenarioComparisonTable', () => {
     it('should show all scenario names in columns', () => {
       render(<ScenarioComparisonTable scenarios={mockScenarios} />);
 
-      expect(screen.getByText('Baseline')).toBeInTheDocument();
-      expect(screen.getByText('Conservative')).toBeInTheDocument();
-      expect(screen.getByText('Aggressive')).toBeInTheDocument();
+      const headerCells = screen.getAllByRole('columnheader').slice(1);
+      const hasHeader = (name: string) =>
+        headerCells.some(cell => within(cell).queryAllByText(name).length > 0);
+
+      expect(hasHeader('Baseline')).toBe(true);
+      expect(hasHeader('Conservative')).toBe(true);
+      expect(hasHeader('Aggressive')).toBe(true);
     });
 
     it('should display risk level badges', () => {
@@ -139,7 +143,10 @@ describe('ScenarioComparisonTable', () => {
     it('should mark baseline scenario', () => {
       render(<ScenarioComparisonTable scenarios={mockScenarios} />);
 
-      expect(screen.getByText('Baseline')).toBeInTheDocument();
+      const baselineHeaders = screen
+        .getAllByRole('columnheader')
+        .filter(header => header.textContent?.includes('Baseline'));
+      expect(baselineHeaders.length).toBeGreaterThan(0);
     });
   });
 
@@ -174,7 +181,7 @@ describe('ScenarioComparisonTable', () => {
     it('should show years to goal with units', () => {
       render(<ScenarioComparisonTable scenarios={mockScenarios} />);
 
-      expect(screen.getByText('25.0 years')).toBeInTheDocument();
+      expect(screen.getAllByText('25.0 years').length).toBeGreaterThan(0);
     });
   });
 
@@ -199,7 +206,8 @@ describe('ScenarioComparisonTable', () => {
       render(<ScenarioComparisonTable scenarios={mockScenarios} />);
 
       // Aggressive has +10% funding level vs baseline (110 vs 100)
-      expect(screen.getByText(/\+10\.0%/)).toBeInTheDocument();
+      const matches = screen.getAllByText((content) => content.includes('+10.0%'));
+      expect(matches.length).toBeGreaterThan(0);
     });
 
     it('should not show deltas for baseline scenario', () => {
@@ -256,10 +264,17 @@ describe('ScenarioComparisonTable', () => {
     it('should show comparison legend', () => {
       render(<ScenarioComparisonTable scenarios={mockScenarios} />);
 
-      expect(screen.getByText('Legend:')).toBeInTheDocument();
-      expect(screen.getByText(/Green.*Better than baseline/)).toBeInTheDocument();
-      expect(screen.getByText(/Red.*Worse than baseline/)).toBeInTheDocument();
-      expect(screen.getByText(/Baseline.*no comparison/)).toBeInTheDocument();
+      const legendLabel = screen.getByText('Legend:');
+      const legendContainer = legendLabel.closest('div')?.parentElement;
+      expect(legendContainer).not.toBeNull();
+
+      const scope = within(legendContainer as HTMLElement);
+      expect(scope.getByText('Green')).toBeInTheDocument();
+      expect(scope.getByText('= Better than baseline')).toBeInTheDocument();
+      expect(scope.getByText('Red')).toBeInTheDocument();
+      expect(scope.getByText('= Worse than baseline')).toBeInTheDocument();
+      expect(scope.getByText('—')).toBeInTheDocument();
+      expect(scope.getByText('= Baseline (no comparison)')).toBeInTheDocument();
     });
   });
 

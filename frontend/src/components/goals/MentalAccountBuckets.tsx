@@ -89,6 +89,14 @@ export const MentalAccountBuckets: React.FC<MentalAccountBucketsProps> = ({
     return icons[category] || '🎯';
   };
 
+  const formatGoalDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-6">
@@ -112,11 +120,27 @@ export const MentalAccountBuckets: React.FC<MentalAccountBucketsProps> = ({
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">{bucket.goalTitle}</h3>
                   <p className="text-sm text-gray-600">
-                    Target: {new Date(bucket.targetDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                    Target: {formatGoalDate(bucket.targetDate)}
                   </p>
                 </div>
               </div>
               {getPriorityBadge(bucket.priority)}
+            </div>
+
+            {/* Goal Financial Metrics */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+              <div>
+                <p className="text-xs text-gray-600">Current Value</p>
+                <p className="text-base font-semibold text-gray-900">{formatCurrency(bucket.currentAmount)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-600">Target Amount</p>
+                <p className="text-base font-semibold text-gray-900">{formatCurrency(bucket.targetAmount)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-600">Projected Value</p>
+                <p className="text-base font-semibold text-blue-600">{formatCurrency(bucket.projectedValue)}</p>
+              </div>
             </div>
 
             {/* Funding Progress */}
