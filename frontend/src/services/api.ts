@@ -103,32 +103,48 @@ class ApiClient {
 
   // ==================== Goal Management ====================
 
-  async getGoals(params?: {
+  async getGoals(userId: string, params?: {
     category?: string;
     priority?: string;
-    status?: string;
-  }): Promise<{ goals: Goal[] }> {
-    const response = await this.client.get('/goals', { params });
+  }): Promise<Goal[]> {
+    const response = await this.client.get('/goals', {
+      params: { user_id: userId, ...params }
+    });
     return response.data;
   }
 
-  async getGoal(id: string): Promise<Goal> {
-    const response = await this.client.get(`/goals/${id}`);
+  async getGoal(id: string, userId: string): Promise<Goal> {
+    const response = await this.client.get(`/goals/${id}`, {
+      params: { user_id: userId }
+    });
     return response.data;
   }
 
-  async createGoal(goal: Partial<Goal>): Promise<Goal> {
-    const response = await this.client.post('/goals', goal);
+  async createGoal(userId: string, goal: Omit<Goal, 'id' | 'status'>): Promise<Goal> {
+    const response = await this.client.post('/goals', goal, {
+      params: { user_id: userId }
+    });
     return response.data;
   }
 
-  async updateGoal(id: string, data: Partial<Goal>): Promise<Goal> {
-    const response = await this.client.patch(`/goals/${id}`, data);
+  async updateGoal(id: string, userId: string, data: Partial<Goal>): Promise<Goal> {
+    const response = await this.client.patch(`/goals/${id}`, data, {
+      params: { user_id: userId }
+    });
     return response.data;
   }
 
-  async deleteGoal(id: string): Promise<void> {
-    await this.client.delete(`/goals/${id}`);
+  async deleteGoal(id: string, userId: string): Promise<void> {
+    await this.client.delete(`/goals/${id}`, {
+      params: { user_id: userId }
+    });
+  }
+
+  async analyzeGoal(id: string, userId: string): Promise<Goal> {
+    const response = await this.client.post(`/goals/${id}/analyze`, null, {
+      params: { user_id: userId }
+    });
+    return response.data.updated_goal;
   }
 
   // ==================== Portfolio Operations ====================

@@ -13,6 +13,7 @@ from .nodes import (
     monte_carlo_simulator_node,
     visualization_node,
 )
+from .advanced_portfolio_agent import advanced_portfolio_agent_node
 
 __all__ = [
     "create_financial_planning_graph",
@@ -24,4 +25,5 @@ __all__ = [
     "portfolio_architect_node",
     "monte_carlo_simulator_node",
     "visualization_node",
+    "advanced_portfolio_agent_node",
 ]

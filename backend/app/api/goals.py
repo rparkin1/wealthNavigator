@@ -4,10 +4,9 @@ Goal Management API
 CRUD operations for financial goals.
 """
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel, Field
 from typing import Optional, List
-from datetime import date
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 import uuid
@@ -21,44 +20,44 @@ router = APIRouter(tags=["goals"])
 
 class GoalCreate(BaseModel):
     """Create goal request"""
-    name: str = Field(..., min_length=1, max_length=255)
+    title: str = Field(..., min_length=1, max_length=255)
     category: GoalCategory
     priority: GoalPriority = GoalPriority.IMPORTANT
     target_amount: float = Field(..., gt=0)
-    target_date: date
-    current_funding: float = Field(default=0.0, ge=0)
+    target_date: str  # ISO date string (YYYY-MM-DD)
+    current_amount: float = Field(default=0.0, ge=0)
+    monthly_contribution: Optional[float] = Field(default=None, ge=0)
     description: Optional[str] = None
 
 
 class GoalUpdate(BaseModel):
     """Update goal request"""
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
+    title: Optional[str] = Field(None, min_length=1, max_length=255)
     priority: Optional[GoalPriority] = None
     target_amount: Optional[float] = Field(None, gt=0)
-    target_date: Optional[date] = None
-    current_funding: Optional[float] = Field(None, ge=0)
+    target_date: Optional[str] = None  # ISO date string
+    current_amount: Optional[float] = Field(None, ge=0)
+    monthly_contribution: Optional[float] = Field(None, ge=0)
     description: Optional[str] = None
 
 
 class GoalResponse(BaseModel):
-    """Goal response"""
+    """Goal response - matches frontend Goal interface"""
     id: str
-    name: str
+    title: str
     category: GoalCategory
     priority: GoalPriority
-    target_amount: float
-    target_date: date
-    current_funding: float
-    success_probability: Optional[float]
-    required_monthly_savings: Optional[float]
-    progress_percentage: float
-    is_on_track: bool
-    description: Optional[str]
-    created_at: str
-    updated_at: str
+    target_amount: float = Field(alias="targetAmount")
+    current_amount: float = Field(alias="currentAmount")
+    target_date: str = Field(alias="targetDate")  # ISO date string
+    monthly_contribution: Optional[float] = Field(None, alias="monthlyContribution")
+    success_probability: Optional[float] = Field(None, alias="successProbability")
+    status: str
+    description: Optional[str] = None
 
     class Config:
         from_attributes = True
+        populate_by_name = True
 
 
 @router.post("", response_model=GoalResponse, status_code=201)
@@ -78,12 +77,13 @@ async def create_goal(
     goal = GoalModel(
         id=str(uuid.uuid4()),
         user_id=user_id,
-        name=goal_data.name,
+        title=goal_data.title,
         category=goal_data.category,
         priority=goal_data.priority,
         target_amount=goal_data.target_amount,
         target_date=goal_data.target_date,
-        current_funding=goal_data.current_funding,
+        current_amount=goal_data.current_amount,
+        monthly_contribution=goal_data.monthly_contribution,
         description=goal_data.description
     )
 
@@ -228,11 +228,11 @@ async def analyze_goal(
 
     # Convert to tool model
     goal_tool = GoalToolModel(
-        name=goal.name,
+        name=goal.title,
         category=goal.category,
         target_amount=goal.target_amount,
         target_date=goal.target_date,
-        current_funding=goal.current_funding,
+        current_funding=goal.current_amount,
         priority=goal.priority
     )
 
