@@ -147,7 +147,7 @@ describe('ThreadSidebar', () => {
       fireEvent.mouseEnter(thread);
 
       // Find and click delete button
-      const buttons = within(thread).getAllByRole('button');
+      const buttons = within(thread as HTMLElement).getAllByRole('button');
       const deleteButton = buttons.find((btn) => btn.title === 'Delete conversation');
 
       if (deleteButton) {
@@ -169,7 +169,7 @@ describe('ThreadSidebar', () => {
     if (thread) {
       fireEvent.mouseEnter(thread);
 
-      const buttons = within(thread).getAllByRole('button');
+      const buttons = within(thread as HTMLElement).getAllByRole('button');
       const deleteButton = buttons.find((btn) => btn.title === 'Delete conversation');
 
       if (deleteButton) {
@@ -193,7 +193,7 @@ describe('ThreadSidebar', () => {
     if (thread) {
       fireEvent.mouseEnter(thread);
 
-      const buttons = within(thread).getAllByRole('button');
+      const buttons = within(thread as HTMLElement).getAllByRole('button');
       const deleteButton = buttons.find((btn) => btn.title === 'Delete conversation');
 
       if (deleteButton) {

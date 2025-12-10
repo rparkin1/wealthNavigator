@@ -60,4 +60,4 @@ class MockEventSource {
   }
 }
 
-global.EventSource = MockEventSource as any;
+globalThis.EventSource = MockEventSource as any;

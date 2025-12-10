@@ -16,7 +16,15 @@ import type {
 } from '../types/portfolio';
 import type { ApiResponse, ErrorResponse } from '../types/api';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+// Standardize on VITE_API_BASE_URL and normalize to include /api/v1
+function normalizeApiBase(raw: string): string {
+  const stripped = raw.replace(/\/$/, '');
+  return /\/api\/v\d+$/.test(stripped) ? stripped : `${stripped}/api/v1`;
+}
+
+const API_BASE_URL = normalizeApiBase(
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) || 'http://localhost:8000'
+);
 
 /**
  * Base fetch wrapper with error handling
@@ -27,11 +35,12 @@ async function apiFetch<T>(
 ): Promise<ApiResponse<T>> {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      // Spread options first, then merge headers to avoid being overwritten
+      ...options,
       headers: {
         'Content-Type': 'application/json',
-        ...options.headers,
+        ...(options.headers || {}),
       },
-      ...options,
     });
 
     if (!response.ok) {

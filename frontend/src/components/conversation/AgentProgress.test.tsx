@@ -33,7 +33,7 @@ describe('AgentProgress', () => {
         agent_id: 'goal_planner',
         agent_name: 'Goal Planner',
         response: 'Calculating retirement needs',
-        timestamp: Date.now(),
+        timestamp: new Date().toISOString(),
       },
     ];
 
@@ -67,7 +67,7 @@ describe('AgentProgress', () => {
         agent_id: 'test',
         agent_name: 'Test Agent',
         response: longResponse,
-        timestamp: Date.now(),
+        timestamp: new Date().toISOString(),
       },
     ];
 
