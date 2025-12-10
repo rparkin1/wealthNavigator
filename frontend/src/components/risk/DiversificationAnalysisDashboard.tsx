@@ -449,7 +449,7 @@ export function DiversificationAnalysisDashboard({
                 <p style={{ margin: 0, fontSize: '13px', color: '#6b7280' }}>{rec.impact}</p>
               </div>
 
-              {rec.specific_actions.length > 0 && (
+              {rec.specific_actions && rec.specific_actions.length > 0 && (
                 <div>
                   <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Specific Actions:</div>
                   <ul style={{ margin: 0, paddingLeft: '20px' }}>

@@ -449,7 +449,7 @@ async def hedging_strategies_auto(
 
         # Convert risk result to dict format for hedging service
         risk_metrics = {
-            "annual_volatility": risk_result.metrics.volatility,
+            "annual_volatility": risk_result.metrics.annual_volatility,
             "beta": risk_result.metrics.beta,
             "max_drawdown": risk_result.metrics.max_drawdown,
             "risk_level": risk_result.metrics.risk_level,
