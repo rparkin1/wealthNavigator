@@ -85,28 +85,68 @@ class MunicipalBondRecommendation(BaseModel):
 class TaxManagementService:
     """Comprehensive tax management service"""
 
-    # State income tax rates (2024-2025)
+    # State income tax rates (2024-2025) - All 50 states + DC
     STATE_TAX_RATES = {
+        # High-tax states (>9%)
         "CA": 0.133,  # California (top rate)
         "NY": 0.109,  # New York
         "NJ": 0.107,  # New Jersey
         "OR": 0.099,  # Oregon
         "MN": 0.098,  # Minnesota
         "DC": 0.095,  # District of Columbia
+        "HI": 0.110,  # Hawaii
+        "VT": 0.087,  # Vermont
+
+        # Medium-high tax states (7-9%)
         "CT": 0.070,  # Connecticut
-        "MA": 0.050,  # Massachusetts
+        "ID": 0.058,  # Idaho
+        "IA": 0.085,  # Iowa
+        "ME": 0.075,  # Maine
+        "NE": 0.068,  # Nebraska
+        "SC": 0.070,  # South Carolina
+        "WI": 0.075,  # Wisconsin
+
+        # Medium tax states (5-7%)
+        "AR": 0.055,  # Arkansas
+        "DE": 0.066,  # Delaware
         "GA": 0.0575, # Georgia
-        "IL": 0.0495, # Illinois
-        "PA": 0.0307, # Pennsylvania
-        "TX": 0.000,  # Texas (no state income tax)
-        "FL": 0.000,  # Florida
-        "WA": 0.000,  # Washington
-        "NV": 0.000,  # Nevada
-        "TN": 0.000,  # Tennessee
-        "WY": 0.000,  # Wyoming
-        "SD": 0.000,  # South Dakota
+        "KS": 0.057,  # Kansas
+        "LA": 0.060,  # Louisiana
+        "MD": 0.0575, # Maryland
+        "MO": 0.054,  # Missouri
+        "MS": 0.050,  # Mississippi
+        "MT": 0.069,  # Montana
+        "NM": 0.059,  # New Mexico
+        "OK": 0.050,  # Oklahoma
+        "RI": 0.0599, # Rhode Island
+        "UT": 0.0495, # Utah
+        "VA": 0.0575, # Virginia
+        "WV": 0.065,  # West Virginia
+
+        # Lower tax states (3-5%)
+        "AL": 0.050,  # Alabama
+        "AZ": 0.045,  # Arizona
+        "CO": 0.044,  # Colorado (flat rate)
+        "IL": 0.0495, # Illinois (flat rate)
+        "IN": 0.0323, # Indiana (flat rate)
+        "KY": 0.045,  # Kentucky (flat rate)
+        "MA": 0.050,  # Massachusetts (flat rate)
+        "MI": 0.0425, # Michigan (flat rate)
+        "NC": 0.0475, # North Carolina (flat rate)
+        "ND": 0.029,  # North Dakota
+        "OH": 0.0399, # Ohio
+        "PA": 0.0307, # Pennsylvania (flat rate)
+
+        # No state income tax states
         "AK": 0.000,  # Alaska
+        "FL": 0.000,  # Florida
+        "NV": 0.000,  # Nevada
         "NH": 0.000,  # New Hampshire (dividends/interest only)
+        "SD": 0.000,  # South Dakota
+        "TN": 0.000,  # Tennessee
+        "TX": 0.000,  # Texas
+        "WA": 0.000,  # Washington
+        "WY": 0.000,  # Wyoming
     }
 
     def generate_tlh_report(
@@ -445,3 +485,183 @@ class TaxManagementService:
                 muni_benefit > 0
             ])
         }
+
+    def calculate_tax_projection(
+        self,
+        income: float,
+        capital_gains: float,
+        qualified_dividends: float,
+        ordinary_dividends: float,
+        state: str,
+        filing_status: str,
+        deductions: float = 0,
+        years: int = 1
+    ) -> Dict:
+        """
+        Calculate tax projection for current and future years.
+
+        REQ-TAX-010: Estimate user tax liability
+        REQ-TAX-012: Multi-year tax projections
+
+        Args:
+            income: Ordinary income (wages, interest, etc.)
+            capital_gains: Long-term capital gains
+            qualified_dividends: Qualified dividends (taxed as LTCG)
+            ordinary_dividends: Ordinary dividends
+            state: State code
+            filing_status: single, married_joint, married_separate, head_of_household
+            deductions: Itemized or standard deductions
+            years: Number of years to project
+
+        Returns:
+            Tax projection with breakdown by year
+        """
+        # 2024 Federal tax brackets
+        brackets_2024 = {
+            "single": [
+                (11000, 0.10),
+                (44725, 0.12),
+                (95375, 0.22),
+                (182100, 0.24),
+                (231250, 0.32),
+                (578125, 0.35),
+                (float('inf'), 0.37)
+            ],
+            "married_joint": [
+                (22000, 0.10),
+                (89050, 0.12),
+                (190750, 0.22),
+                (364200, 0.24),
+                (462500, 0.32),
+                (693750, 0.35),
+                (float('inf'), 0.37)
+            ],
+            "married_separate": [
+                (11000, 0.10),
+                (44525, 0.12),
+                (95375, 0.22),
+                (182100, 0.24),
+                (231250, 0.32),
+                (346875, 0.35),
+                (float('inf'), 0.37)
+            ],
+            "head_of_household": [
+                (15700, 0.10),
+                (59850, 0.12),
+                (95350, 0.22),
+                (182100, 0.24),
+                (231250, 0.32),
+                (578100, 0.35),
+                (float('inf'), 0.37)
+            ]
+        }
+
+        # Long-term capital gains brackets
+        ltcg_brackets = {
+            "single": [(44625, 0.0), (492300, 0.15), (float('inf'), 0.20)],
+            "married_joint": [(89250, 0.0), (553850, 0.15), (float('inf'), 0.20)],
+            "married_separate": [(44625, 0.0), (276900, 0.15), (float('inf'), 0.20)],
+            "head_of_household": [(59750, 0.0), (523050, 0.15), (float('inf'), 0.20)]
+        }
+
+        # Standard deductions 2024
+        standard_deductions = {
+            "single": 14600,
+            "married_joint": 29200,
+            "married_separate": 14600,
+            "head_of_household": 21900
+        }
+
+        projections = []
+
+        for year in range(years):
+            # Assume 2.5% annual inflation adjustment for brackets
+            inflation_factor = 1.025 ** year
+
+            # Use standard deduction if deductions not specified
+            effective_deductions = deductions if deductions > 0 else standard_deductions.get(filing_status, 14600)
+
+            # Calculate adjusted gross income (AGI)
+            agi = income + capital_gains + qualified_dividends + ordinary_dividends
+
+            # Calculate taxable income (after deductions)
+            taxable_income = max(0, agi - effective_deductions * inflation_factor)
+
+            # Calculate ordinary income tax
+            ordinary_taxable = max(0, taxable_income - capital_gains - qualified_dividends)
+            ordinary_tax = self._calculate_progressive_tax(
+                ordinary_taxable,
+                brackets_2024.get(filing_status, brackets_2024["single"]),
+                inflation_factor
+            )
+
+            # Calculate capital gains tax (includes qualified dividends)
+            ltcg_taxable = capital_gains + qualified_dividends
+            ltcg_tax = self._calculate_progressive_tax(
+                ltcg_taxable,
+                ltcg_brackets.get(filing_status, ltcg_brackets["single"]),
+                inflation_factor
+            )
+
+            # Total federal tax
+            federal_tax = ordinary_tax + ltcg_tax
+
+            # Net Investment Income Tax (NIIT) - 3.8% on investment income
+            niit_threshold = {"single": 200000, "married_joint": 250000, "married_separate": 125000, "head_of_household": 200000}
+            threshold = niit_threshold.get(filing_status, 200000) * inflation_factor
+            niit_income = capital_gains + qualified_dividends + ordinary_dividends
+            niit = max(0, min(niit_income, agi - threshold)) * 0.038 if agi > threshold else 0
+
+            # State tax
+            state_rate = self.STATE_TAX_RATES.get(state.upper(), 0.05)
+            state_tax = taxable_income * state_rate
+
+            # Total tax liability
+            total_tax = federal_tax + niit + state_tax
+
+            # Effective rate
+            effective_rate = (total_tax / agi) if agi > 0 else 0
+
+            projections.append({
+                "year": datetime.now().year + year,
+                "agi": round(agi * inflation_factor, 2),
+                "taxable_income": round(taxable_income, 2),
+                "federal_tax": round(federal_tax, 2),
+                "niit": round(niit, 2),
+                "state_tax": round(state_tax, 2),
+                "total_tax": round(total_tax, 2),
+                "effective_rate": round(effective_rate, 4),
+                "marginal_rate": self._get_marginal_rate(ordinary_taxable, brackets_2024.get(filing_status, brackets_2024["single"]), inflation_factor)
+            })
+
+        return {
+            "projections": projections,
+            "filing_status": filing_status,
+            "state": state,
+            "years": years
+        }
+
+    def _calculate_progressive_tax(self, income: float, brackets: List, inflation_factor: float = 1.0) -> float:
+        """Calculate tax using progressive bracket system"""
+        tax = 0
+        previous_limit = 0
+
+        for limit, rate in brackets:
+            if income <= previous_limit:
+                break
+
+            taxable_in_bracket = min(income, limit * inflation_factor) - previous_limit
+            tax += taxable_in_bracket * rate
+            previous_limit = limit * inflation_factor
+
+            if income <= limit * inflation_factor:
+                break
+
+        return tax
+
+    def _get_marginal_rate(self, income: float, brackets: List, inflation_factor: float = 1.0) -> float:
+        """Get marginal tax rate for given income"""
+        for limit, rate in brackets:
+            if income <= limit * inflation_factor:
+                return rate
+        return brackets[-1][1]  # Return top rate if above all brackets

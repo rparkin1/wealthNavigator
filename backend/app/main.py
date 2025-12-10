@@ -5,11 +5,24 @@ Entry point for the WealthNavigator AI backend
 
 from fastapi import FastAPI, APIRouter, Request
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
-from app.core.rate_limit import limiter
+from app.middleware import (
+    limiter,
+    rate_limit_exceeded_handler,
+    SecurityHeadersMiddleware,
+    InputValidationMiddleware,
+    CSRFProtectionMiddleware,
+)
+from app.core.monitoring import init_sentry
+from app.core.cache import cache
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Initialize error tracking
+init_sentry()
 
 # Create FastAPI app
 app = FastAPI(
@@ -19,18 +32,58 @@ app = FastAPI(
 )
 
 # Configure rate limiting
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+if settings.RATE_LIMIT_ENABLED:
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+    logger.info("Rate limiting enabled")
+
+# Add security middleware (order matters!)
+# 1. Input validation (first line of defense)
+app.add_middleware(InputValidationMiddleware)
+logger.info("Input validation middleware enabled")
+
+# 2. CSRF protection
+app.add_middleware(CSRFProtectionMiddleware)
+logger.info("CSRF protection middleware enabled")
+
+# 3. Security headers (production hardening)
+app.add_middleware(SecurityHeadersMiddleware)
+logger.info("Security headers middleware enabled")
 
 # Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
-    allow_origin_regex=r"^https?://localhost(?::\d+)?$",  # dev convenience
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+cors_config = {
+    "allow_credentials": True,
+    "allow_methods": ["*"],
+    "allow_headers": ["*"],
+}
+
+# Production CORS - strict origins only
+if settings.PLAID_ENV == "production":
+    cors_config["allow_origins"] = settings.CORS_ORIGINS
+    logger.info(f"Production CORS configured with origins: {settings.CORS_ORIGINS}")
+else:
+    # Development CORS - more permissive
+    cors_config["allow_origins"] = settings.CORS_ORIGINS
+    cors_config["allow_origin_regex"] = r"^https?://localhost(?::\d+)?$"
+    logger.info("Development CORS configured")
+
+app.add_middleware(CORSMiddleware, **cors_config)
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize services on startup"""
+    logger.info("Starting WealthNavigator AI backend...")
+    await cache.connect()
+    logger.info("Startup complete")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on shutdown"""
+    logger.info("Shutting down WealthNavigator AI backend...")
+    await cache.disconnect()
+    logger.info("Shutdown complete")
 
 
 @app.get("/")
@@ -81,10 +134,20 @@ from app.api.v1.endpoints.estate_planning import router as estate_planning_route
 from app.api.v1.endpoints.insurance_optimization import router as insurance_optimization_router
 from app.api.v1.endpoints.sensitivity_analysis import router as sensitivity_analysis_router
 from app.api.v1.endpoints.enhanced_performance import router as enhanced_performance_router
+from app.api.v1.endpoints.custom_reports import router as custom_reports_router
 from app.api.v1.endpoints.auth import router as auth_router
+from app.api.v1.endpoints.privacy import router as privacy_router
+from app.api.v1.endpoints.mfa import router as mfa_router
+from app.api.v1.endpoints.performance_metrics import router as performance_metrics_router
 
 # Authentication endpoints (no prefix, auth handles its own /auth prefix)
 app.include_router(auth_router, prefix=settings.API_V1_PREFIX)
+
+# Privacy & Compliance endpoints (GDPR/CCPA)
+app.include_router(privacy_router, prefix=settings.API_V1_PREFIX)
+
+# Multi-Factor Authentication endpoints
+app.include_router(mfa_router, prefix=settings.API_V1_PREFIX)
 
 # Core endpoints
 app.include_router(threads_router, prefix=settings.API_V1_PREFIX)
@@ -145,8 +208,14 @@ app.include_router(insurance_optimization_router, prefix=settings.API_V1_PREFIX,
 # Enhanced Performance Reporting v1 endpoints
 app.include_router(enhanced_performance_router, prefix=settings.API_V1_PREFIX, tags=["performance-reporting"])
 
+# Custom Reports v1 endpoints (REQ-REPORT-012)
+app.include_router(custom_reports_router, prefix=settings.API_V1_PREFIX, tags=["custom-reports"])
+
 # Sensitivity Analysis v1 endpoints
 app.include_router(sensitivity_analysis_router, prefix=settings.API_V1_PREFIX, tags=["sensitivity-analysis"])
+
+# Performance Metrics endpoints
+app.include_router(performance_metrics_router, prefix=settings.API_V1_PREFIX, tags=["performance"])
 
 # Section 6: What-If Analysis & Scenario Planning - NEW!
 from app.api.v1 import life_events, historical_scenarios, simulations

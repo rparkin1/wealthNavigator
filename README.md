@@ -221,18 +221,27 @@ npm run dev
 
 Comprehensive documentation is available in the `docs/` directory:
 
-- **[User Guide](docs/USER_GUIDE.md)** - How to use WealthNavigator AI
-- **[Developer Guide](docs/DEVELOPER_GUIDE.md)** - Development setup and architecture
-- **[API Documentation](docs/API_DOCUMENTATION.md)** - API endpoints and usage
-- **[Product Roadmap](docs/PRODUCT_ROADMAP.md)** - Feature development timeline
-- **[Architecture Guide](docs/ARCHITECTURE.md)** - Technical architecture details
+### User Documentation
 
-### Additional Resources
+- **[Getting Started Guide](docs/GETTING_STARTED.md)** - Installation, setup, and first-use instructions
+- **[User Guide](docs/USER_GUIDE.md)** - Complete guide to using WealthNavigator AI
+- **[Feature Tutorials](docs/FEATURE_TUTORIALS.md)** - Step-by-step tutorials for all features
+- **[FAQ](docs/FAQ.md)** - Frequently asked questions
+- **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Solutions to common problems
 
+### Developer Documentation
+
+- **[API Documentation](docs/API_DOCUMENTATION.md)** - Complete REST API reference with examples
+- **[Developer Guide](docs/DEVELOPER_GUIDE.md)** - Development setup and architecture (Coming soon)
+- **[Architecture Guide](docs/ARCHITECTURE.md)** - Technical architecture details (Coming soon)
+
+### Product Documentation
+
+- **[Product Roadmap](docs/PRODUCT_ROADMAP.md)** - Feature development timeline (Coming soon)
 - **[CLAUDE.md](CLAUDE.md)** - Claude Code development guidance
-- **[DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md)** - Detailed development plan
-- **[development_docs/ProductDescription/PRD.md](development_docs/ProductDescription/PRD.md)** - Product requirements
-- **[development_docs/ProductDescription/user-stories.md](development_docs/ProductDescription/user-stories.md)** - User stories
+- **[development_docs/ProductDescription/PRD.md](development_docs/ProductDescription/PRD.md)** - Product requirements (170+ requirements)
+- **[development_docs/ProductDescription/user-stories.md](development_docs/ProductDescription/user-stories.md)** - User stories (40+ stories)
+- **[development_docs/IMPLEMENTATION_STATUS_REPORT.md](development_docs/IMPLEMENTATION_STATUS_REPORT.md)** - Current implementation status (95-98% complete)
 
 ---
 
