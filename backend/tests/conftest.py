@@ -51,13 +51,14 @@ async def async_engine():
 
 
 @pytest.fixture(scope="function")
-def async_session_maker(async_engine):
+async def async_session_maker(async_engine):
     """Session factory shared between tests and FastAPI dependency override."""
-    return async_sessionmaker(
+    session_maker = async_sessionmaker(
         async_engine,
         class_=AsyncSession,
         expire_on_commit=False,
     )
+    yield session_maker
 
 
 @pytest.fixture(scope="function")
@@ -172,7 +173,8 @@ async def test_user(async_session):
     )
     existing = result.scalar_one_or_none()
     if existing:
-        return existing
+        yield existing
+        return
 
     user = await create_test_user(
         async_session,
@@ -180,11 +182,12 @@ async def test_user(async_session):
         password="testpass123",
         user_id="test-user-123"
     )
-    return user
+    await async_session.commit()  # Ensure user is committed
+    yield user
 
 
 @pytest.fixture
-async def auth_headers(async_session):
+async def auth_headers(async_session) -> dict:
     """Create a real JWT for a test user so auth-dependent endpoints return 200."""
     from tests.utils.auth_helpers import create_test_user, create_test_token
     from sqlalchemy import select
@@ -203,25 +206,22 @@ async def auth_headers(async_session):
             user_id="test-user-123",
         )
 
+    await async_session.commit()  # Ensure user is committed
     token = create_test_token(user.id)
-    return {"Authorization": f"Bearer {token}"}
+    yield {"Authorization": f"Bearer {token}"}
 
 
 @pytest.fixture
-async def authenticated_client(client, auth_headers) -> AsyncClient:
+async def authenticated_client(client, auth_headers) -> AsyncGenerator[AsyncClient, None]:
     """Create an authenticated HTTP client for testing."""
     client.headers.update(auth_headers)
-    return client
+    yield client
 
 
 @pytest.fixture
-def db(request, async_session, sync_session):
-    """Provide database session for tests (async for asyncio-marked tests, sync otherwise)."""
-
-    if request.node.get_closest_marker("asyncio"):
-        yield async_session
-    else:
-        yield sync_session
+async def db(async_session):
+    """Provide database session for async tests."""
+    yield async_session
 
 
 @pytest.fixture(autouse=True)
@@ -244,13 +244,3 @@ async def override_database_dependency(async_session_maker):
     app.dependency_overrides.pop(get_db, None)
 
 
-@pytest.fixture
-def auth_headers():
-    """Mock authentication headers for API tests"""
-    return {"Authorization": "Bearer test_token"}
-
-
-@pytest.fixture
-def test_user_token():
-    """Mock user token for integration tests"""
-    return "test_token"

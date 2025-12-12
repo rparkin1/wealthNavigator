@@ -693,10 +693,13 @@ class MultiLevelOptimizer:
 
     def _calculate_diversification_score(self, allocation: Dict[str, float]) -> float:
         """
-        Calculate diversification score using Herfindahl-Hirschman Index (HHI).
+        Calculate diversification score using Herfindahl-Hirschman Index (HHI)
+        and number of assets.
 
         HHI = sum of squared weights
-        Score = 1 - normalized_HHI (0 = concentrated, 1 = perfectly diversified)
+        Score = (1 - normalized_HHI) * asset_count_penalty
+
+        This penalizes both concentration and insufficient asset count.
         """
         if not allocation:
             return 0.0
@@ -710,10 +713,24 @@ class MultiLevelOptimizer:
         min_hhi = 1.0 / n if n > 0 else 1.0
 
         if max_hhi == min_hhi:
-            return 1.0
+            base_score = 1.0
+        else:
+            normalized_hhi = (hhi - min_hhi) / (max_hhi - min_hhi)
+            base_score = 1.0 - normalized_hhi
 
-        normalized_hhi = (hhi - min_hhi) / (max_hhi - min_hhi)
-        diversification_score = 1.0 - normalized_hhi
+        # Apply penalty for having too few assets
+        # Ideal diversification has 8+ asset classes
+        # Score scales: 1 asset = 0.1x, 2 = 0.3x, 4 = 0.6x, 8+ = 1.0x
+        if n >= 8:
+            asset_count_factor = 1.0
+        elif n >= 4:
+            asset_count_factor = 0.6 + 0.1 * (n - 4)  # 0.6 to 1.0
+        elif n >= 2:
+            asset_count_factor = 0.3 + 0.15 * (n - 2)  # 0.3 to 0.6
+        else:
+            asset_count_factor = 0.1 * n  # 0.1 for 1 asset
+
+        diversification_score = base_score * asset_count_factor
 
         return diversification_score
 

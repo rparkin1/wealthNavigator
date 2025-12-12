@@ -6,6 +6,7 @@ Handles environment variables and settings
 from pydantic_settings import BaseSettings
 from pydantic import ConfigDict, field_validator
 from typing import Optional, Union, List
+from pathlib import Path
 import json
 
 
@@ -55,7 +56,7 @@ class Settings(BaseSettings):
     RATE_LIMIT_STORAGE: str = "memory://"  # Use "redis://localhost:6379" in production
 
     model_config = ConfigDict(
-        env_file=".env",
+        env_file=str(Path(__file__).parent.parent.parent / ".env"),
         case_sensitive=True,
         extra="ignore"  # Ignore extra fields in .env file
     )
