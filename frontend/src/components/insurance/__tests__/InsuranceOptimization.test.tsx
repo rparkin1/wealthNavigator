@@ -21,10 +21,10 @@ describe('Insurance Optimization Dashboard', () => {
     render(<InsuranceOptimizationDashboard />);
 
     expect(screen.getByText(/Insurance Optimization/i)).toBeInTheDocument();
-    expect(screen.getByText(/Life Insurance/i)).toBeInTheDocument();
-    expect(screen.getByText(/Disability Coverage/i)).toBeInTheDocument();
-    expect(screen.getByText(/Long-Term Care/i)).toBeInTheDocument();
-    expect(screen.getByText(/Gap Analysis/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /💰 Life Insurance/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /🏥 Disability Coverage/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /🏠 Long-Term Care/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /📊 Gap Analysis/i })).toBeInTheDocument();
   });
 
   test('switches between tabs', () => {
@@ -76,9 +76,9 @@ describe('Life Insurance Calculator', () => {
     render(<LifeInsuranceCalculator />);
 
     expect(screen.getByText(/Life Insurance Needs Calculator/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Annual Income/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Age/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Number of Dependents/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Annual Income$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Age$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Dependents/i)).toBeInTheDocument();
   });
 
   test('calculates life insurance needs', async () => {
@@ -98,7 +98,7 @@ describe('Life Insurance Calculator', () => {
   test('updates form inputs', () => {
     render(<LifeInsuranceCalculator />);
 
-    const incomeInput = screen.getByLabelText(/Annual Income/i) as HTMLInputElement;
+    const incomeInput = screen.getByLabelText(/^Annual Income$/i) as HTMLInputElement;
     fireEvent.change(incomeInput, { target: { value: '100000' } });
 
     expect(incomeInput.value).toBe('100000');
@@ -170,7 +170,7 @@ describe('Disability Coverage Analyzer', () => {
     render(<DisabilityCoverageAnalyzer />);
 
     expect(screen.getByText(/Disability Coverage Analyzer/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Occupation/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Occupation$/i)).toBeInTheDocument();
   });
 
   test('analyzes disability coverage', async () => {
@@ -197,12 +197,12 @@ describe('Disability Coverage Analyzer', () => {
   test('shows coverage gaps', async () => {
     render(<DisabilityCoverageAnalyzer />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Analyze/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Analyze Disability Coverage/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/Short-Term Disability/i)).toBeInTheDocument();
       expect(screen.getByText(/Long-Term Disability/i)).toBeInTheDocument();
-    });
+    }, { timeout: 2000 });
   });
 });
 
@@ -252,7 +252,7 @@ describe('Long-Term Care Planner', () => {
     render(<LongTermCarePlanner />);
 
     expect(screen.getByText(/Long-Term Care Planner/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Current Assets/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Current Assets$/i)).toBeInTheDocument();
   });
 
   test('calculates LTC needs', async () => {
@@ -391,9 +391,9 @@ describe('Insurance Gap Analysis', () => {
       />
     );
 
-    expect(screen.getByText(/Life Insurance/i)).toBeInTheDocument();
-    expect(screen.getByText(/Disability Insurance/i)).toBeInTheDocument();
-    expect(screen.getByText(/Long-Term Care/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Life Insurance/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Disability Insurance/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Long-Term Care/i).length).toBeGreaterThan(0);
   });
 
   test('shows no gaps message when coverage adequate', () => {

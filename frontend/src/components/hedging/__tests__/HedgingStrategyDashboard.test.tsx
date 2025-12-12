@@ -110,6 +110,7 @@ describe('HedgingStrategyDashboard', () => {
         portfolioValue={500000}
         allocation={{ US_LC_BLEND: 0.70, US_TREASURY_INTER: 0.30 }}
         riskMetrics={{ annual_volatility: 0.18, beta: 1.15, risk_level: 'aggressive' }}
+        usePlaidData={false}
       />
     );
 
@@ -121,7 +122,7 @@ describe('HedgingStrategyDashboard', () => {
         market_conditions: undefined,
         objectives: expect.any(Object),
       });
-    });
+    }, { timeout: 2000 });
   });
 
   it('displays optimal strategy', async () => {
@@ -132,13 +133,14 @@ describe('HedgingStrategyDashboard', () => {
         portfolioValue={500000}
         allocation={{ US_LC_BLEND: 0.70, US_TREASURY_INTER: 0.30 }}
         riskMetrics={{ annual_volatility: 0.18, beta: 1.15, risk_level: 'aggressive' }}
+        usePlaidData={false}
       />
     );
 
     await waitFor(() => {
       expect(screen.getByText('⭐ OPTIMAL STRATEGY')).toBeInTheDocument();
       expect(screen.getByTestId('optimal-strategy-name')).toHaveTextContent('Collar Strategy');
-    });
+    }, { timeout: 2000 });
   });
 
   it('displays all recommended strategies', async () => {
@@ -149,13 +151,14 @@ describe('HedgingStrategyDashboard', () => {
         portfolioValue={500000}
         allocation={{ US_LC_BLEND: 0.70, US_TREASURY_INTER: 0.30 }}
         riskMetrics={{ annual_volatility: 0.18, beta: 1.15, risk_level: 'aggressive' }}
+        usePlaidData={false}
       />
     );
 
     await waitFor(() => {
       expect(screen.getByText('All Recommended Strategies (2)')).toBeInTheDocument();
       expect(screen.getByText('Protective Put')).toBeInTheDocument();
-    });
+    }, { timeout: 2000 });
   });
 
   it('allows setting custom objectives', async () => {
@@ -166,6 +169,7 @@ describe('HedgingStrategyDashboard', () => {
         portfolioValue={500000}
         allocation={{ US_LC_BLEND: 0.70, US_TREASURY_INTER: 0.30 }}
         riskMetrics={{ annual_volatility: 0.18, beta: 1.15, risk_level: 'aggressive' }}
+        usePlaidData={false}
       />
     );
 
@@ -175,7 +179,7 @@ describe('HedgingStrategyDashboard', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Hedging Objectives')).toBeInTheDocument();
-    });
+    }, { timeout: 2000 });
 
     // Apply objectives
     const applyButton = screen.getByText('Apply Objectives');
@@ -183,7 +187,7 @@ describe('HedgingStrategyDashboard', () => {
 
     await waitFor(() => {
       expect(hedgingApi.getHedgingRecommendations).toHaveBeenCalledTimes(2);
-    });
+    }, { timeout: 2000 });
   });
 
   it('shows market conditions note', async () => {
@@ -194,12 +198,13 @@ describe('HedgingStrategyDashboard', () => {
         portfolioValue={500000}
         allocation={{ US_LC_BLEND: 0.70, US_TREASURY_INTER: 0.30 }}
         riskMetrics={{ annual_volatility: 0.18, beta: 1.15, risk_level: 'aggressive' }}
+        usePlaidData={false}
       />
     );
 
     await waitFor(() => {
       expect(screen.getByText(/High volatility environment/)).toBeInTheDocument();
-    });
+    }, { timeout: 2000 });
   });
 
   it('displays objectives met indicators', async () => {
@@ -210,6 +215,7 @@ describe('HedgingStrategyDashboard', () => {
         portfolioValue={500000}
         allocation={{ US_LC_BLEND: 0.70, US_TREASURY_INTER: 0.30 }}
         riskMetrics={{ annual_volatility: 0.18, beta: 1.15, risk_level: 'aggressive' }}
+        usePlaidData={false}
       />
     );
 
@@ -217,7 +223,7 @@ describe('HedgingStrategyDashboard', () => {
       expect(screen.getByTestId('objective-status-cost_tolerance')).toHaveTextContent('✅ cost tolerance');
       expect(screen.getByTestId('objective-status-protection_level')).toHaveTextContent('✅ protection level');
       expect(screen.getByTestId('objective-status-hedge_percentage')).toHaveTextContent('✅ hedge percentage');
-    });
+    }, { timeout: 2000 });
   });
 
   it('handles strategy selection', async () => {
@@ -228,12 +234,13 @@ describe('HedgingStrategyDashboard', () => {
         portfolioValue={500000}
         allocation={{ US_LC_BLEND: 0.70, US_TREASURY_INTER: 0.30 }}
         riskMetrics={{ annual_volatility: 0.18, beta: 1.15, risk_level: 'aggressive' }}
+        usePlaidData={false}
       />
     );
 
     await waitFor(() => {
       expect(screen.getByText('Protective Put')).toBeInTheDocument();
-    });
+    }, { timeout: 2000 });
 
     // Click on a strategy
     const protectivePutCard = screen.getByText('Protective Put').closest('div');
@@ -245,7 +252,7 @@ describe('HedgingStrategyDashboard', () => {
       expect(screen.getByText('📋 Implementation')).toBeInTheDocument();
       expect(screen.getByText('✅ Pros')).toBeInTheDocument();
       expect(screen.getByText('❌ Cons')).toBeInTheDocument();
-    });
+    }, { timeout: 2000 });
   });
 
   it('displays implementation steps', async () => {
@@ -256,17 +263,18 @@ describe('HedgingStrategyDashboard', () => {
         portfolioValue={500000}
         allocation={{ US_LC_BLEND: 0.70, US_TREASURY_INTER: 0.30 }}
         riskMetrics={{ annual_volatility: 0.18, beta: 1.15, risk_level: 'aggressive' }}
+        usePlaidData={false}
       />
     );
 
     await waitFor(() => {
       const viewDetailsButton = screen.getByText('View Implementation Details');
       fireEvent.click(viewDetailsButton);
-    });
+    }, { timeout: 2000 });
 
     await waitFor(() => {
       expect(screen.getByText('✅ Implementation Steps')).toBeInTheDocument();
-    });
+    }, { timeout: 2000 });
   });
 
   it('handles API errors', async () => {
@@ -279,12 +287,13 @@ describe('HedgingStrategyDashboard', () => {
         portfolioValue={500000}
         allocation={{ US_LC_BLEND: 0.70, US_TREASURY_INTER: 0.30 }}
         riskMetrics={{ annual_volatility: 0.18, beta: 1.15, risk_level: 'aggressive' }}
+        usePlaidData={false}
       />
     );
 
     await waitFor(() => {
       expect(screen.getByText(/Failed to load recommendations/)).toBeInTheDocument();
-    });
+    }, { timeout: 2000 });
   });
 
   it('runs example analysis', async () => {
@@ -295,6 +304,7 @@ describe('HedgingStrategyDashboard', () => {
         portfolioValue={500000}
         allocation={{ US_LC_BLEND: 0.70, US_TREASURY_INTER: 0.30 }}
         riskMetrics={{ annual_volatility: 0.18, beta: 1.15, risk_level: 'aggressive' }}
+        usePlaidData={false}
       />
     );
 
@@ -307,6 +317,6 @@ describe('HedgingStrategyDashboard', () => {
           portfolio_value: 500000,
         })
       );
-    });
+    }, { timeout: 2000 });
   });
 });

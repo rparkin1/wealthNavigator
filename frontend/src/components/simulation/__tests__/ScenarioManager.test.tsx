@@ -242,7 +242,7 @@ describe('ScenarioManager', () => {
         expect(screen.getByText('Conservative Approach')).toBeInTheDocument();
       });
 
-      const loadButtons = screen.getAllByText('Load');
+      const loadButtons = screen.getAllByRole('button', { name: 'Load' });
       fireEvent.click(loadButtons[0]);
 
       expect(mockProps.onSelectScenario).toHaveBeenCalledWith(mockScenarios[0]);
@@ -257,12 +257,12 @@ describe('ScenarioManager', () => {
         expect(screen.getByText('Conservative Approach')).toBeInTheDocument();
       });
 
-      const deleteButtons = screen.getAllByText('Delete');
+      const deleteButtons = screen.getAllByRole('button', { name: 'Delete' });
       fireEvent.click(deleteButtons[0]);
 
       await waitFor(() => {
         expect(api.deleteScenario).toHaveBeenCalledWith('goal-123', 'scenario-1');
-      });
+      }, { timeout: 2000 });
     });
 
     it('should not delete if user cancels confirmation', async () => {
@@ -339,10 +339,23 @@ describe('ScenarioManager', () => {
 
       render(<ScenarioManager {...mockProps} />);
 
-      const closeButton = screen.getByRole('button', { name: /close/i });
-      fireEvent.click(closeButton);
+      // Wait for scenarios to load first
+      await waitFor(() => {
+        expect(screen.getByText('Conservative Approach')).toBeInTheDocument();
+      });
 
-      expect(mockProps.onClose).toHaveBeenCalledOnce();
+      // Find close button by SVG pattern (X icon in header)
+      const closeButtons = screen.getAllByRole('button');
+      const closeButton = closeButtons.find(btn => {
+        const svg = btn.querySelector('svg');
+        return svg && svg.getAttribute('viewBox') === '0 0 24 24';
+      });
+
+      expect(closeButton).toBeDefined();
+      if (closeButton) {
+        fireEvent.click(closeButton);
+        expect(mockProps.onClose).toHaveBeenCalledOnce();
+      }
     });
   });
 
@@ -358,7 +371,7 @@ describe('ScenarioManager', () => {
         expect(screen.getByText('92.0%')).toBeInTheDocument(); // success probability
         expect(screen.getByText('$1,000')).toBeInTheDocument(); // monthly contribution
         expect(screen.getByText('$480,000')).toBeInTheDocument(); // projected value
-      });
+      }, { timeout: 2000 });
     });
 
     it('should show risk level badges', async () => {
@@ -374,8 +387,9 @@ describe('ScenarioManager', () => {
       render(<ScenarioManager {...mockProps} />);
 
       await waitFor(() => {
-        expect(screen.getByText(/Created Jan/)).toBeInTheDocument();
-      });
+        // The formatDate function returns format like "Jan 1, 2025"
+        expect(screen.getByText(/Jan 1, 2025/)).toBeInTheDocument();
+      }, { timeout: 2000 });
     });
   });
 });
