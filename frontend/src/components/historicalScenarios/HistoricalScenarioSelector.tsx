@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { ChartBarIcon, StarIcon } from '@heroicons/react/24/outline';
 import type {
   ScenarioListItem,
   ScenarioResult,
@@ -259,7 +260,9 @@ export function HistoricalScenarioSelector({
 
       {!loading && !error && scenarios.length === 0 && (
         <div className="text-center py-12">
-          <div className="text-6xl mb-4">📊</div>
+          <div className="flex justify-center mb-4">
+            <ChartBarIcon className="w-24 h-24 text-gray-400" />
+          </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">No Scenarios Available</h3>
           <p className="text-gray-600">Historical scenarios need to be initialized.</p>
         </div>
@@ -279,7 +282,7 @@ export function HistoricalScenarioSelector({
                 className="text-left p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="flex items-start gap-4">
-                  <div className="text-4xl">{metadata?.icon || '📊'}</div>
+                  <div className="text-4xl">{metadata?.icon || <ChartBarIcon className="w-10 h-10 text-gray-600" />}</div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">
                       {scenario.name}
@@ -303,8 +306,9 @@ export function HistoricalScenarioSelector({
 
                     <div className="flex items-center gap-2">
                       {scenario.is_featured && (
-                        <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded">
-                          ⭐ Featured
+                        <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded flex items-center gap-1">
+                          <StarIcon className="w-4 h-4" />
+                          Featured
                         </span>
                       )}
                       <span className={`px-2 py-1 ${riskColors.bg} ${riskColors.text} text-xs font-medium rounded border ${riskColors.border}`}>

@@ -5,6 +5,13 @@
  */
 
 import React, { useState } from 'react';
+import {
+  ChartBarIcon,
+  BanknotesIcon,
+  CurrencyDollarIcon,
+  ScaleIcon,
+  ArrowTrendingUpIcon,
+} from '@heroicons/react/24/outline';
 import { TaxLossHarvestingPanel } from './TaxLossHarvestingPanel';
 import { RebalancingDashboard } from './RebalancingDashboard';
 import { PerformanceDashboard } from './PerformanceDashboard';
@@ -25,11 +32,11 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
   const [activeTab, setActiveTab] = useState<TabView>('overview');
 
   const tabs = [
-    { id: 'overview' as TabView, label: 'Overview', icon: '📊' },
-    { id: 'net-worth' as TabView, label: 'Net Worth', icon: '💰' },
-    { id: 'tax-loss' as TabView, label: 'Tax-Loss Harvesting', icon: '💵' },
-    { id: 'rebalancing' as TabView, label: 'Rebalancing', icon: '⚖️' },
-    { id: 'performance' as TabView, label: 'Performance', icon: '📈' },
+    { id: 'overview' as TabView, label: 'Overview', icon: <ChartBarIcon className="w-5 h-5" /> },
+    { id: 'net-worth' as TabView, label: 'Net Worth', icon: <BanknotesIcon className="w-5 h-5" /> },
+    { id: 'tax-loss' as TabView, label: 'Tax-Loss Harvesting', icon: <CurrencyDollarIcon className="w-5 h-5" /> },
+    { id: 'rebalancing' as TabView, label: 'Rebalancing', icon: <ScaleIcon className="w-5 h-5" /> },
+    { id: 'performance' as TabView, label: 'Performance', icon: <ArrowTrendingUpIcon className="w-5 h-5" /> },
   ];
 
   const renderContent = () => {

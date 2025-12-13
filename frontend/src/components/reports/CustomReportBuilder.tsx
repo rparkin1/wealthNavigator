@@ -12,6 +12,14 @@
  */
 
 import React, { useState } from 'react';
+import {
+  ArrowTrendingUpIcon,
+  ChartBarIcon,
+  ChartPieIcon,
+  CircleStackIcon,
+  FireIcon,
+  TableCellsIcon,
+} from '@heroicons/react/24/outline';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -115,14 +123,14 @@ const AVAILABLE_METRICS: Array<{ value: ReportMetric; label: string; category: s
   { value: 'risk_score', label: 'Risk Score', category: 'Risk' },
 ];
 
-const VISUALIZATIONS: Array<{ value: VisualizationType; label: string; icon: string }> = [
-  { value: 'line_chart', label: 'Line Chart', icon: '📈' },
-  { value: 'bar_chart', label: 'Bar Chart', icon: '📊' },
-  { value: 'pie_chart', label: 'Pie Chart', icon: '🥧' },
-  { value: 'area_chart', label: 'Area Chart', icon: '📉' },
-  { value: 'scatter_plot', label: 'Scatter Plot', icon: '⚪' },
-  { value: 'heat_map', label: 'Heat Map', icon: '🔥' },
-  { value: 'table', label: 'Table', icon: '📋' },
+const VISUALIZATIONS: Array<{ value: VisualizationType; label: string; icon: React.ReactNode }> = [
+  { value: 'line_chart', label: 'Line Chart', icon: <ArrowTrendingUpIcon className="w-10 h-10" /> },
+  { value: 'bar_chart', label: 'Bar Chart', icon: <ChartBarIcon className="w-10 h-10" /> },
+  { value: 'pie_chart', label: 'Pie Chart', icon: <ChartPieIcon className="w-10 h-10" /> },
+  { value: 'area_chart', label: 'Area Chart', icon: <ChartBarIcon className="w-10 h-10" /> },
+  { value: 'scatter_plot', label: 'Scatter Plot', icon: <CircleStackIcon className="w-10 h-10" /> },
+  { value: 'heat_map', label: 'Heat Map', icon: <FireIcon className="w-10 h-10" /> },
+  { value: 'table', label: 'Table', icon: <TableCellsIcon className="w-10 h-10" /> },
 ];
 
 // ==================== Component ====================
@@ -435,7 +443,7 @@ export function CustomReportBuilder() {
                                       : 'border-gray-200 hover:border-gray-300'
                                   }`}
                                 >
-                                  <div className="text-2xl mb-1">{viz.icon}</div>
+                                  <div className="flex justify-center mb-1">{viz.icon}</div>
                                   <div className="text-xs">{viz.label}</div>
                                 </button>
                               ))}

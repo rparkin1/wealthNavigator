@@ -5,6 +5,15 @@
  */
 
 import React, { useState } from 'react';
+import {
+  RocketLaunchIcon,
+  FlagIcon,
+  CubeIcon,
+  QuestionMarkCircleIcon,
+  VideoCameraIcon,
+  ChatBubbleLeftRightIcon,
+  EnvelopeIcon,
+} from '@heroicons/react/24/outline';
 
 interface HelpMenuProps {
   onOpenDocumentation: (docPath: string) => void;
@@ -21,25 +30,25 @@ export const HelpMenu: React.FC<HelpMenuProps> = ({
     {
       title: 'Quick Start Guide',
       description: 'Get up and running in 5 minutes',
-      icon: '🚀',
+      icon: <RocketLaunchIcon className="w-8 h-8" />,
       action: () => onOpenDocumentation('quick-start'),
     },
     {
       title: 'Goal Planning Tutorial',
       description: 'Learn how to create and manage goals',
-      icon: '🎯',
+      icon: <FlagIcon className="w-8 h-8" />,
       action: () => onOpenTutorial('goal-planning'),
     },
     {
       title: 'Monte Carlo Guide',
       description: 'Understanding success probabilities',
-      icon: '🎲',
+      icon: <CubeIcon className="w-8 h-8" />,
       action: () => onOpenTutorial('monte-carlo'),
     },
     {
       title: 'FAQ',
       description: 'Frequently asked questions',
-      icon: '❓',
+      icon: <QuestionMarkCircleIcon className="w-8 h-8" />,
       action: () => onOpenDocumentation('faq'),
     },
   ];
@@ -47,17 +56,17 @@ export const HelpMenu: React.FC<HelpMenuProps> = ({
   const supportOptions = [
     {
       title: 'Video Tutorials',
-      icon: '🎥',
+      icon: <VideoCameraIcon className="w-8 h-8" />,
       action: () => window.open('https://youtube.com/wealthnavigator', '_blank'),
     },
     {
       title: 'Community Forum',
-      icon: '💬',
+      icon: <ChatBubbleLeftRightIcon className="w-8 h-8" />,
       action: () => window.open('https://community.wealthnavigator.ai', '_blank'),
     },
     {
       title: 'Contact Support',
-      icon: '📧',
+      icon: <EnvelopeIcon className="w-8 h-8" />,
       action: () => window.location.href = 'mailto:support@wealthnavigator.ai',
     },
   ];
@@ -118,7 +127,7 @@ export const HelpMenu: React.FC<HelpMenuProps> = ({
                     className="w-full text-left p-3 rounded-lg hover:bg-gray-50 transition-colors group"
                   >
                     <div className="flex items-start">
-                      <div className="text-2xl mr-3 group-hover:scale-110 transition-transform">
+                      <div className="mr-3 text-gray-600 group-hover:text-blue-600 group-hover:scale-110 transition-all">
                         {link.icon}
                       </div>
                       <div className="flex-1">
@@ -153,7 +162,7 @@ export const HelpMenu: React.FC<HelpMenuProps> = ({
                     }}
                     className="p-3 bg-white rounded-lg hover:bg-blue-50 hover:shadow-md transition-all group text-center"
                   >
-                    <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">
+                    <div className="flex justify-center mb-2 text-gray-600 group-hover:text-blue-600 group-hover:scale-110 transition-all">
                       {option.icon}
                     </div>
                     <div className="text-xs font-medium text-gray-700 group-hover:text-blue-600 transition-colors">

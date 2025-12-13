@@ -13,6 +13,19 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import {
+  HandRaisedIcon,
+  FlagIcon,
+  ChartBarIcon,
+  CpuChipIcon,
+  CalendarIcon,
+  AcademicCapIcon,
+  HomeIcon,
+  BanknotesIcon,
+  CheckCircleIcon,
+  ChatBubbleLeftRightIcon,
+  QuestionMarkCircleIcon,
+} from '@heroicons/react/24/outline';
 
 export interface OnboardingStep {
   id: string;
@@ -220,7 +233,9 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
 const WelcomeStep: React.FC<{ onNext: () => void }> = ({ onNext }) => {
   return (
     <div className="text-center py-8">
-      <div className="text-6xl mb-6">👋</div>
+      <div className="flex justify-center mb-6">
+        <HandRaisedIcon className="w-24 h-24 text-blue-600" />
+      </div>
       <h3 className="text-3xl font-bold text-gray-900 mb-4">
         Welcome to WealthNavigator AI
       </h3>
@@ -230,7 +245,9 @@ const WelcomeStep: React.FC<{ onNext: () => void }> = ({ onNext }) => {
 
       <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto mb-8">
         <div className="bg-blue-50 rounded-lg p-6">
-          <div className="text-3xl mb-3">🎯</div>
+          <div className="flex justify-center mb-3">
+            <FlagIcon className="w-12 h-12 text-blue-600" />
+          </div>
           <h4 className="font-semibold text-gray-900 mb-2">Set Goals</h4>
           <p className="text-sm text-gray-600">
             Plan for retirement, education, or any financial milestone
@@ -238,7 +255,9 @@ const WelcomeStep: React.FC<{ onNext: () => void }> = ({ onNext }) => {
         </div>
 
         <div className="bg-green-50 rounded-lg p-6">
-          <div className="text-3xl mb-3">📊</div>
+          <div className="flex justify-center mb-3">
+            <ChartBarIcon className="w-12 h-12 text-green-600" />
+          </div>
           <h4 className="font-semibold text-gray-900 mb-2">Track Progress</h4>
           <p className="text-sm text-gray-600">
             Monitor your goals with real-time success probabilities
@@ -246,7 +265,9 @@ const WelcomeStep: React.FC<{ onNext: () => void }> = ({ onNext }) => {
         </div>
 
         <div className="bg-purple-50 rounded-lg p-6">
-          <div className="text-3xl mb-3">🤖</div>
+          <div className="flex justify-center mb-3">
+            <CpuChipIcon className="w-12 h-12 text-purple-600" />
+          </div>
           <h4 className="font-semibold text-gray-900 mb-2">AI Guidance</h4>
           <p className="text-sm text-gray-600">
             Get personalized advice powered by advanced AI
@@ -400,10 +421,10 @@ const FirstGoalStep: React.FC<FirstGoalStepProps> = ({ data, onChange, onNext, o
   });
 
   const goalTypes = [
-    { value: 'retirement', label: 'Retirement', icon: '🏖️', description: 'Plan for retirement' },
-    { value: 'education', label: 'Education', icon: '🎓', description: 'College savings' },
-    { value: 'home', label: 'Home Purchase', icon: '🏠', description: 'Down payment' },
-    { value: 'emergency', label: 'Emergency Fund', icon: '💰', description: '3-6 months expenses' },
+    { value: 'retirement', label: 'Retirement', icon: <CalendarIcon className="w-16 h-16" />, description: 'Plan for retirement' },
+    { value: 'education', label: 'Education', icon: <AcademicCapIcon className="w-16 h-16" />, description: 'College savings' },
+    { value: 'home', label: 'Home Purchase', icon: <HomeIcon className="w-16 h-16" />, description: 'Down payment' },
+    { value: 'emergency', label: 'Emergency Fund', icon: <BanknotesIcon className="w-16 h-16" />, description: '3-6 months expenses' },
   ];
 
   const handleSubmit = () => {
@@ -432,7 +453,7 @@ const FirstGoalStep: React.FC<FirstGoalStepProps> = ({ data, onChange, onNext, o
                 onClick={() => setGoalType(type.value)}
                 className="p-6 border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:bg-blue-50 transition-colors text-left"
               >
-                <div className="text-4xl mb-3">{type.icon}</div>
+                <div className="flex justify-center mb-3 text-blue-600">{type.icon}</div>
                 <div className="font-semibold text-lg text-gray-900 mb-1">{type.label}</div>
                 <div className="text-sm text-gray-600">{type.description}</div>
               </button>
@@ -634,7 +655,9 @@ const BudgetStep: React.FC<BudgetStepProps> = ({ data, onChange, onNext, onSkip 
 const TourStep: React.FC<{ onNext: () => void }> = ({ onNext }) => {
   return (
     <div className="text-center py-8">
-      <div className="text-6xl mb-6">🎉</div>
+      <div className="flex justify-center mb-6">
+        <CheckCircleIcon className="w-24 h-24 text-green-600" />
+      </div>
       <h3 className="text-3xl font-bold text-gray-900 mb-4">
         You're All Set!
       </h3>
@@ -644,7 +667,9 @@ const TourStep: React.FC<{ onNext: () => void }> = ({ onNext }) => {
 
       <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-8">
         <div className="bg-gray-50 rounded-lg p-6 text-left">
-          <div className="text-3xl mb-3">🎯</div>
+          <div className="flex mb-3">
+            <FlagIcon className="w-12 h-12 text-blue-600" />
+          </div>
           <h4 className="font-semibold text-gray-900 mb-2">Goals Dashboard</h4>
           <p className="text-sm text-gray-600 mb-2">
             Track all your financial goals in one place. Monitor progress, success probabilities, and get AI recommendations.
@@ -653,7 +678,9 @@ const TourStep: React.FC<{ onNext: () => void }> = ({ onNext }) => {
         </div>
 
         <div className="bg-gray-50 rounded-lg p-6 text-left">
-          <div className="text-3xl mb-3">💬</div>
+          <div className="flex mb-3">
+            <ChatBubbleLeftRightIcon className="w-12 h-12 text-green-600" />
+          </div>
           <h4 className="font-semibold text-gray-900 mb-2">AI Chat</h4>
           <p className="text-sm text-gray-600 mb-2">
             Ask questions about your finances, create goals, and get personalized advice from our AI assistant.
@@ -662,7 +689,9 @@ const TourStep: React.FC<{ onNext: () => void }> = ({ onNext }) => {
         </div>
 
         <div className="bg-gray-50 rounded-lg p-6 text-left">
-          <div className="text-3xl mb-3">📊</div>
+          <div className="flex mb-3">
+            <ChartBarIcon className="w-12 h-12 text-purple-600" />
+          </div>
           <h4 className="font-semibold text-gray-900 mb-2">Portfolio Analysis</h4>
           <p className="text-sm text-gray-600 mb-2">
             View comprehensive portfolio insights, performance metrics, and optimization recommendations.
@@ -671,7 +700,9 @@ const TourStep: React.FC<{ onNext: () => void }> = ({ onNext }) => {
         </div>
 
         <div className="bg-gray-50 rounded-lg p-6 text-left">
-          <div className="text-3xl mb-3">❓</div>
+          <div className="flex mb-3">
+            <QuestionMarkCircleIcon className="w-12 h-12 text-orange-600" />
+          </div>
           <h4 className="font-semibold text-gray-900 mb-2">Help & Tutorials</h4>
           <p className="text-sm text-gray-600 mb-2">
             Access tutorials, FAQ, and guides anytime from the help menu in the header.

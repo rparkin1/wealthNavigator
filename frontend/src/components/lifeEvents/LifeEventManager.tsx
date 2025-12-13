@@ -6,6 +6,18 @@
  */
 
 import { useState, useEffect } from 'react';
+import {
+  BriefcaseIcon,
+  HeartIcon,
+  BanknotesIcon,
+  HomeIcon,
+  RocketLaunchIcon,
+  ArrowPathIcon,
+  UserPlusIcon,
+  TruckIcon,
+  SparklesIcon,
+  CalendarIcon,
+} from '@heroicons/react/24/outline';
 import { LifeEventForm } from './LifeEventForm';
 import { LifeEventTimeline } from './LifeEventTimeline';
 import { LifeEventImpactComparison } from './LifeEventImpactComparison';
@@ -16,19 +28,19 @@ import * as lifeEventsApi from '../../services/lifeEventsApi';
 // Re-export types for backward compatibility
 export type { LifeEvent, LifeEventManagerProps };
 
-const EVENT_TYPE_ICONS: Record<string, string> = {
-  job_loss: '💼',
-  disability: '🏥',
-  divorce: '💔',
-  inheritance: '💰',
-  major_medical: '🏥',
-  home_purchase: '🏡',
-  business_start: '🚀',
-  career_change: '📊',
-  marriage: '💍',
-  child_birth: '👶',
-  relocation: '📦',
-  windfall: '🎰',
+const EVENT_TYPE_ICONS: Record<string, React.ReactNode> = {
+  job_loss: <BriefcaseIcon className="w-5 h-5" />,
+  disability: <HeartIcon className="w-5 h-5" />,
+  divorce: <HeartIcon className="w-5 h-5" />,
+  inheritance: <BanknotesIcon className="w-5 h-5" />,
+  major_medical: <HeartIcon className="w-5 h-5" />,
+  home_purchase: <HomeIcon className="w-5 h-5" />,
+  business_start: <RocketLaunchIcon className="w-5 h-5" />,
+  career_change: <ArrowPathIcon className="w-5 h-5" />,
+  marriage: <HeartIcon className="w-5 h-5" />,
+  child_birth: <UserPlusIcon className="w-5 h-5" />,
+  relocation: <TruckIcon className="w-5 h-5" />,
+  windfall: <SparklesIcon className="w-5 h-5" />,
 };
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
@@ -311,7 +323,9 @@ export function LifeEventManager({ goalId, onEventSelect }: LifeEventManagerProp
         <div className="grid grid-cols-1 gap-4">
           {filteredEvents.length === 0 ? (
             <div className="bg-white p-12 rounded-lg border border-gray-200 text-center">
-              <div className="text-6xl mb-4">📅</div>
+              <div className="flex justify-center mb-4">
+                <CalendarIcon className="w-16 h-16 text-gray-400" />
+              </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No Life Events</h3>
               <p className="text-gray-600 mb-4">
                 Add your first life event to see how it might impact your financial goals

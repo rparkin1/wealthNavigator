@@ -6,6 +6,12 @@
  */
 
 import React, { useState } from 'react';
+import {
+  Cog6ToothIcon,
+  ShieldCheckIcon,
+  ScaleIcon,
+  RocketLaunchIcon,
+} from '@heroicons/react/24/outline';
 import { createScenario, quickCompareScenarios } from '../../services/goalScenariosApi';
 import type { ScenarioCreationRequest, QuickCompareResponse } from '../../types/goalScenarios';
 
@@ -244,7 +250,7 @@ export const ScenarioCreationWizard: React.FC<ScenarioCreationWizardProps> = ({
                   className="p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left group"
                 >
                   <div className="flex items-start gap-3">
-                    <span className="text-3xl">🎛️</span>
+                    <Cog6ToothIcon className="w-12 h-12 text-gray-600 group-hover:text-blue-600" />
                     <div>
                       <h4 tabIndex={-1} className="font-semibold text-gray-900 group-hover:text-blue-600">
                         Custom Setup
@@ -355,21 +361,21 @@ export const ScenarioCreationWizard: React.FC<ScenarioCreationWizardProps> = ({
                   const riskData = {
                     conservative: {
                       color: 'blue',
-                      icon: '🛡️',
+                      icon: <ShieldCheckIcon className="w-10 h-10" />,
                       return: '5.0%',
                       description: 'Lower risk, steady growth',
                       allocation: '40% stocks, 60% bonds',
                     },
                     moderate: {
                       color: 'yellow',
-                      icon: '⚖️',
+                      icon: <ScaleIcon className="w-10 h-10" />,
                       return: '7.0%',
                       description: 'Balanced risk and return',
                       allocation: '60% stocks, 40% bonds',
                     },
                     aggressive: {
                       color: 'red',
-                      icon: '🚀',
+                      icon: <RocketLaunchIcon className="w-10 h-10" />,
                       return: '9.0%',
                       description: 'Higher risk, higher potential return',
                       allocation: '80% stocks, 20% bonds',
@@ -388,7 +394,7 @@ export const ScenarioCreationWizard: React.FC<ScenarioCreationWizardProps> = ({
                       }`}
                     >
                       <div className="flex items-start gap-4">
-                        <span className="text-4xl">{riskData.icon}</span>
+                        <div className="flex-shrink-0">{riskData.icon}</div>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="font-semibold text-gray-900">{riskLabel}</h4>

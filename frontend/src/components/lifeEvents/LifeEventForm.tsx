@@ -1,18 +1,29 @@
 import { useState } from 'react';
+import {
+  BriefcaseIcon,
+  HeartIcon,
+  BanknotesIcon,
+  HomeIcon,
+  RocketLaunchIcon,
+  ArrowPathIcon,
+  UserPlusIcon,
+  TruckIcon,
+  SparklesIcon,
+} from '@heroicons/react/24/outline';
 
 const EVENT_TYPES = [
-  { value: 'job_loss', label: 'Job Loss', icon: '💼' },
-  { value: 'disability', label: 'Disability', icon: '🏥' },
-  { value: 'divorce', label: 'Divorce', icon: '💔' },
-  { value: 'inheritance', label: 'Inheritance', icon: '💰' },
-  { value: 'major_medical', label: 'Major Medical', icon: '🏥' },
-  { value: 'home_purchase', label: 'Home Purchase', icon: '🏠' },
-  { value: 'business_start', label: 'Business Start', icon: '🚀' },
-  { value: 'career_change', label: 'Career Change', icon: '💼' },
-  { value: 'marriage', label: 'Marriage', icon: '💍' },
-  { value: 'child_birth', label: 'Child Birth', icon: '👶' },
-  { value: 'relocation', label: 'Relocation', icon: '📦' },
-  { value: 'windfall', label: 'Windfall', icon: '🎰' }
+  { value: 'job_loss', label: 'Job Loss', icon: <BriefcaseIcon className="w-8 h-8" /> },
+  { value: 'disability', label: 'Disability', icon: <HeartIcon className="w-8 h-8" /> },
+  { value: 'divorce', label: 'Divorce', icon: <HeartIcon className="w-8 h-8" /> },
+  { value: 'inheritance', label: 'Inheritance', icon: <BanknotesIcon className="w-8 h-8" /> },
+  { value: 'major_medical', label: 'Major Medical', icon: <HeartIcon className="w-8 h-8" /> },
+  { value: 'home_purchase', label: 'Home Purchase', icon: <HomeIcon className="w-8 h-8" /> },
+  { value: 'business_start', label: 'Business Start', icon: <RocketLaunchIcon className="w-8 h-8" /> },
+  { value: 'career_change', label: 'Career Change', icon: <ArrowPathIcon className="w-8 h-8" /> },
+  { value: 'marriage', label: 'Marriage', icon: <HeartIcon className="w-8 h-8" /> },
+  { value: 'child_birth', label: 'Child Birth', icon: <UserPlusIcon className="w-8 h-8" /> },
+  { value: 'relocation', label: 'Relocation', icon: <TruckIcon className="w-8 h-8" /> },
+  { value: 'windfall', label: 'Windfall', icon: <SparklesIcon className="w-8 h-8" /> }
 ];
 
 interface LifeEventFormProps {

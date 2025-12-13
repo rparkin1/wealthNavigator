@@ -6,6 +6,13 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import {
+  ChartBarIcon,
+  FlagIcon,
+  ArrowTrendingUpIcon,
+  BookOpenIcon,
+  ArrowPathIcon,
+} from '@heroicons/react/24/outline';
 import { EmergencyFundGauge } from './EmergencyFundGauge';
 import { ReserveAlertsPanel } from './ReserveAlertsPanel';
 import { ReserveReplenishmentPlan } from './ReserveReplenishmentPlan';
@@ -107,7 +114,9 @@ export const ReserveMonitoringDashboard: React.FC<ReserveMonitoringDashboardProp
           fontFamily: 'system-ui, -apple-system, sans-serif',
         }}
       >
-        <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <ChartBarIcon style={{ width: '96px', height: '96px', color: '#9ca3af' }} />
+        </div>
         <div style={{ fontSize: '18px', fontWeight: 600 }}>Analyzing Reserve Status...</div>
         <div style={{ fontSize: '14px', marginTop: '8px' }}>
           Evaluating your emergency fund and generating recommendations
@@ -176,10 +185,10 @@ export const ReserveMonitoringDashboard: React.FC<ReserveMonitoringDashboardProp
         }}
       >
         {[
-          { id: 'overview' as Tab, label: 'Overview', icon: '📊' },
-          { id: 'plan' as Tab, label: 'Build Plan', icon: '🎯' },
-          { id: 'simulator' as Tab, label: 'Simulator', icon: '📈' },
-          { id: 'guidelines' as Tab, label: 'Guidelines', icon: '📚' },
+          { id: 'overview' as Tab, label: 'Overview', icon: <ChartBarIcon style={{ width: '20px', height: '20px' }} /> },
+          { id: 'plan' as Tab, label: 'Build Plan', icon: <FlagIcon style={{ width: '20px', height: '20px' }} /> },
+          { id: 'simulator' as Tab, label: 'Simulator', icon: <ArrowTrendingUpIcon style={{ width: '20px', height: '20px' }} /> },
+          { id: 'guidelines' as Tab, label: 'Guidelines', icon: <BookOpenIcon style={{ width: '20px', height: '20px' }} /> },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -194,9 +203,12 @@ export const ReserveMonitoringDashboard: React.FC<ReserveMonitoringDashboardProp
               borderBottom: `3px solid ${activeTab === tab.id ? '#3b82f6' : 'transparent'}`,
               cursor: 'pointer',
               transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
             }}
           >
-            <span style={{ marginRight: '8px' }}>{tab.icon}</span>
+            {tab.icon}
             {tab.label}
           </button>
         ))}
@@ -480,9 +492,13 @@ export const ReserveMonitoringDashboard: React.FC<ReserveMonitoringDashboardProp
             border: '1px solid #e5e7eb',
             borderRadius: '8px',
             cursor: loading ? 'not-allowed' : 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
           }}
         >
-          {loading ? '🔄 Refreshing...' : '🔄 Refresh Data'}
+          <ArrowPathIcon style={{ width: '16px', height: '16px' }} />
+          {loading ? 'Refreshing...' : 'Refresh Data'}
         </button>
         <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '8px' }}>
           Last updated: {new Date(result.last_updated).toLocaleString()}

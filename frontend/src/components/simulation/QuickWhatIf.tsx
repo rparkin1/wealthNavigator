@@ -6,6 +6,15 @@
  */
 
 import { useMemo, useState } from 'react';
+import {
+  CalendarIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  BoltIcon,
+  SunIcon,
+  FireIcon,
+  RocketLaunchIcon,
+} from '@heroicons/react/24/outline';
 
 export type QuickScenarioCategory = 'Optimistic' | 'Pessimistic' | 'Adjustment';
 
@@ -13,7 +22,7 @@ export interface QuickScenario {
   id: string;
   title: string;
   description: string;
-  icon: string;
+  icon: React.ReactNode;
   category: QuickScenarioCategory;
   impactLabel?: string;
   adjustments: Record<string, number>;
@@ -38,7 +47,7 @@ interface BaselineValues {
 interface ScenarioDefinition {
   id: string;
   title: string;
-  icon: string;
+  icon: React.ReactNode;
   category: QuickScenarioCategory;
   description: (baseline: BaselineValues) => string;
   impactLabel?: (baseline: BaselineValues) => string;
@@ -96,7 +105,7 @@ const scenarioDefinitions: ScenarioDefinition[] = [
   {
     id: 'retire_5_years_earlier',
     title: 'Retire 5 Years Earlier',
-    icon: '🏖️',
+    icon: <CalendarIcon className="w-6 h-6" />,
     category: 'Adjustment',
     description: (ctx) =>
       `What if I retire at ${Math.max(ctx.retirementAge - 5, 0)} instead of ${ctx.retirementAge}?`,
@@ -106,7 +115,7 @@ const scenarioDefinitions: ScenarioDefinition[] = [
   {
     id: 'increase_contributions_50',
     title: 'Increase Contributions 50%',
-    icon: '📈',
+    icon: <ArrowTrendingUpIcon className="w-6 h-6" />,
     category: 'Adjustment',
     description: (ctx) =>
       `What if I increase monthly contributions to ${formatCurrency(ctx.monthlyContribution * 1.5)}?`,
@@ -116,7 +125,7 @@ const scenarioDefinitions: ScenarioDefinition[] = [
   {
     id: 'decrease_contributions_25',
     title: 'Decrease Contributions 25%',
-    icon: '📉',
+    icon: <ArrowTrendingDownIcon className="w-6 h-6" />,
     category: 'Adjustment',
     description: (ctx) =>
       `What if I reduce contributions to ${formatCurrency(ctx.monthlyContribution * 0.75)} for a while?`,
@@ -126,7 +135,7 @@ const scenarioDefinitions: ScenarioDefinition[] = [
   {
     id: 'market_crash',
     title: 'Market Crash Scenario',
-    icon: '💥',
+    icon: <BoltIcon className="w-6 h-6" />,
     category: 'Pessimistic',
     description: (ctx) =>
       `Simulate a 20% drop next year and reduce equity returns to ${formatPercentage(
@@ -140,7 +149,7 @@ const scenarioDefinitions: ScenarioDefinition[] = [
   {
     id: 'lower_inflation',
     title: 'Lower Inflation',
-    icon: '🌤️',
+    icon: <SunIcon className="w-6 h-6" />,
     category: 'Optimistic',
     description: (ctx) => {
       const newRate = Math.max(ctx.inflationRate - 0.01, 0.01);
@@ -157,7 +166,7 @@ const scenarioDefinitions: ScenarioDefinition[] = [
   {
     id: 'high_inflation',
     title: 'High Inflation (4%)',
-    icon: '🔥',
+    icon: <FireIcon className="w-6 h-6" />,
     category: 'Pessimistic',
     description: () => 'Stress-test the plan with inflation averaging 4% over the next decade.',
     impactLabel: () => '4.0% inflation',
@@ -168,7 +177,7 @@ const scenarioDefinitions: ScenarioDefinition[] = [
   {
     id: 'better_returns',
     title: 'Better Than Expected Returns',
-    icon: '🚀',
+    icon: <RocketLaunchIcon className="w-6 h-6" />,
     category: 'Optimistic',
     description: (ctx) => {
       const improved = ctx.expectedReturnStocks + 0.02;

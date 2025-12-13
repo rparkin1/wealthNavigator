@@ -53,7 +53,7 @@ Instead of one projection, we run **5,000 different scenarios**:
 - ✅ In 87% of scenarios, you reach your goal
 - ❌ In 13% of scenarios, you fall short
 
-## 🎉 Next Steps
+## Next Steps
 
 - Add more goals (education, home purchase)
 - Connect bank accounts
@@ -66,7 +66,7 @@ Instead of one projection, we run **5,000 different scenarios**:
     content: `
 # Frequently Asked Questions
 
-## 🔐 Security & Privacy
+## Security & Privacy
 
 ### Is my financial data secure?
 **Yes.** We use bank-level security:
@@ -77,7 +77,7 @@ Instead of one projection, we run **5,000 different scenarios**:
 ### Do you sell my data?
 **No, never.** We do not sell, rent, or share your personal financial data.
 
-## 💰 Financial Planning
+## Financial Planning
 
 ### How accurate are the projections?
 Projections are **estimates** based on:
@@ -103,7 +103,7 @@ Common reasons:
 
 **Solutions**: Increase savings, extend timeline, or adjust goal.
 
-## 📊 Goals & Planning
+## Goals & Planning
 
 ### How many goals can I create?
 **Unlimited** during beta. We recommend starting with 1-3 primary goals:
@@ -117,7 +117,7 @@ The AI will help you:
 2. **Trade off**: "Fund retirement at 90%, education at 75%"
 3. **Adjust**: Lower one goal to fully fund another
 
-## 💼 Portfolios & Investments
+## Portfolios & Investments
 
 ### Do you execute trades?
 **No.** We provide **recommendations only**. You execute trades with your broker.

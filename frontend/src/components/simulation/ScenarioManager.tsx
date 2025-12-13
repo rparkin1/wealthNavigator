@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { ChartBarIcon } from '@heroicons/react/24/outline';
 import { getScenarios, deleteScenario } from '../../services/goalScenariosApi';
 import type { GoalScenario } from '../../types/goalScenarios';
 
@@ -250,7 +251,9 @@ export const ScenarioManager: React.FC<ScenarioManagerProps> = ({
 
           {!loading && !error && filteredAndSortedScenarios.length === 0 && (
             <div className="text-center py-12">
-              <span className="text-6xl mb-4 block">📊</span>
+              <div className="flex justify-center mb-4">
+                <ChartBarIcon className="w-16 h-16 text-gray-400" />
+              </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No Scenarios Found</h3>
               <p className="text-gray-600 mb-6">
                 {scenarios.length === 0

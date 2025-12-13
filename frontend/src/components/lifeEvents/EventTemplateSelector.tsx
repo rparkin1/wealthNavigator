@@ -6,6 +6,18 @@
  */
 
 import { useState, useEffect } from 'react';
+import {
+  BriefcaseIcon,
+  HeartIcon,
+  BanknotesIcon,
+  HomeIcon,
+  RocketLaunchIcon,
+  ArrowPathIcon,
+  UserPlusIcon,
+  TruckIcon,
+  SparklesIcon,
+  ClipboardDocumentListIcon,
+} from '@heroicons/react/24/outline';
 import type { EventTemplate, LifeEventType } from '../../types/lifeEvents';
 import { getEventTemplates } from '../../services/lifeEventsApi';
 
@@ -15,19 +27,19 @@ export interface EventTemplateSelectorProps {
   onClose: () => void;
 }
 
-const EVENT_TYPE_ICONS: Record<string, string> = {
-  job_loss: '💼',
-  disability: '🏥',
-  divorce: '💔',
-  inheritance: '💰',
-  major_medical: '🏥',
-  home_purchase: '🏡',
-  business_start: '🚀',
-  career_change: '📊',
-  marriage: '💍',
-  child_birth: '👶',
-  relocation: '📦',
-  windfall: '🎰',
+const EVENT_TYPE_ICONS: Record<string, React.ReactNode> = {
+  job_loss: <BriefcaseIcon className="w-10 h-10" />,
+  disability: <HeartIcon className="w-10 h-10" />,
+  divorce: <HeartIcon className="w-10 h-10" />,
+  inheritance: <BanknotesIcon className="w-10 h-10" />,
+  major_medical: <HeartIcon className="w-10 h-10" />,
+  home_purchase: <HomeIcon className="w-10 h-10" />,
+  business_start: <RocketLaunchIcon className="w-10 h-10" />,
+  career_change: <ArrowPathIcon className="w-10 h-10" />,
+  marriage: <HeartIcon className="w-10 h-10" />,
+  child_birth: <UserPlusIcon className="w-10 h-10" />,
+  relocation: <TruckIcon className="w-10 h-10" />,
+  windfall: <SparklesIcon className="w-10 h-10" />,
 };
 
 export function EventTemplateSelector({
@@ -93,18 +105,18 @@ export function EventTemplateSelector({
               className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Event Types</option>
-              <option value="job_loss">💼 Job Loss</option>
-              <option value="disability">🏥 Disability</option>
-              <option value="divorce">💔 Divorce</option>
-              <option value="inheritance">💰 Inheritance</option>
-              <option value="major_medical">🏥 Major Medical</option>
-              <option value="home_purchase">🏡 Home Purchase</option>
-              <option value="business_start">🚀 Business Start</option>
-              <option value="career_change">📊 Career Change</option>
-              <option value="marriage">💍 Marriage</option>
-              <option value="child_birth">👶 Child Birth</option>
-              <option value="relocation">📦 Relocation</option>
-              <option value="windfall">🎰 Windfall</option>
+              <option value="job_loss">Job Loss</option>
+              <option value="disability">Disability</option>
+              <option value="divorce">Divorce</option>
+              <option value="inheritance">Inheritance</option>
+              <option value="major_medical">Major Medical</option>
+              <option value="home_purchase">Home Purchase</option>
+              <option value="business_start">Business Start</option>
+              <option value="career_change">Career Change</option>
+              <option value="marriage">Marriage</option>
+              <option value="child_birth">Child Birth</option>
+              <option value="relocation">Relocation</option>
+              <option value="windfall">Windfall</option>
             </select>
           </div>
         </div>
@@ -131,7 +143,9 @@ export function EventTemplateSelector({
 
           {!loading && !error && templates.length === 0 && (
             <div className="text-center py-12">
-              <div className="text-6xl mb-4">📋</div>
+              <div className="flex justify-center mb-4">
+                <ClipboardDocumentListIcon className="w-16 h-16 text-gray-400" />
+              </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No Templates Available</h3>
               <p className="text-gray-600">
                 No templates found for the selected event type.
