@@ -3,9 +3,12 @@
  *
  * Implements REQ-GOAL-009: Mental account buckets showing dedicated assets,
  * expected value at goal date, funding level, success probability, and funding gap/surplus.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import React from 'react';
+import { getCategoryIcon as getIconComponent, type GoalCategory } from '../../utils/icons';
 
 export interface MentalAccountBucket {
   goalId: string;
@@ -77,16 +80,14 @@ export const MentalAccountBuckets: React.FC<MentalAccountBucketsProps> = ({
     return 'text-red-600';
   };
 
-  const getCategoryIcon = (category: string) => {
-    const icons = {
-      retirement: '🏖️',
-      education: '🎓',
-      home: '🏠',
-      major_expense: '🛒',
-      emergency: '🚨',
-      legacy: '💝',
-    };
-    return icons[category] || '🎯';
+  const getCategoryIconComponent = (category: string): React.ComponentType<{ className?: string }> => {
+    const validCategories: GoalCategory[] = ['retirement', 'education', 'home', 'major_expense', 'emergency', 'legacy'];
+    const cat = category.toLowerCase() as GoalCategory;
+
+    if (validCategories.includes(cat)) {
+      return getIconComponent(cat);
+    }
+    return getIconComponent('retirement'); // Default fallback
   };
 
   const formatGoalDate = (dateString: string) => {
@@ -116,7 +117,12 @@ export const MentalAccountBuckets: React.FC<MentalAccountBucketsProps> = ({
             {/* Header */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-2">
-                <span className="text-3xl">{getCategoryIcon(bucket.goalCategory)}</span>
+                <div className="text-primary-600">
+                  {(() => {
+                    const IconComponent = getCategoryIconComponent(bucket.goalCategory);
+                    return <IconComponent className="w-8 h-8" />;
+                  })()}
+                </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">{bucket.goalTitle}</h3>
                   <p className="text-sm text-gray-600">

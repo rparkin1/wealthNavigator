@@ -3,6 +3,8 @@
  *
  * CRUD interface for managing goal milestones with creation, editing, and deletion.
  * Includes auto-generation and progress checking capabilities.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState, useEffect } from 'react';
@@ -13,6 +15,7 @@ import type {
   MilestoneUpdateRequest,
 } from '../../types/goalMilestones';
 import * as milestoneApi from '../../services/goalMilestonesApi';
+import { SparklesIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 export interface MilestoneManagerProps {
   goal: Goal;
@@ -215,9 +218,10 @@ export function MilestoneManager({
           </button>
           <button
             onClick={handleAutoGenerate}
-            className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center gap-2"
           >
-            🤖 Auto-Generate
+            <SparklesIcon className="w-5 h-5" />
+            <span>Auto-Generate</span>
           </button>
         </div>
       )}
@@ -373,10 +377,10 @@ export function MilestoneManager({
                     <>
                       <button
                         onClick={() => handleCompleteMilestone(milestone.id)}
-                        className="px-3 py-1 bg-green-600 text-white rounded text-xs font-medium hover:bg-green-700"
+                        className="px-3 py-1 bg-green-600 text-white rounded text-xs font-medium hover:bg-green-700 flex items-center justify-center"
                         title="Mark as completed"
                       >
-                        ✓
+                        <CheckCircleIcon className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleEditClick(milestone)}

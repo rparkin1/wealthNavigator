@@ -3,6 +3,8 @@
  *
  * Main interface for AI-powered natural language goal creation.
  * Provides conversational goal setup with intelligent recommendations.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState, useEffect } from 'react';
@@ -20,6 +22,12 @@ import type {
   UserContext,
 } from '../../types/aiGoalAssistance';
 import * as aiGoalApi from '../../services/aiGoalAssistanceApi';
+import {
+  XMarkIcon,
+  ChatBubbleLeftRightIcon,
+  ClipboardDocumentListIcon,
+  BoltIcon,
+} from '@heroicons/react/24/outline';
 
 export interface AIGoalAssistantProps {
   userId: string;
@@ -268,9 +276,10 @@ export function AIGoalAssistant({
             </div>
             <button
               onClick={onCancel}
-              className="text-white hover:text-blue-100 text-2xl font-light"
+              className="text-white hover:text-blue-100 p-1"
+              aria-label="Close"
             >
-              ✕
+              <XMarkIcon className="w-6 h-6" />
             </button>
           </div>
 
@@ -278,33 +287,36 @@ export function AIGoalAssistant({
           <div className="flex gap-2 mt-4">
             <button
               onClick={() => handleModeChange('natural-language')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
+              className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
                 state.mode === 'natural-language'
                   ? 'bg-white text-blue-600 font-semibold'
                   : 'bg-blue-500 text-white hover:bg-blue-400'
               }`}
             >
-              💬 Natural Language
+              <ChatBubbleLeftRightIcon className="w-5 h-5" />
+              <span>Natural Language</span>
             </button>
             <button
               onClick={() => handleModeChange('template')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
+              className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
                 state.mode === 'template'
                   ? 'bg-white text-blue-600 font-semibold'
                   : 'bg-blue-500 text-white hover:bg-blue-400'
               }`}
             >
-              📋 Templates
+              <ClipboardDocumentListIcon className="w-5 h-5" />
+              <span>Templates</span>
             </button>
             <button
               onClick={() => handleModeChange('quick-setup')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
+              className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
                 state.mode === 'quick-setup'
                   ? 'bg-white text-blue-600 font-semibold'
                   : 'bg-blue-500 text-white hover:bg-blue-400'
               }`}
             >
-              ⚡ Quick Setup
+              <BoltIcon className="w-5 h-5" />
+              <span>Quick Setup</span>
             </button>
           </div>
         </div>
@@ -316,9 +328,10 @@ export function AIGoalAssistant({
               <span className="text-red-700">{state.error}</span>
               <button
                 onClick={() => setState(prev => ({ ...prev, error: null }))}
-                className="text-red-600 hover:text-red-800"
+                className="text-red-600 hover:text-red-800 p-1"
+                aria-label="Dismiss error"
               >
-                ✕
+                <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
           </div>

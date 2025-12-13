@@ -3,12 +3,15 @@
  *
  * Visual timeline showing milestones with progress tracking.
  * Displays milestones chronologically with completion status.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useEffect, useState } from 'react';
 import type { Goal } from '../../types/goal';
 import type { Milestone } from '../../types/goalMilestones';
 import * as milestoneApi from '../../services/goalMilestonesApi';
+import { CheckCircleIcon } from '@heroicons/react/24/outline';
 
 export interface MilestoneTimelineProps {
   goal: Goal;
@@ -125,7 +128,7 @@ export function MilestoneTimeline({ goal }: MilestoneTimelineProps) {
             >
               {milestone.completed && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">✓</span>
+                  <CheckCircleIcon className="w-4 h-4 text-white stroke-[3]" />
                 </div>
               )}
             </div>
@@ -167,8 +170,9 @@ export function MilestoneTimeline({ goal }: MilestoneTimelineProps) {
                   )}
 
                   {milestone.completed && milestone.completed_date && (
-                    <p className="mt-2 text-xs text-green-700 font-medium">
-                      ✓ Completed on {formatDate(milestone.completed_date)}
+                    <p className="mt-2 text-xs text-green-700 font-medium flex items-center gap-1">
+                      <CheckCircleIcon className="w-4 h-4" />
+                      <span>Completed on {formatDate(milestone.completed_date)}</span>
                     </p>
                   )}
                 </div>

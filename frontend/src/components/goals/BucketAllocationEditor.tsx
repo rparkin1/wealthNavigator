@@ -2,12 +2,15 @@
  * Bucket Allocation Editor Component
  *
  * Interface for allocating accounts to goal buckets with percentage allocation
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState, useEffect } from 'react';
 import type { Goal } from '../../types/goal';
 import type { AllocateAccountRequest, DedicatedAccount } from '../../types/mentalAccounting';
 import * as mentalAccountingApi from '../../services/mentalAccountingApi';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 export interface Account {
   id: string;
@@ -297,8 +300,9 @@ export function BucketAllocationEditor({
 
         {totalPercentage > 100 && (
           <div className="mt-3 bg-red-50 border border-red-200 rounded p-2">
-            <p className="text-xs text-red-700">
-              ⚠️ Total allocation exceeds 100%. Please adjust allocations.
+            <p className="text-xs text-red-700 flex items-center gap-1.5">
+              <ExclamationTriangleIcon className="w-4 h-4 flex-shrink-0" />
+              <span>Total allocation exceeds 100%. Please adjust allocations.</span>
             </p>
           </div>
         )}

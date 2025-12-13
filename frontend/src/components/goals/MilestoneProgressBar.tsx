@@ -3,12 +3,15 @@
  *
  * Comprehensive progress visualization with velocity metrics and on-track status.
  * Shows financial progress, time progress, and milestone completion.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useEffect, useState } from 'react';
 import type { Goal } from '../../types/goal';
 import type { ProgressMetrics } from '../../types/goalMilestones';
 import * as milestoneApi from '../../services/goalMilestonesApi';
+import { CheckCircleIcon, ExclamationTriangleIcon, LightBulbIcon } from '@heroicons/react/24/outline';
 
 export interface MilestoneProgressBarProps {
   goal: Goal;
@@ -88,13 +91,23 @@ export function MilestoneProgressBar({ goal, compact = false }: MilestoneProgres
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-gray-900">Progress Metrics</h3>
         <span
-          className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
             metrics.on_track
               ? 'bg-green-100 text-green-800'
               : 'bg-red-100 text-red-800'
           }`}
         >
-          {metrics.on_track ? '✓ On Track' : '⚠ Behind Schedule'}
+          {metrics.on_track ? (
+            <>
+              <CheckCircleIcon className="w-4 h-4" />
+              <span>On Track</span>
+            </>
+          ) : (
+            <>
+              <ExclamationTriangleIcon className="w-4 h-4" />
+              <span>Behind Schedule</span>
+            </>
+          )}
         </span>
       </div>
 
@@ -207,7 +220,10 @@ export function MilestoneProgressBar({ goal, compact = false }: MilestoneProgres
       {/* Recommendations */}
       {!metrics.on_track && metrics.velocity_gap > 0 && (
         <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <h4 className="text-sm font-semibold text-yellow-900 mb-2">💡 Recommendation</h4>
+          <h4 className="text-sm font-semibold text-yellow-900 mb-2 flex items-center gap-2">
+            <LightBulbIcon className="w-5 h-5" />
+            <span>Recommendation</span>
+          </h4>
           <p className="text-sm text-yellow-800">
             To get back on track, consider increasing your monthly contribution by{' '}
             <span className="font-semibold">{formatCurrency(metrics.velocity_gap)}</span> or

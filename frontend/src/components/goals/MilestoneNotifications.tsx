@@ -3,11 +3,15 @@
  *
  * Alert system showing overdue milestones and recent completions.
  * Displays notifications with different severity levels.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useEffect, useState } from 'react';
 import type { OverdueMilestone, UpcomingMilestone } from '../../types/goalMilestones';
 import * as milestoneApi from '../../services/goalMilestonesApi';
+import { getCategoryIcon, type GoalCategory } from '../../utils/icons';
+import { CheckCircleIcon } from '@heroicons/react/24/outline';
 
 export interface MilestoneNotificationsProps {
   userId: string;
@@ -62,16 +66,14 @@ export function MilestoneNotifications({
     }).format(amount);
   };
 
-  const getGoalIcon = (category: string): string => {
-    const icons: Record<string, string> = {
-      retirement: '🏖️',
-      education: '🎓',
-      home: '🏠',
-      major_expense: '💎',
-      emergency: '💰',
-      legacy: '🌳',
-    };
-    return icons[category] || '🎯';
+  const getGoalIconComponent = (category: string): React.ComponentType<{ className?: string }> => {
+    const validCategories: GoalCategory[] = ['retirement', 'education', 'home', 'major_expense', 'emergency', 'legacy'];
+    const cat = category.toLowerCase() as GoalCategory;
+
+    if (validCategories.includes(cat)) {
+      return getCategoryIcon(cat);
+    }
+    return getCategoryIcon('retirement'); // Default fallback
   };
 
   if (loading) {
@@ -103,7 +105,9 @@ export function MilestoneNotifications({
       <div className="bg-white border border-gray-200 rounded-lg p-4">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Milestone Alerts</h3>
         <div className="text-center py-8 bg-green-50 rounded-lg border-2 border-green-200">
-          <div className="text-4xl mb-2">✅</div>
+          <div className="flex justify-center mb-2">
+            <CheckCircleIcon className="w-12 h-12 text-success-600" />
+          </div>
           <p className="text-green-700 font-medium">All caught up!</p>
           <p className="text-green-600 text-sm mt-1">No overdue or upcoming milestones</p>
         </div>
@@ -152,8 +156,11 @@ export function MilestoneNotifications({
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="text-2xl flex-shrink-0">
-                      {getGoalIcon(milestone.goal_category)}
+                    <div className="flex-shrink-0 text-red-600">
+                      {(() => {
+                        const IconComponent = getGoalIconComponent(milestone.goal_category);
+                        return <IconComponent className="w-6 h-6" />;
+                      })()}
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -214,8 +221,11 @@ export function MilestoneNotifications({
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="text-2xl flex-shrink-0">
-                      {getGoalIcon(milestone.goal_category)}
+                    <div className="flex-shrink-0 text-yellow-600">
+                      {(() => {
+                        const IconComponent = getGoalIconComponent(milestone.goal_category);
+                        return <IconComponent className="w-6 h-6" />;
+                      })()}
                     </div>
 
                     <div className="flex-1 min-w-0">

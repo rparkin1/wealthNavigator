@@ -3,11 +3,14 @@
  *
  * Dashboard widget showing upcoming milestones across all goals.
  * Displays next 30 days by default with goal context.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useEffect, useState } from 'react';
 import type { UpcomingMilestone } from '../../types/goalMilestones';
 import * as milestoneApi from '../../services/goalMilestonesApi';
+import { getCategoryIcon, type GoalCategory } from '../../utils/icons';
 
 export interface UpcomingMilestonesProps {
   userId: string;
@@ -55,16 +58,14 @@ export function UpcomingMilestones({
     }).format(amount);
   };
 
-  const getGoalIcon = (category: string): string => {
-    const icons: Record<string, string> = {
-      retirement: '🏖️',
-      education: '🎓',
-      home: '🏠',
-      major_expense: '💎',
-      emergency: '💰',
-      legacy: '🌳',
-    };
-    return icons[category] || '🎯';
+  const getGoalIconComponent = (category: string): React.ComponentType<{ className?: string }> => {
+    const validCategories: GoalCategory[] = ['retirement', 'education', 'home', 'major_expense', 'emergency', 'legacy'];
+    const cat = category.toLowerCase() as GoalCategory;
+
+    if (validCategories.includes(cat)) {
+      return getCategoryIcon(cat);
+    }
+    return getCategoryIcon('retirement'); // Default fallback
   };
 
   const getUrgencyColor = (daysUntil: number): string => {
@@ -127,8 +128,11 @@ export function UpcomingMilestones({
           >
             <div className="flex items-start gap-3">
               {/* Goal Icon */}
-              <div className="text-2xl flex-shrink-0">
-                {getGoalIcon(milestone.goal_category)}
+              <div className="flex-shrink-0 text-primary-600">
+                {(() => {
+                  const IconComponent = getGoalIconComponent(milestone.goal_category);
+                  return <IconComponent className="w-6 h-6" />;
+                })()}
               </div>
 
               {/* Content */}

@@ -2,10 +2,13 @@
  * Funding Waterfall Chart Component
  *
  * Visualizes priority-based funding allocation across goals
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState, useEffect } from 'react';
 import type { MentalAccountBucket } from '../../types/mentalAccounting';
+import { CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 
 export interface FundingWaterfallChartProps {
   buckets: MentalAccountBucket[];
@@ -111,16 +114,16 @@ export function FundingWaterfallChart({
     }
   };
 
-  const getStatusIcon = (status: string): string => {
+  const getStatusIconComponent = (status: string): React.ComponentType<{ className?: string }> => {
     switch (status) {
       case 'fully_funded':
-        return '✅';
+        return CheckCircleIcon; // Green check for fully funded
       case 'partially_funded':
-        return '⚠️';
+        return ExclamationTriangleIcon; // Yellow warning for partial funding
       case 'unfunded':
-        return '❌';
+        return XCircleIcon; // Red X for unfunded
       default:
-        return '❓';
+        return QuestionMarkCircleIcon; // Gray question mark for unknown
     }
   };
 
@@ -166,7 +169,12 @@ export function FundingWaterfallChart({
               {/* Goal Header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-xl">{getStatusIcon(step.funding_status)}</span>
+                  <div className={`${step.funding_status === 'fully_funded' ? 'text-success-600' : step.funding_status === 'partially_funded' ? 'text-warning-600' : step.funding_status === 'unfunded' ? 'text-error-600' : 'text-gray-600'}`}>
+                    {(() => {
+                      const IconComponent = getStatusIconComponent(step.funding_status);
+                      return <IconComponent className="w-6 h-6" />;
+                    })()}
+                  </div>
                   <span className="font-semibold text-gray-900">{step.goal_name}</span>
                   <span className={`px-2 py-0.5 text-xs font-semibold rounded ${getPriorityBadgeColor(step.priority)}`}>
                     {step.priority}

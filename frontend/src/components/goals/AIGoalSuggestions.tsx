@@ -2,10 +2,22 @@
  * AI Goal Suggestions Component
  *
  * Displays AI-generated recommendations and alternative scenarios.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState } from 'react';
 import type { GoalRecommendations, AlternativeScenario } from '../../types/aiGoalAssistance';
+import {
+  SparklesIcon,
+  LightBulbIcon,
+  CheckIcon,
+  ChartBarIcon,
+  RocketLaunchIcon,
+  ScaleIcon,
+  BanknotesIcon,
+  ExclamationTriangleIcon,
+} from '@heroicons/react/24/outline';
 
 export interface AIGoalSuggestionsProps {
   recommendations: GoalRecommendations;
@@ -23,7 +35,7 @@ export function AIGoalSuggestions({ recommendations }: AIGoalSuggestionsProps) {
       {/* Main Recommendations */}
       <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-5">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <span>🤖</span>
+          <SparklesIcon className="w-6 h-6 text-indigo-600" />
           AI Recommendations
         </h3>
 
@@ -40,7 +52,7 @@ export function AIGoalSuggestions({ recommendations }: AIGoalSuggestionsProps) {
           </p>
           <div className="mt-3 bg-indigo-50 rounded p-3">
             <div className="flex items-center gap-2 text-sm text-indigo-700">
-              <span>💡</span>
+              <LightBulbIcon className="w-5 h-5 text-indigo-600 flex-shrink-0" />
               <span>
                 Automating this contribution can help you stay on track without thinking about it
               </span>
@@ -55,7 +67,7 @@ export function AIGoalSuggestions({ recommendations }: AIGoalSuggestionsProps) {
             <ul className="space-y-2">
               {recommendations.optimization_tips.map((tip, index) => (
                 <li key={index} className="flex items-start gap-3 text-sm text-gray-700">
-                  <span className="text-green-600 font-bold mt-0.5">✓</span>
+                  <CheckIcon className="w-5 h-5 text-success-600 flex-shrink-0 mt-0.5" />
                   <span>{tip}</span>
                 </li>
               ))}
@@ -68,7 +80,7 @@ export function AIGoalSuggestions({ recommendations }: AIGoalSuggestionsProps) {
       {recommendations.alternative_scenarios && recommendations.alternative_scenarios.length > 0 && (
         <div className="space-y-3">
           <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-            <span>🎯</span>
+            <ChartBarIcon className="w-5 h-5 text-primary-600" />
             Alternative Scenarios ({recommendations.alternative_scenarios.length})
           </h4>
           <p className="text-sm text-gray-600">
@@ -76,25 +88,25 @@ export function AIGoalSuggestions({ recommendations }: AIGoalSuggestionsProps) {
           </p>
 
           <div className="space-y-2">
-            {recommendations.alternative_scenarios.map((scenario, index) => (
-              <div
-                key={index}
-                className="border border-gray-200 rounded-lg overflow-hidden hover:border-indigo-300 transition-colors"
-              >
-                {/* Scenario Header */}
-                <button
-                  onClick={() => toggleScenario(index)}
-                  className="w-full px-4 py-3 bg-white hover:bg-gray-50 flex items-center justify-between"
+            {recommendations.alternative_scenarios.map((scenario, index) => {
+              const ScenarioIcon = index === 0 ? RocketLaunchIcon : index === 1 ? ScaleIcon : BanknotesIcon;
+              return (
+                <div
+                  key={index}
+                  className="border border-gray-200 rounded-lg overflow-hidden hover:border-indigo-300 transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">
-                      {index === 0 ? '🚀' : index === 1 ? '⚖️' : '💰'}
-                    </span>
-                    <div className="text-left">
-                      <h5 className="font-medium text-gray-900">{scenario.name}</h5>
-                      <p className="text-sm text-gray-600">{scenario.description}</p>
+                  {/* Scenario Header */}
+                  <button
+                    onClick={() => toggleScenario(index)}
+                    className="w-full px-4 py-3 bg-white hover:bg-gray-50 flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-3">
+                      <ScenarioIcon className="w-6 h-6 text-indigo-600 flex-shrink-0" />
+                      <div className="text-left">
+                        <h5 className="font-medium text-gray-900">{scenario.name}</h5>
+                        <p className="text-sm text-gray-600">{scenario.description}</p>
+                      </div>
                     </div>
-                  </div>
                   <span className="text-gray-400">
                     {expandedScenario === index ? '−' : '+'}
                   </span>
@@ -143,7 +155,8 @@ export function AIGoalSuggestions({ recommendations }: AIGoalSuggestionsProps) {
                   </div>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -152,7 +165,7 @@ export function AIGoalSuggestions({ recommendations }: AIGoalSuggestionsProps) {
       {recommendations.risk_guidance && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <span className="text-2xl">⚠️</span>
+            <ExclamationTriangleIcon className="w-6 h-6 text-warning-600 flex-shrink-0" />
             <div>
               <h4 className="font-semibold text-amber-900 mb-1">Risk Considerations</h4>
               <p className="text-sm text-amber-800">{recommendations.risk_guidance}</p>
