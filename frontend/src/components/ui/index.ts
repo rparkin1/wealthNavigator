@@ -35,3 +35,7 @@ export type {
   ProgressBarColor,
   ProgressBarHeight,
 } from './ProgressBar';
+
+// RangeSlider
+export { RangeSlider, formatters as rangeSliderFormatters } from './RangeSlider';
+export type { RangeSliderProps } from './RangeSlider';

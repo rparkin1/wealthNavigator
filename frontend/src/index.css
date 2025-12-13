@@ -1,6 +1,10 @@
 /* Import design tokens first */
 @import './styles/design-tokens.css';
 
+/* Import component-specific styles */
+@import './styles/thread-animations.css';
+@import './styles/range-slider.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

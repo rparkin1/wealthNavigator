@@ -40,11 +40,15 @@ export type ConnectionStatus = 'healthy' | 'syncing' | 'error' | 'authentication
 
 export interface Holding {
   symbol: string;
+  ticker?: string; // Alias for symbol (UI compatibility)
   name: string;
   shares: number;
   value: number;
   costBasis: number;
   assetClass: string;
+  gainLoss?: number;
+  gainLossPercent?: number;
+  lastUpdate?: string;
 }
 
 export interface PerformanceMetrics {
@@ -89,6 +93,57 @@ export interface OptimizationResult {
   sharpeRatio: number;
   efficientFrontierPosition: string;
   timestamp: number;
+}
+
+// Efficient Frontier Visualization Types
+export interface EfficientFrontierPoint {
+  risk: number; // Standard deviation
+  return: number; // Expected return
+  allocation: AssetAllocation;
+  sharpeRatio: number;
+  label?: string; // e.g., "Current", "Max Sharpe", "Min Risk"
+  isCurrent?: boolean;
+  isRecommended?: boolean;
+}
+
+// Tax Impact Analysis Types
+export interface TaxImpact {
+  shortTermCapitalGains: number;
+  longTermCapitalGains: number;
+  estimatedTaxLiability: number;
+  taxEfficiencyScore: number; // 0-10 scale
+  recommendations: string[];
+}
+
+// Holdings Table Filter and Sort Types
+export type SortField = 'ticker' | 'symbol' | 'name' | 'value' | 'gainLoss' | 'gainLossPercent' | 'assetClass';
+export type SortDirection = 'asc' | 'desc';
+
+export interface HoldingsFilter {
+  search?: string;
+  assetClass?: string | 'all';
+  accountId?: string | 'all';
+}
+
+export interface HoldingsSortConfig {
+  field: SortField;
+  direction: SortDirection;
+}
+
+// Rebalancing Plan Types (extended)
+export interface RebalancingPlanDetails {
+  id: string;
+  portfolioId: string;
+  createdAt: string;
+  trades: RebalancingTrade[];
+  totalTaxImpact: number;
+  estimatedCost: number; // Trading fees
+  expectedImprovement: {
+    returnIncrease: number;
+    riskReduction: number;
+    sharpeImprovement: number;
+  };
+  status: 'draft' | 'pending' | 'executed' | 'cancelled';
 }
 
 // ============================================================================

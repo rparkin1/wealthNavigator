@@ -33,3 +33,18 @@ export type { EmptyGoalsStateProps } from './EmptyGoalsState';
 
 // Types - Legacy
 export type { GoalFormProps } from './GoalForm';
+
+// Goal Detail View Components (Week 8)
+export { GoalDetailView } from './GoalDetailView';
+export { TabNavigation } from './TabNavigation';
+export { ProjectionTab } from './ProjectionTab';
+export { SuccessProbabilityDisplay } from './SuccessProbabilityDisplay';
+export { MonteCarloFanChartRedesign } from './MonteCarloFanChartRedesign';
+
+// What-If Analysis Components (Week 9)
+export { WhatIfTab } from './WhatIfTab';
+export { ImpactSummary, CompactImpactSummary } from './ImpactSummary';
+export { ScenarioComparison } from './ScenarioComparison';
+export type { SavedScenario, WhatIfTabProps } from './WhatIfTab';
+export type { ImpactSummaryProps } from './ImpactSummary';
+export type { ScenarioComparisonProps } from './ScenarioComparison';

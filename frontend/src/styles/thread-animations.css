@@ -1,0 +1,74 @@
+/**
+ * Thread Component Animations
+ *
+ * Smooth animations for thread management components
+ * Part of WealthNavigator UI Redesign
+ */
+
+/* Fade in animation for modals and overlays */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Slide in from left for mobile drawer */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Scale in animation for modals */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animation classes */
+.animate-fadeIn {
+  animation: fadeIn 150ms ease-out;
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 250ms ease-out;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 200ms ease-out;
+}
+
+/* Thread list transitions */
+.thread-list-enter {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.thread-list-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 200ms ease-out, transform 200ms ease-out;
+}
+
+.thread-list-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.thread-list-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 150ms ease-in, transform 150ms ease-in;
+}
