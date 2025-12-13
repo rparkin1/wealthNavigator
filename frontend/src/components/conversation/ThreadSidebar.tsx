@@ -3,10 +3,14 @@
  *
  * Manages conversation threads with date-based categorization,
  * search, and thread operations (create, select, delete).
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
+import { getCategoryIcon, type GoalCategory } from '../../utils/icons';
+import { ChartBarIcon } from '@heroicons/react/24/outline';
 
 interface Thread {
   id: string;
@@ -319,20 +323,23 @@ export function ThreadSidebar({
 
                               {/* Goal Type Badges */}
                               {thread.goalTypes && thread.goalTypes.length > 0 && (
-                                <div className="flex-none">
-                                  {thread.goalTypes.slice(0, 2).map((type) => (
-                                    <span
-                                      key={type}
-                                      className={`inline-block px-1.5 py-0.5 text-xs rounded ${
-                                        currentThreadId === thread.id
-                                          ? 'bg-blue-100 text-blue-700'
-                                          : 'bg-gray-100 text-gray-600'
-                                      }`}
-                                      title={type}
-                                    >
-                                      {getGoalTypeIcon(type)}
-                                    </span>
-                                  ))}
+                                <div className="flex-none flex gap-1">
+                                  {thread.goalTypes.slice(0, 2).map((type) => {
+                                    const IconComponent = getGoalTypeIconComponent(type);
+                                    return (
+                                      <span
+                                        key={type}
+                                        className={`inline-flex items-center px-1.5 py-0.5 rounded ${
+                                          currentThreadId === thread.id
+                                            ? 'bg-blue-100 text-blue-700'
+                                            : 'bg-gray-100 text-gray-600'
+                                        }`}
+                                        title={type}
+                                      >
+                                        <IconComponent className="w-3.5 h-3.5" />
+                                      </span>
+                                    );
+                                  })}
                                 </div>
                               )}
                             </div>
@@ -389,16 +396,14 @@ export function ThreadSidebar({
 }
 
 /**
- * Get icon/emoji for goal type
+ * Get professional SVG icon component for goal type
  */
-function getGoalTypeIcon(type: string): string {
-  const icons: Record<string, string> = {
-    retirement: '🏖️',
-    education: '🎓',
-    home: '🏠',
-    major_expense: '💰',
-    emergency: '🚨',
-    legacy: '🌟',
-  };
-  return icons[type.toLowerCase()] || '📊';
+function getGoalTypeIconComponent(type: string): React.ComponentType<{ className?: string }> {
+  const validCategories: GoalCategory[] = ['retirement', 'education', 'home', 'major_expense', 'emergency', 'legacy'];
+  const category = type.toLowerCase() as GoalCategory;
+
+  if (validCategories.includes(category)) {
+    return getCategoryIcon(category);
+  }
+  return ChartBarIcon; // Default icon for unknown types
 }

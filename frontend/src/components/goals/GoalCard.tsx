@@ -3,9 +3,21 @@
  *
  * Displays an individual financial goal with progress visualization,
  * status indicators, and action menu.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState } from 'react';
+import {
+  getCategoryIcon,
+  getStatusIcon,
+  getPriorityIcon,
+  iconSizes,
+  type GoalCategory as IconGoalCategory,
+  type GoalStatus as IconGoalStatus,
+  type PriorityLevel
+} from '../../utils/icons';
+import { CalendarIcon } from '@heroicons/react/24/outline';
 
 export type GoalCategory = 'retirement' | 'education' | 'home' | 'major_expense' | 'emergency' | 'legacy';
 export type GoalPriority = 'essential' | 'important' | 'aspirational';
@@ -59,7 +71,9 @@ export function GoalCard({
       <div className="p-4 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
-            <span className="text-2xl">{getCategoryIcon(goal.category)}</span>
+            <div className="text-primary-600">
+              {getCategoryIcon(goal.category as IconGoalCategory)({ className: iconSizes.lg })}
+            </div>
             <div>
               <h3 className="font-semibold text-gray-900">{goal.title}</h3>
               <p className="text-sm text-gray-600">
@@ -82,7 +96,9 @@ export function GoalCard({
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start space-x-3">
-            <span className="text-3xl">{getCategoryIcon(goal.category)}</span>
+            <div className="text-primary-600 mt-1">
+              {getCategoryIcon(goal.category as IconGoalCategory)({ className: iconSizes.xl })}
+            </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900">{goal.title}</h3>
               <p className="text-sm text-gray-600">{getCategoryLabel(goal.category)}</p>
@@ -171,9 +187,7 @@ export function GoalCard({
         {/* Timeline */}
         <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
           <div className="flex items-center space-x-1">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <CalendarIcon className="w-4 h-4" />
             <span>
               {yearsRemaining > 0 ? `${yearsRemaining} year${yearsRemaining !== 1 ? 's' : ''} remaining` : `${monthsRemaining} month${monthsRemaining !== 1 ? 's' : ''} remaining`}
             </span>
@@ -253,69 +267,53 @@ function ProgressBar({ progress, status }: { progress: number; status: GoalStatu
 }
 
 /**
- * Status Badge Component
+ * Status Badge Component - Professional design with uppercase text
  */
 function StatusBadge({ status }: { status: GoalStatus }) {
   const getStatusConfig = () => {
     switch (status) {
       case 'on_track':
-        return { label: 'On Track', className: 'bg-green-100 text-green-800' };
+        return { label: 'ON TRACK', className: 'bg-success-50 text-success-700 border border-success-200' };
       case 'behind':
-        return { label: 'Behind', className: 'bg-yellow-100 text-yellow-800' };
+        return { label: 'BEHIND', className: 'bg-warning-50 text-warning-700 border border-warning-200' };
       case 'at_risk':
-        return { label: 'At Risk', className: 'bg-red-100 text-red-800' };
+        return { label: 'AT RISK', className: 'bg-error-50 text-error-700 border border-error-200' };
       case 'achieved':
-        return { label: 'Achieved', className: 'bg-blue-100 text-blue-800' };
+        return { label: 'ACHIEVED', className: 'bg-info-50 text-info-700 border border-info-200' };
     }
   };
 
   const config = getStatusConfig();
 
   return (
-    <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${config.className}`}>
+    <span className={`px-2.5 py-0.5 text-[11px] font-semibold tracking-wide rounded-sm ${config.className}`}>
       {config.label}
     </span>
   );
 }
 
 /**
- * Priority Badge Component
+ * Priority Badge Component - Professional design with uppercase text
  */
 function PriorityBadge({ priority }: { priority: GoalPriority }) {
   const getPriorityConfig = () => {
     switch (priority) {
       case 'essential':
-        return { label: 'Essential', className: 'bg-red-100 text-red-800', icon: '🔴' };
+        return { label: 'ESSENTIAL', className: 'bg-error-50 text-error-700 border border-error-200' };
       case 'important':
-        return { label: 'Important', className: 'bg-orange-100 text-orange-800', icon: '🟠' };
+        return { label: 'IMPORTANT', className: 'bg-warning-50 text-warning-700 border border-warning-200' };
       case 'aspirational':
-        return { label: 'Aspirational', className: 'bg-blue-100 text-blue-800', icon: '🔵' };
+        return { label: 'ASPIRATIONAL', className: 'bg-info-50 text-info-700 border border-info-200' };
     }
   };
 
   const config = getPriorityConfig();
 
   return (
-    <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${config.className} flex items-center space-x-1`}>
-      <span>{config.icon}</span>
-      <span>{config.label}</span>
+    <span className={`px-2.5 py-0.5 text-[11px] font-semibold tracking-wide rounded-sm ${config.className}`}>
+      {config.label}
     </span>
   );
-}
-
-/**
- * Get category icon emoji
- */
-function getCategoryIcon(category: GoalCategory): string {
-  const icons: Record<GoalCategory, string> = {
-    retirement: '🏖️',
-    education: '🎓',
-    home: '🏠',
-    major_expense: '💰',
-    emergency: '🚨',
-    legacy: '🌟',
-  };
-  return icons[category];
 }
 
 /**

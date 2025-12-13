@@ -5,8 +5,10 @@
  */
 
 import { useState, useEffect } from 'react';
-import { GoalDashboard } from './GoalDashboard';
+import { GoalDashboardRedesign } from './GoalDashboardRedesign';
 import { GoalForm } from './GoalForm';
+import { GoalCreationWizard } from './wizard';
+import type { WizardFormData } from './wizard/types';
 import { AIGoalAssistant } from './AIGoalAssistant';
 import { GoalDependencyGraph } from './GoalDependencyGraph';
 import { DependencyEditor } from './DependencyEditor';
@@ -423,7 +425,7 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
       </div>
 
       {/* Goal Dashboard */}
-      <GoalDashboard
+      <GoalDashboardRedesign
         goals={goals}
         onNewGoal={handleNewGoal}
         onEditGoal={handleEditGoal}

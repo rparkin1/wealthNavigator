@@ -89,19 +89,31 @@
   --info-900: #0c4a6e;
 
   /* ========================================
-     NEUTRAL COLORS - Gray Scale
+     NEUTRAL COLORS - Slate (Professional Gray)
      Used for: Text, borders, backgrounds
      ======================================== */
-  --gray-50:  #f9fafb;  /* Backgrounds */
-  --gray-100: #f3f4f6;  /* Hover states */
-  --gray-200: #e5e7eb;  /* Borders */
-  --gray-300: #d1d5db;  /* Disabled borders */
-  --gray-400: #9ca3af;  /* Placeholder text */
-  --gray-500: #6b7280;  /* Secondary text */
-  --gray-600: #4b5563;  /* Body text */
-  --gray-700: #374151;  /* Headings */
-  --gray-800: #1f2937;  /* Emphasis */
-  --gray-900: #111827;  /* Maximum contrast */
+  --slate-50:  #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+
+  /* Legacy gray aliases for backwards compatibility */
+  --gray-50:  var(--slate-50);
+  --gray-100: var(--slate-100);
+  --gray-200: var(--slate-200);
+  --gray-300: var(--slate-300);
+  --gray-400: var(--slate-400);
+  --gray-500: var(--slate-500);
+  --gray-600: var(--slate-600);
+  --gray-700: var(--slate-700);
+  --gray-800: var(--slate-800);
+  --gray-900: var(--slate-900);
 
   /* ========================================
      CHART COLORS - Data Visualization

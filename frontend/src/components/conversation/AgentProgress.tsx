@@ -2,9 +2,21 @@
  * AgentProgress Component
  *
  * Displays current agent activity and progress during streaming.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { type AgentProgressEvent } from '../../services/streaming';
+import {
+  ChartBarIcon,
+  CurrencyDollarIcon,
+  ShieldCheckIcon,
+  TrendingUpIcon,
+  BeakerIcon,
+  BanknotesIcon,
+  SparklesIcon,
+  CpuChipIcon,
+} from '@heroicons/react/24/outline';
 
 interface AgentProgressProps {
   currentAgent: string | null;
@@ -14,19 +26,20 @@ interface AgentProgressProps {
 export function AgentProgress({ currentAgent, agentUpdates }: AgentProgressProps) {
   if (!currentAgent) return null;
 
-  const agentIcons: Record<string, string> = {
-    'orchestrator': '🎯',
-    'Goal Planner': '📊',
-    'Portfolio Architect': '🏗️',
-    'Monte Carlo Simulator': '🎲',
-    'Risk Manager': '🛡️',
-    'Tax Strategist': '💰',
-    'Budgeting Agent': '💵',
-    'Retirement Planner': '🏖️',
-    'Visualization Agent': '📈',
+  // Professional agent icons using Heroicons
+  const agentIconComponents: Record<string, React.ComponentType<{ className?: string }>> = {
+    'orchestrator': SparklesIcon,
+    'Goal Planner': ChartBarIcon,
+    'Portfolio Architect': BeakerIcon,
+    'Monte Carlo Simulator': CpuChipIcon,
+    'Risk Manager': ShieldCheckIcon,
+    'Tax Strategist': CurrencyDollarIcon,
+    'Budgeting Agent': BanknotesIcon,
+    'Retirement Planner': TrendingUpIcon,
+    'Visualization Agent': ChartBarIcon,
   };
 
-  const icon = agentIcons[currentAgent] || '🤖';
+  const IconComponent = agentIconComponents[currentAgent] || CpuChipIcon;
   const latestUpdate = agentUpdates[agentUpdates.length - 1];
 
   return (
@@ -34,7 +47,9 @@ export function AgentProgress({ currentAgent, agentUpdates }: AgentProgressProps
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
-            <span className="text-2xl">{icon}</span>
+            <div className="text-blue-600">
+              <IconComponent className="w-6 h-6" />
+            </div>
             <div>
               <p className="text-sm font-medium text-blue-900">
                 {currentAgent}
@@ -61,14 +76,14 @@ export function AgentProgress({ currentAgent, agentUpdates }: AgentProgressProps
 
       {/* Agent team visualization */}
       <div className="mt-3 flex items-center space-x-2 overflow-x-auto">
-        {Object.entries(agentIcons).map(([name, emoji]) => {
+        {Object.entries(agentIconComponents).map(([name, Icon]) => {
           const isActive = name === currentAgent;
           const hasUpdated = agentUpdates.some(u => u.agent_name === name);
 
           return (
             <div
               key={name}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
                 isActive
                   ? 'bg-blue-600 text-white scale-110'
                   : hasUpdated
@@ -77,7 +92,7 @@ export function AgentProgress({ currentAgent, agentUpdates }: AgentProgressProps
               }`}
               title={name}
             >
-              <span className="mr-1">{emoji}</span>
+              <Icon className="w-4 h-4" />
               <span className="hidden sm:inline">{name}</span>
             </div>
           );

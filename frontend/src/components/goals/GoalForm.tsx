@@ -3,10 +3,13 @@
  *
  * Multi-step wizard for creating and editing financial goals.
  * Steps: 1) Goal Type, 2) Amounts & Dates, 3) Funding & Priority
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState } from 'react';
 import type { Goal, GoalCategory, GoalPriority } from './GoalCard';
+import { getCategoryIcon, iconSizes, type GoalCategory as IconGoalCategory } from '../../utils/icons';
 
 export interface GoalFormProps {
   goal?: Goal | null;
@@ -28,35 +31,29 @@ interface FormData {
 
 type FormStep = 1 | 2 | 3;
 
-const CATEGORY_INFO: Record<GoalCategory, { label: string; icon: string; description: string }> = {
+const CATEGORY_INFO: Record<GoalCategory, { label: string; description: string }> = {
   retirement: {
     label: 'Retirement',
-    icon: '🏖️',
     description: 'Plan for financial independence and comfortable retirement',
   },
   education: {
     label: 'Education',
-    icon: '🎓',
     description: 'Save for college, tuition, or continuing education',
   },
   home: {
     label: 'Home Purchase',
-    icon: '🏠',
     description: 'Save for a down payment or home renovation',
   },
   major_expense: {
     label: 'Major Expense',
-    icon: '💰',
     description: 'Plan for large purchases like a car, wedding, or vacation',
   },
   emergency: {
     label: 'Emergency Fund',
-    icon: '🚨',
     description: 'Build a safety net for unexpected expenses',
   },
   legacy: {
     label: 'Legacy Planning',
-    icon: '🌟',
     description: 'Plan for estate, charitable giving, or inheritance',
   },
 };
@@ -271,24 +268,29 @@ export function GoalForm({ goal, onSubmit, onCancel, mode = 'create' }: GoalForm
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">Goal Category *</label>
                 <div className="grid grid-cols-2 gap-3">
-                  {Object.entries(CATEGORY_INFO).map(([key, info]) => (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => updateField('category', key)}
-                      className={`p-4 border-2 rounded-lg text-left transition-all ${
-                        formData.category === key
-                          ? 'border-blue-600 bg-blue-50'
-                          : 'border-gray-300 hover:border-gray-400'
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3 mb-2">
-                        <span className="text-2xl">{info.icon}</span>
-                        <span className="font-semibold text-gray-900">{info.label}</span>
-                      </div>
-                      <p className="text-xs text-gray-600">{info.description}</p>
-                    </button>
-                  ))}
+                  {Object.entries(CATEGORY_INFO).map(([key, info]) => {
+                    const IconComponent = getCategoryIcon(key as IconGoalCategory);
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => updateField('category', key)}
+                        className={`p-4 border-2 rounded-lg text-left transition-all ${
+                          formData.category === key
+                            ? 'border-primary-600 bg-primary-50'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3 mb-2">
+                          <div className={`${formData.category === key ? 'text-primary-600' : 'text-slate-400'}`}>
+                            <IconComponent className={iconSizes.xl} />
+                          </div>
+                          <span className="font-semibold text-gray-900">{info.label}</span>
+                        </div>
+                        <p className="text-xs text-gray-600">{info.description}</p>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

@@ -1,0 +1,14 @@
+/**
+ * Professional Font Loading - Inter and IBM Plex Mono
+ * WealthNavigator AI Design System
+ */
+
+/* Inter Variable Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* IBM Plex Mono - For financial data */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+/* Preconnect to font CDN for performance */
+@import url('https://fonts.googleapis.com');
+@import url('https://fonts.gstatic.com');
