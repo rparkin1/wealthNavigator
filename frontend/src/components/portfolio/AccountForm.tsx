@@ -6,6 +6,13 @@
  */
 
 import { useState } from 'react';
+import {
+  BriefcaseIcon,
+  BuildingLibraryIcon,
+  StarIcon,
+  BuildingColumnsIcon,
+  CreditCardIcon,
+} from '@heroicons/react/24/outline';
 
 export interface Account {
   id?: string;
@@ -39,35 +46,35 @@ interface FormData {
 
 const ACCOUNT_TYPES: Record<
   AccountType,
-  { label: string; icon: string; description: string; examples: string }
+  { label: string; icon: React.ReactNode; description: string; examples: string }
 > = {
   taxable: {
     label: 'Taxable',
-    icon: '💼',
+    icon: <BriefcaseIcon className="w-6 h-6" />,
     description: 'Regular brokerage accounts',
     examples: 'Brokerage account, Individual account, Joint account',
   },
   tax_deferred: {
     label: 'Tax-Deferred',
-    icon: '🏦',
+    icon: <BuildingLibraryIcon className="w-6 h-6" />,
     description: 'Pre-tax retirement accounts',
     examples: '401(k), Traditional IRA, 403(b), SEP IRA',
   },
   tax_exempt: {
     label: 'Tax-Exempt',
-    icon: '🌟',
+    icon: <StarIcon className="w-6 h-6" />,
     description: 'After-tax retirement accounts',
     examples: 'Roth IRA, Roth 401(k), Roth 403(b)',
   },
   depository: {
     label: 'Bank Account',
-    icon: '🏛️',
+    icon: <BuildingColumnsIcon className="w-6 h-6" />,
     description: 'Checking and savings accounts',
     examples: 'Checking, Savings, Money Market, CD',
   },
   credit: {
     label: 'Credit/Debt',
-    icon: '💳',
+    icon: <CreditCardIcon className="w-6 h-6" />,
     description: 'Credit cards and loans',
     examples: 'Credit card, Mortgage, Auto loan, Student loan',
   },
@@ -220,12 +227,12 @@ export function AccountForm({ account, onSubmit, onCancel, mode = 'create' }: Ac
                   onClick={() => updateField('accountType', key)}
                   className={`p-4 border-2 rounded-lg text-left transition-all ${
                     formData.accountType === key
-                      ? 'border-blue-600 bg-blue-50'
-                      : 'border-gray-300 hover:border-gray-400'
+                      ? 'border-blue-600 bg-blue-50 text-blue-600'
+                      : 'border-gray-300 hover:border-gray-400 text-gray-600'
                   }`}
                 >
                   <div className="flex items-center space-x-3 mb-2">
-                    <span className="text-2xl">{info.icon}</span>
+                    <span>{info.icon}</span>
                     <span className="font-semibold text-gray-900">{info.label}</span>
                   </div>
                   <p className="text-xs text-gray-600 mb-1">{info.description}</p>

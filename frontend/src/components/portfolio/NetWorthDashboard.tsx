@@ -10,6 +10,13 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import {
+  ArrowTrendingUpIcon,
+  ChartBarIcon,
+  ChartBarSquareIcon,
+  FlagIcon,
+  SparklesIcon,
+} from '@heroicons/react/24/outline';
 import { NetWorthTrendChart } from './NetWorthTrendChart';
 import { NetWorthGrowthMetrics } from './NetWorthGrowthMetrics';
 import { NetWorthProjection } from './NetWorthProjection';
@@ -138,10 +145,10 @@ export const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({ userId }) 
     { value: 'ALL', label: 'All Time' },
   ];
 
-  const viewModeOptions: { value: ViewMode; label: string; icon: string }[] = [
-    { value: 'line', label: 'Line Chart', icon: '📈' },
-    { value: 'area', label: 'Area Chart', icon: '📊' },
-    { value: 'stacked', label: 'Stacked', icon: '📉' },
+  const viewModeOptions: { value: ViewMode; label: string; icon: React.ReactNode }[] = [
+    { value: 'line', label: 'Line Chart', icon: <ArrowTrendingUpIcon className="w-5 h-5" /> },
+    { value: 'area', label: 'Area Chart', icon: <ChartBarIcon className="w-5 h-5" /> },
+    { value: 'stacked', label: 'Stacked', icon: <ChartBarSquareIcon className="w-5 h-5" /> },
   ];
 
   return (
@@ -185,13 +192,13 @@ export const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({ userId }) 
             <button
               key={option.value}
               onClick={() => setViewMode(option.value)}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${
                 viewMode === option.value
                   ? 'bg-white text-green-700 shadow-md'
                   : 'bg-green-700 text-white hover:bg-green-600'
               }`}
             >
-              <span className="mr-2">{option.icon}</span>
+              {option.icon}
               {option.label}
             </button>
           ))}
@@ -200,33 +207,36 @@ export const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({ userId }) 
           <div className="ml-auto flex gap-2">
             <button
               onClick={() => setShowMovingAverage(!showMovingAverage)}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${
                 showMovingAverage
                   ? 'bg-white text-green-700 shadow-md'
                   : 'bg-green-700 text-white hover:bg-green-600'
               }`}
             >
-              📊 Moving Average
+              <ChartBarIcon className="w-5 h-5" />
+              Moving Average
             </button>
             <button
               onClick={() => setShowMilestones(!showMilestones)}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${
                 showMilestones
                   ? 'bg-white text-green-700 shadow-md'
                   : 'bg-green-700 text-white hover:bg-green-600'
               }`}
             >
-              🎯 Milestones
+              <FlagIcon className="w-5 h-5" />
+              Milestones
             </button>
             <button
               onClick={() => setShowProjection(!showProjection)}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${
                 showProjection
                   ? 'bg-white text-green-700 shadow-md'
                   : 'bg-green-700 text-white hover:bg-green-600'
               }`}
             >
-              🔮 Projection
+              <SparklesIcon className="w-5 h-5" />
+              Projection
             </button>
           </div>
         </div>

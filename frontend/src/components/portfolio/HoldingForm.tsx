@@ -3,9 +3,18 @@
  *
  * Form for adding or editing individual portfolio holdings.
  * Supports stocks, bonds, ETFs, mutual funds, and other securities.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState } from 'react';
+import {
+  ArrowTrendingUpIcon,
+  ChartBarSquareIcon,
+  BuildingLibraryIcon,
+  BanknotesIcon,
+  DocumentTextIcon,
+} from '@heroicons/react/24/outline';
 
 export interface Holding {
   id?: string;
@@ -44,30 +53,30 @@ interface FormData {
   expenseRatio: string;
 }
 
-const SECURITY_TYPES: Record<SecurityType, { label: string; icon: string; description: string }> = {
+const SECURITY_TYPES: Record<SecurityType, { label: string; icon: React.ReactNode; description: string }> = {
   stock: {
     label: 'Stock',
-    icon: '📈',
+    icon: <ArrowTrendingUpIcon className="w-8 h-8" />,
     description: 'Individual company shares',
   },
   etf: {
     label: 'ETF',
-    icon: '📊',
+    icon: <ChartBarSquareIcon className="w-8 h-8" />,
     description: 'Exchange-traded fund',
   },
   mutual_fund: {
     label: 'Mutual Fund',
-    icon: '🏦',
+    icon: <BuildingLibraryIcon className="w-8 h-8" />,
     description: 'Actively managed fund',
   },
   bond: {
     label: 'Bond',
-    icon: '💵',
+    icon: <BanknotesIcon className="w-8 h-8" />,
     description: 'Fixed income security',
   },
   other: {
     label: 'Other',
-    icon: '📝',
+    icon: <DocumentTextIcon className="w-8 h-8" />,
     description: 'Other security types',
   },
 };
@@ -320,11 +329,11 @@ export function HoldingForm({ holding, accounts, onSubmit, onCancel, mode = 'cre
                       onClick={() => updateField('securityType', key)}
                       className={`p-3 border-2 rounded-lg text-center transition-all ${
                         formData.securityType === key
-                          ? 'border-blue-600 bg-blue-50'
-                          : 'border-gray-300 hover:border-gray-400'
+                          ? 'border-blue-600 bg-blue-50 text-blue-600'
+                          : 'border-gray-300 hover:border-gray-400 text-gray-600'
                       }`}
                     >
-                      <div className="text-2xl mb-1">{info.icon}</div>
+                      <div className="flex justify-center mb-2">{info.icon}</div>
                       <div className="text-xs font-semibold text-gray-900">{info.label}</div>
                     </button>
                   ))}
