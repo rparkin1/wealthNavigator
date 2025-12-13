@@ -3,6 +3,8 @@
  *
  * Timeline coordinator showing goals in dependency order.
  * Visualizes optimized timeline and sequencing recommendations.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState, useEffect } from 'react';
@@ -13,6 +15,7 @@ import type {
   DependencyOptimization,
 } from '../../types/goalDependencies';
 import * as dependencyApi from '../../services/goalDependenciesApi';
+import { getCategoryIcon, type GoalCategory } from '../../utils/icons';
 
 export interface SequentialGoalPlannerProps {
   goals: Goal[];
@@ -71,16 +74,14 @@ export function SequentialGoalPlanner({
     return goals.find((g) => g.id === goalId);
   };
 
-  const getGoalIcon = (category: string): string => {
-    const icons: Record<string, string> = {
-      retirement: '🏖️',
-      education: '🎓',
-      home: '🏠',
-      major_expense: '💎',
-      emergency: '💰',
-      legacy: '🌳',
-    };
-    return icons[category] || '🎯';
+  const getGoalIconComponent = (category: string): React.ComponentType<{ className?: string }> => {
+    const validCategories: GoalCategory[] = ['retirement', 'education', 'home', 'major_expense', 'emergency', 'legacy'];
+    const cat = category.toLowerCase() as GoalCategory;
+
+    if (validCategories.includes(cat)) {
+      return getCategoryIcon(cat);
+    }
+    return getCategoryIcon('retirement'); // Default fallback
   };
 
   if (isLoading) {
@@ -156,12 +157,15 @@ export function SequentialGoalPlanner({
             <div className="flex flex-wrap gap-2">
               {optimization.critical_path.map((goalId, index) => {
                 const goal = getGoalById(goalId);
+                const IconComponent = goal ? getGoalIconComponent(goal.category) : getGoalIconComponent('retirement');
                 return (
                   <div
                     key={goalId}
                     className="flex items-center bg-white border border-red-300 rounded-md px-3 py-1"
                   >
-                    <span className="mr-2">{goal ? getGoalIcon(goal.category) : '🎯'}</span>
+                    <div className="mr-2 text-primary-600">
+                      <IconComponent className="w-4 h-4" />
+                    </div>
                     <span className="text-sm font-medium text-gray-900">
                       {goal?.title || 'Unknown'}
                     </span>
@@ -189,9 +193,12 @@ export function SequentialGoalPlanner({
                     <div className="flex flex-wrap gap-2">
                       {group.map((goalId) => {
                         const goal = getGoalById(goalId);
+                        const IconComponent = goal ? getGoalIconComponent(goal.category) : getGoalIconComponent('retirement');
                         return (
                           <div key={goalId} className="flex items-center text-sm">
-                            <span className="mr-1">{goal ? getGoalIcon(goal.category) : '🎯'}</span>
+                            <div className="mr-1 text-primary-600">
+                              <IconComponent className="w-4 h-4" />
+                            </div>
                             <span className="text-gray-900">{goal?.title || 'Unknown'}</span>
                           </div>
                         );
@@ -243,7 +250,12 @@ export function SequentialGoalPlanner({
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-start flex-1">
-                  <div className="text-2xl mr-3">{getGoalIcon(goal.category)}</div>
+                  <div className="text-primary-600 mr-3">
+                    {(() => {
+                      const IconComponent = getGoalIconComponent(goal.category);
+                      return <IconComponent className="w-8 h-8" />;
+                    })()}
+                  </div>
                   <div className="flex-1">
                     <h4 className="font-semibold text-gray-900">{item.goal_title}</h4>
                     <div className="mt-2 space-y-1">

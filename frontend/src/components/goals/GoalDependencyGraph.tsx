@@ -3,6 +3,8 @@
  *
  * D3.js visualization of goal dependencies and relationships.
  * Displays goals as nodes and dependencies as directed edges.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -14,6 +16,8 @@ import type {
   DependencyGraphNode,
   DependencyGraphLink,
 } from '../../types/goalDependencies';
+import { LightBulbIcon } from '@heroicons/react/24/outline';
+import { getCategoryIcon, type GoalCategory } from '../../utils/icons';
 
 export interface GoalDependencyGraphProps {
   goals: Goal[];
@@ -267,8 +271,9 @@ export function GoalDependencyGraph({
 
       {/* Help text */}
       <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-3 z-10 border border-gray-200">
-        <p className="text-xs text-gray-600">
-          💡 <strong>Tip:</strong> Drag nodes to rearrange • Scroll to zoom • Click to select
+        <p className="text-xs text-gray-600 flex items-start gap-1.5">
+          <LightBulbIcon className="w-4 h-4 text-primary-600 flex-shrink-0 mt-0.5" />
+          <span><strong>Tip:</strong> Drag nodes to rearrange • Scroll to zoom • Click to select</span>
         </p>
       </div>
 
@@ -499,18 +504,16 @@ function getNodeColor(goal: Goal): string {
 }
 
 /**
- * Get icon for goal category
+ * Get icon component for goal category
  */
-function getGoalIcon(category: string): string {
-  const icons: Record<string, string> = {
-    retirement: '🏖️',
-    education: '🎓',
-    home: '🏠',
-    major_expense: '💎',
-    emergency: '💰',
-    legacy: '🌳',
-  };
-  return icons[category] || '🎯';
+function getGoalIconComponent(category: string): React.ComponentType<{ className?: string }> {
+  const validCategories: GoalCategory[] = ['retirement', 'education', 'home', 'major_expense', 'emergency', 'legacy'];
+  const cat = category.toLowerCase() as GoalCategory;
+
+  if (validCategories.includes(cat)) {
+    return getCategoryIcon(cat);
+  }
+  return getCategoryIcon('retirement'); // Default fallback
 }
 
 /**

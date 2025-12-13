@@ -3,6 +3,8 @@
  *
  * Complete budget management with API integration, loading states, and error handling.
  * This component demonstrates full integration with the backend.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import React, { useState, useEffect } from 'react';
@@ -14,6 +16,17 @@ import { ImportExportPanel } from '../portfolio/ImportExportPanel';
 import type { BudgetEntry } from './BudgetForm';
 import * as budgetApi from '@/services/budgetApi';
 import type { BudgetEntryResponse, BudgetSuggestions } from '@/services/budgetApi';
+import {
+  ExclamationTriangleIcon,
+  XMarkIcon,
+  ChartBarIcon,
+  CreditCardIcon,
+  CurrencyDollarIcon,
+  ArrowDownTrayIcon,
+  LightBulbIcon,
+  BanknotesIcon,
+  FlagIcon,
+} from '@heroicons/react/24/outline';
 
 export interface BudgetManagerProps {
   userId?: string;
@@ -134,7 +147,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({ userId: _userId })
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6">
         <div className="flex items-start gap-3">
-          <div className="text-red-600 text-2xl">⚠️</div>
+          <ExclamationTriangleIcon className="w-8 h-8 text-red-600 flex-shrink-0" />
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-red-900 mb-2">
               Error Loading Budget
@@ -158,14 +171,14 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({ userId: _userId })
       {error && entries.length > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-red-600 text-xl">⚠️</span>
+            <ExclamationTriangleIcon className="w-6 h-6 text-red-600 flex-shrink-0" />
             <span className="text-red-700">{error}</span>
           </div>
           <button
             onClick={() => setError(null)}
             className="text-red-600 hover:text-red-800"
           >
-            ✕
+            <XMarkIcon className="w-6 h-6" />
           </button>
         </div>
       )}
@@ -174,43 +187,47 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({ userId: _userId })
       <div className="bg-white border border-gray-200 rounded-lg p-2 flex gap-2">
         <button
           onClick={() => setCurrentView('dashboard')}
-          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
             currentView === 'dashboard'
               ? 'bg-blue-600 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          📊 Dashboard
+          <ChartBarIcon className="w-5 h-5" />
+          <span>Dashboard</span>
         </button>
         <button
           onClick={() => setCurrentView('expenses')}
-          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
             currentView === 'expenses'
               ? 'bg-blue-600 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          💳 Expenses
+          <CreditCardIcon className="w-5 h-5" />
+          <span>Expenses</span>
         </button>
         <button
           onClick={() => setCurrentView('income')}
-          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
             currentView === 'income'
               ? 'bg-blue-600 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          💰 Income
+          <CurrencyDollarIcon className="w-5 h-5" />
+          <span>Income</span>
         </button>
         <button
           onClick={() => setCurrentView('import-export')}
-          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
             currentView === 'import-export'
               ? 'bg-blue-600 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          📥 Import/Export
+          <ArrowDownTrayIcon className="w-5 h-5" />
+          <span>Import/Export</span>
         </button>
       </div>
 
@@ -259,8 +276,9 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({ userId: _userId })
       {/* AI Suggestions Panel */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">
-            💡 AI Budget Suggestions
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <LightBulbIcon className="w-6 h-6 text-blue-600" />
+            <span>AI Budget Suggestions</span>
           </h3>
           <button
             onClick={handleLoadSuggestions}
@@ -305,7 +323,10 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({ userId: _userId })
             {/* Concerns */}
             {suggestions.concerns.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-2">⚠️ Concerns</h4>
+                <h4 className="text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
+                  <ExclamationTriangleIcon className="w-5 h-5 text-orange-600" />
+                  <span>Concerns</span>
+                </h4>
                 <ul className="space-y-1">
                   {suggestions.concerns.map((concern, idx) => (
                     <li key={idx} className="text-sm text-gray-700 pl-4">
@@ -319,7 +340,10 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({ userId: _userId })
             {/* Opportunities */}
             {suggestions.opportunities.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-2">💰 Savings Opportunities</h4>
+                <h4 className="text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
+                  <BanknotesIcon className="w-5 h-5 text-green-600" />
+                  <span>Savings Opportunities</span>
+                </h4>
                 <div className="space-y-2">
                   {suggestions.opportunities.slice(0, 3).map((opp, idx) => (
                     <div key={idx} className="bg-green-50 border border-green-200 rounded p-3">
@@ -341,7 +365,10 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({ userId: _userId })
             {/* Recommendations */}
             {suggestions.recommendations.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-2">🎯 Top Recommendations</h4>
+                <h4 className="text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
+                  <FlagIcon className="w-5 h-5 text-blue-600" />
+                  <span>Top Recommendations</span>
+                </h4>
                 <div className="space-y-2">
                   {suggestions.recommendations.slice(0, 3).map((rec, idx) => (
                     <div key={idx} className="bg-blue-50 border border-blue-200 rounded p-3">

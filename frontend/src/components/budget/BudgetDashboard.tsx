@@ -7,10 +7,22 @@
  * - Cash flow analysis
  * - Spending trends
  * - Budget vs Actual comparison
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState, useMemo } from 'react';
 import type { BudgetEntry } from './BudgetForm';
+import {
+  CurrencyDollarIcon,
+  CreditCardIcon,
+  ArchiveBoxIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  XCircleIcon,
+} from '@heroicons/react/24/outline';
 
 export interface BudgetDashboardProps {
   entries: BudgetEntry[];
@@ -187,7 +199,7 @@ export function BudgetDashboard({ entries, onAddEntry, onEditEntry, onDeleteEntr
           <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-green-900">Annual Income</span>
-              <span className="text-2xl">💰</span>
+              <CurrencyDollarIcon className="w-8 h-8 text-green-600" />
             </div>
             <p className="text-2xl font-bold text-green-700">
               ${totals.income.toLocaleString()}
@@ -201,7 +213,7 @@ export function BudgetDashboard({ entries, onAddEntry, onEditEntry, onDeleteEntr
           <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-red-900">Annual Expenses</span>
-              <span className="text-2xl">💳</span>
+              <CreditCardIcon className="w-8 h-8 text-red-600" />
             </div>
             <p className="text-2xl font-bold text-red-700">
               ${totals.expenses.toLocaleString()}
@@ -215,7 +227,7 @@ export function BudgetDashboard({ entries, onAddEntry, onEditEntry, onDeleteEntr
           <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-blue-900">Annual Savings</span>
-              <span className="text-2xl">🎯</span>
+              <ArchiveBoxIcon className="w-8 h-8 text-blue-600" />
             </div>
             <p className="text-2xl font-bold text-blue-700">
               ${totals.savings.toLocaleString()}
@@ -237,7 +249,11 @@ export function BudgetDashboard({ entries, onAddEntry, onEditEntry, onDeleteEntr
               }`}>
                 Net Cash Flow
               </span>
-              <span className="text-2xl">{totals.netIncome >= 0 ? '📈' : '📉'}</span>
+              {totals.netIncome >= 0 ? (
+                <ArrowTrendingUpIcon className="w-8 h-8 text-emerald-600" />
+              ) : (
+                <ArrowTrendingDownIcon className="w-8 h-8 text-orange-600" />
+              )}
             </div>
             <p className={`text-2xl font-bold ${
               totals.netIncome >= 0 ? 'text-emerald-700' : 'text-orange-700'
@@ -269,9 +285,13 @@ export function BudgetDashboard({ entries, onAddEntry, onEditEntry, onDeleteEntr
               }`}>
                 Budget Health
               </span>
-              <span className="text-2xl">
-                {totals.savingsRate >= 20 ? '✅' : totals.savingsRate >= 10 ? '⚠️' : '❌'}
-              </span>
+              {totals.savingsRate >= 20 ? (
+                <CheckCircleIcon className="w-8 h-8 text-green-600" />
+              ) : totals.savingsRate >= 10 ? (
+                <ExclamationTriangleIcon className="w-8 h-8 text-yellow-600" />
+              ) : (
+                <XCircleIcon className="w-8 h-8 text-red-600" />
+              )}
             </div>
             <p className={`text-2xl font-bold ${
               totals.savingsRate >= 20
@@ -320,39 +340,42 @@ export function BudgetDashboard({ entries, onAddEntry, onEditEntry, onDeleteEntr
               setSelectedType('income');
               setSelectedCategory(null);
             }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
               selectedType === 'income'
                 ? 'bg-green-600 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            💰 Income
+            <CurrencyDollarIcon className="w-5 h-5" />
+            <span>Income</span>
           </button>
           <button
             onClick={() => {
               setSelectedType('expense');
               setSelectedCategory(null);
             }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
               selectedType === 'expense'
                 ? 'bg-red-600 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            💳 Expenses
+            <CreditCardIcon className="w-5 h-5" />
+            <span>Expenses</span>
           </button>
           <button
             onClick={() => {
               setSelectedType('savings');
               setSelectedCategory(null);
             }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
               selectedType === 'savings'
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            🎯 Savings
+            <ArchiveBoxIcon className="w-5 h-5" />
+            <span>Savings</span>
           </button>
         </div>
       </div>

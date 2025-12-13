@@ -2,10 +2,14 @@
  * Goal Template Selector Component
  *
  * Displays pre-configured goal templates for quick setup.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState } from 'react';
 import type { GoalTemplate } from '../../types/aiGoalAssistance';
+import { ClipboardDocumentListIcon, BoltIcon } from '@heroicons/react/24/outline';
+import { getCategoryIcon, type GoalCategory } from '../../utils/icons';
 
 export interface GoalTemplateSelectorProps {
   onSelectTemplate: (templateId: string) => void;
@@ -26,7 +30,7 @@ export function GoalTemplateSelector({
       description: 'Retire before traditional retirement age with financial independence',
       typical_amount_range: { min: 1000000, max: 3000000 },
       typical_timeframe_years: 20,
-      icon: '🏖️',
+      icon: '',
       priority_suggestion: 'essential',
       quick_setup_available: true,
     },
@@ -37,7 +41,7 @@ export function GoalTemplateSelector({
       description: 'Retire at age 65-67 with comfortable lifestyle',
       typical_amount_range: { min: 500000, max: 2000000 },
       typical_timeframe_years: 30,
-      icon: '🏖️',
+      icon: '',
       priority_suggestion: 'essential',
       quick_setup_available: true,
     },
@@ -48,7 +52,7 @@ export function GoalTemplateSelector({
       description: '4-year college education for one child',
       typical_amount_range: { min: 100000, max: 300000 },
       typical_timeframe_years: 15,
-      icon: '🎓',
+      icon: '',
       priority_suggestion: 'important',
       quick_setup_available: true,
     },
@@ -59,7 +63,7 @@ export function GoalTemplateSelector({
       description: 'K-12 private school education',
       typical_amount_range: { min: 150000, max: 400000 },
       typical_timeframe_years: 12,
-      icon: '🎓',
+      icon: '',
       priority_suggestion: 'important',
       quick_setup_available: true,
     },
@@ -70,7 +74,7 @@ export function GoalTemplateSelector({
       description: 'Down payment for first home (20%)',
       typical_amount_range: { min: 60000, max: 200000 },
       typical_timeframe_years: 5,
-      icon: '🏠',
+      icon: '',
       priority_suggestion: 'important',
       quick_setup_available: true,
     },
@@ -81,7 +85,7 @@ export function GoalTemplateSelector({
       description: 'Move to a larger or better home',
       typical_amount_range: { min: 100000, max: 400000 },
       typical_timeframe_years: 7,
-      icon: '🏠',
+      icon: '',
       priority_suggestion: 'aspirational',
       quick_setup_available: true,
     },
@@ -92,7 +96,7 @@ export function GoalTemplateSelector({
       description: '6 months of living expenses',
       typical_amount_range: { min: 10000, max: 50000 },
       typical_timeframe_years: 1,
-      icon: '💰',
+      icon: '',
       priority_suggestion: 'essential',
       quick_setup_available: true,
     },
@@ -103,7 +107,7 @@ export function GoalTemplateSelector({
       description: 'Save for wedding expenses',
       typical_amount_range: { min: 20000, max: 100000 },
       typical_timeframe_years: 2,
-      icon: '💒',
+      icon: '',
       priority_suggestion: 'important',
       quick_setup_available: true,
     },
@@ -114,7 +118,7 @@ export function GoalTemplateSelector({
       description: 'Save for a major travel experience',
       typical_amount_range: { min: 10000, max: 50000 },
       typical_timeframe_years: 2,
-      icon: '✈️',
+      icon: '',
       priority_suggestion: 'aspirational',
       quick_setup_available: true,
     },
@@ -125,19 +129,19 @@ export function GoalTemplateSelector({
       description: 'Estate planning and legacy for heirs',
       typical_amount_range: { min: 100000, max: 1000000 },
       typical_timeframe_years: 20,
-      icon: '🌳',
+      icon: '',
       priority_suggestion: 'important',
       quick_setup_available: true,
     },
   ];
 
   const categories = [
-    { id: 'retirement', name: 'Retirement', icon: '🏖️' },
-    { id: 'education', name: 'Education', icon: '🎓' },
-    { id: 'home', name: 'Home', icon: '🏠' },
-    { id: 'major_expense', name: 'Major Expense', icon: '💎' },
-    { id: 'emergency', name: 'Emergency', icon: '💰' },
-    { id: 'legacy', name: 'Legacy', icon: '🌳' },
+    { id: 'retirement', name: 'Retirement' },
+    { id: 'education', name: 'Education' },
+    { id: 'home', name: 'Home' },
+    { id: 'major_expense', name: 'Major Expense' },
+    { id: 'emergency', name: 'Emergency' },
+    { id: 'legacy', name: 'Legacy' },
   ];
 
   const filteredTemplates = selectedCategory
@@ -166,12 +170,23 @@ export function GoalTemplateSelector({
     }
   };
 
+  const getCategoryIconComponent = (category: string): React.ComponentType<{ className?: string }> => {
+    const validCategories: GoalCategory[] = ['retirement', 'education', 'home', 'major_expense', 'emergency', 'legacy'];
+    const cat = category.toLowerCase() as GoalCategory;
+    if (validCategories.includes(cat)) {
+      return getCategoryIcon(cat);
+    }
+    return getCategoryIcon('retirement');
+  };
+
   return (
     <div className="space-y-6">
       {/* Introduction */}
       <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-6">
         <div className="flex items-start gap-4">
-          <div className="text-4xl">📋</div>
+          <div className="text-primary-600">
+            <ClipboardDocumentListIcon className="w-12 h-12" />
+          </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Choose a Goal Template
@@ -179,8 +194,9 @@ export function GoalTemplateSelector({
             <p className="text-gray-700 mb-2">
               Select a pre-configured template to get started quickly. AI will customize it for your situation.
             </p>
-            <p className="text-sm text-gray-600">
-              ⚡ Templates include typical costs, timelines, and best practices
+            <p className="text-sm text-gray-600 flex items-center gap-1.5">
+              <BoltIcon className="w-4 h-4 flex-shrink-0" />
+              <span>Templates include typical costs, timelines, and best practices</span>
             </p>
           </div>
         </div>
@@ -198,50 +214,58 @@ export function GoalTemplateSelector({
         >
           All Templates
         </button>
-        {categories.map(cat => (
-          <button
-            key={cat.id}
-            onClick={() => setSelectedCategory(cat.id)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              selectedCategory === cat.id
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <span className="mr-2">{cat.icon}</span>
-            {cat.name}
-          </button>
-        ))}
+        {categories.map(cat => {
+          const IconComponent = getCategoryIconComponent(cat.id);
+          return (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                selectedCategory === cat.id
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <IconComponent className="w-5 h-5" />
+              {cat.name}
+            </button>
+          );
+        })}
       </div>
 
       {/* Template Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filteredTemplates.map(template => (
-          <button
-            key={template.id}
-            onClick={() => onSelectTemplate(template.id)}
-            disabled={isProcessing}
-            className="text-left bg-white border border-gray-200 rounded-lg p-5 hover:border-indigo-400 hover:shadow-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {/* Header */}
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">{template.icon}</span>
-                <div>
-                  <h4 className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
-                    {template.title}
-                  </h4>
-                  <span className={`text-xs px-2 py-1 rounded capitalize ${getPriorityColor(template.priority_suggestion)}`}>
-                    {template.priority_suggestion}
-                  </span>
+        {filteredTemplates.map(template => {
+          const TemplateIconComponent = getCategoryIconComponent(template.category);
+          return (
+            <button
+              key={template.id}
+              onClick={() => onSelectTemplate(template.id)}
+              disabled={isProcessing}
+              className="text-left bg-white border border-gray-200 rounded-lg p-5 hover:border-indigo-400 hover:shadow-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {/* Header */}
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="text-primary-600">
+                    <TemplateIconComponent className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                      {template.title}
+                    </h4>
+                    <span className={`text-xs px-2 py-1 rounded capitalize ${getPriorityColor(template.priority_suggestion)}`}>
+                      {template.priority_suggestion}
+                    </span>
+                  </div>
                 </div>
+                {template.quick_setup_available && (
+                  <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded flex items-center gap-1">
+                    <BoltIcon className="w-3 h-3" />
+                    <span>Quick</span>
+                  </span>
+                )}
               </div>
-              {template.quick_setup_available && (
-                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                  ⚡ Quick
-                </span>
-              )}
-            </div>
 
             {/* Description */}
             <p className="text-sm text-gray-600 mb-4">
@@ -273,8 +297,9 @@ export function GoalTemplateSelector({
                 →
               </span>
             </div>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
 
       {filteredTemplates.length === 0 && (

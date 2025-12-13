@@ -1,7 +1,14 @@
+/**
+ * Impact Summary Component
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
+ */
+
 import React from 'react';
 import { ArrowUpIcon, ArrowDownIcon } from './GoalIcons';
 import type { ComparisonResult } from '../../utils/whatIfCalculations';
 import { formatCurrency, formatPercentage, formatDifference } from '../../utils/whatIfCalculations';
+import { LightBulbIcon } from '@heroicons/react/24/outline';
 
 export interface ImpactSummaryProps {
   comparison: ComparisonResult;
@@ -66,8 +73,9 @@ export function ImpactSummary({
             />
           </svg>
         </div>
-        <h3 className="text-lg font-semibold text-gray-900">
-          💡 Impact Summary
+        <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <LightBulbIcon className="w-5 h-5 text-primary-600" />
+          <span>Impact Summary</span>
         </h3>
       </div>
 

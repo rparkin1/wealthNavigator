@@ -3,10 +3,13 @@
  *
  * Displays goals that are below the success probability threshold.
  * Provides recommendations for improving goal funding and prioritization.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState, useEffect } from 'react';
 import type { Goal } from '../../types/goal';
+import { CheckCircleIcon } from '@heroicons/react/24/outline';
 
 export interface AtRiskGoal extends Goal {
   shortfallAmount: number;
@@ -76,7 +79,9 @@ export function AtRiskGoalsPanel({
     return (
       <div className="bg-white p-6 rounded-lg border border-gray-200">
         <div className="text-center py-8">
-          <div className="text-6xl mb-4">✅</div>
+          <div className="flex justify-center mb-4">
+            <CheckCircleIcon className="w-16 h-16 text-success-600" />
+          </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             All Goals On Track!
           </h3>

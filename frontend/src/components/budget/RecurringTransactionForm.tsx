@@ -2,6 +2,8 @@
  * RecurringTransactionForm Component
  *
  * Form for creating and editing recurring budget transactions.
+ *
+ * Updated: 2025-12-13 - Using professional design (no emoji)
  */
 
 import React, { useState } from 'react';
@@ -188,9 +190,9 @@ export const RecurringTransactionForm: React.FC<RecurringTransactionFormProps> =
                   onChange={(e) => handleChange('type', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="income">💰 Income</option>
-                  <option value="expense">💳 Expense</option>
-                  <option value="savings">🏦 Savings</option>
+                  <option value="income">Income</option>
+                  <option value="expense">Expense</option>
+                  <option value="savings">Savings</option>
                 </select>
               </div>
 

@@ -3,11 +3,19 @@
  *
  * Main dashboard for displaying and managing all financial goals.
  * Includes filtering, sorting, summary statistics, and grid layout.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState, useMemo } from 'react';
 import { GoalCard } from './GoalCard';
 import type { Goal, GoalCategory, GoalPriority, GoalStatus } from './GoalCard';
+import {
+  ChartBarSquareIcon,
+  ArrowTrendingUpIcon,
+  CheckCircleIcon,
+  FireIcon,
+} from '@heroicons/react/24/outline';
 
 export interface GoalDashboardProps {
   goals: Goal[];
@@ -159,28 +167,28 @@ export function GoalDashboard({
         <StatCard
           title="Total Goals"
           value={stats.total}
-          icon="📊"
+          icon={<ChartBarSquareIcon className="w-8 h-8" />}
           color="bg-blue-50 text-blue-600"
         />
         <StatCard
           title="Overall Progress"
           value={`${stats.totalProgress.toFixed(1)}%`}
           subtitle={`${formatCurrency(stats.totalCurrent)} / ${formatCurrency(stats.totalTarget)}`}
-          icon="📈"
+          icon={<ArrowTrendingUpIcon className="w-8 h-8" />}
           color="bg-green-50 text-green-600"
         />
         <StatCard
           title="On Track"
           value={stats.onTrack}
           subtitle={`${stats.behind} behind, ${stats.atRisk} at risk`}
-          icon="✅"
+          icon={<CheckCircleIcon className="w-8 h-8" />}
           color="bg-emerald-50 text-emerald-600"
         />
         <StatCard
           title="Avg. Success Rate"
           value={`${stats.avgSuccessProbability.toFixed(0)}%`}
           subtitle={`${stats.achieved} achieved`}
-          icon="🎯"
+          icon={<FireIcon className="w-8 h-8" />}
           color="bg-purple-50 text-purple-600"
         />
       </div>
@@ -328,7 +336,7 @@ interface StatCardProps {
   title: string;
   value: string | number;
   subtitle?: string;
-  icon: string;
+  icon: React.ReactNode;
   color: string;
 }
 
@@ -341,7 +349,7 @@ function StatCard({ title, value, subtitle, icon, color }: StatCardProps) {
           <p className="text-2xl font-bold text-gray-900">{value}</p>
           {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
         </div>
-        <div className={`text-3xl p-2 rounded-lg ${color}`}>
+        <div className={`p-2 rounded-lg ${color}`}>
           {icon}
         </div>
       </div>

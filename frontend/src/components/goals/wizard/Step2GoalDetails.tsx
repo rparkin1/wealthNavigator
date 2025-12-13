@@ -3,11 +3,14 @@
  * Week 11 - UI Redesign Phase 3
  *
  * Form for name, target amount, date, current savings, and priority
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import React from 'react';
 import type { GoalPriority, ValidationErrors, WizardFormData } from './types';
 import { PRIORITY_INFO, GOAL_CATEGORIES } from './constants';
+import { LightBulbIcon } from '@heroicons/react/24/outline';
 
 interface Step2GoalDetailsProps {
   formData: WizardFormData;
@@ -118,8 +121,8 @@ export const Step2GoalDetails: React.FC<Step2GoalDetailsProps> = ({
           )}
           {!errors.targetAmount && formData.category === 'retirement' && formData.targetAmount > 0 && (
             <p id="target-hint" className="mt-1 text-sm text-gray-600 flex items-start gap-1">
-              <span className="text-info-500">💡</span>
-              Based on 4% withdrawal rule for {calculateWithdrawalRate(formData.targetAmount)}/year income
+              <LightBulbIcon className="w-4 h-4 text-info-600 flex-shrink-0" />
+              <span>Based on 4% withdrawal rule for {calculateWithdrawalRate(formData.targetAmount)}/year income</span>
             </p>
           )}
         </div>

@@ -3,9 +3,37 @@
  *
  * Form for creating and managing budget entries.
  * Tracks income, expenses, and savings goals.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState } from 'react';
+import {
+  CurrencyDollarIcon,
+  GiftIcon,
+  ArrowTrendingUpIcon,
+  HomeIcon,
+  BanknotesIcon,
+  HomeModernIcon,
+  BoltIcon,
+  TruckIcon,
+  ShoppingCartIcon,
+  HeartIcon,
+  ShieldCheckIcon,
+  CreditCardIcon,
+  FilmIcon,
+  ShoppingBagIcon,
+  PaperAirplaneIcon,
+  AcademicCapIcon,
+  UserGroupIcon,
+  SparklesIcon,
+  TvIcon,
+  DocumentTextIcon,
+  CalendarDaysIcon,
+  ExclamationTriangleIcon,
+  FlagIcon,
+  ArchiveBoxIcon,
+} from '@heroicons/react/24/outline';
 
 export interface BudgetEntry {
   id?: string;
@@ -71,38 +99,38 @@ interface FormData {
   endDate: string;
 }
 
-const INCOME_CATEGORIES: Record<string, { label: string; icon: string }> = {
-  salary: { label: 'Salary/Wages', icon: '💰' },
-  bonus: { label: 'Bonus', icon: '🎁' },
-  investment_income: { label: 'Investment Income', icon: '📈' },
-  rental_income: { label: 'Rental Income', icon: '🏠' },
-  other_income: { label: 'Other Income', icon: '💵' },
+const INCOME_CATEGORIES: Record<string, { label: string; icon: React.ReactNode }> = {
+  salary: { label: 'Salary/Wages', icon: <CurrencyDollarIcon className="w-5 h-5" /> },
+  bonus: { label: 'Bonus', icon: <GiftIcon className="w-5 h-5" /> },
+  investment_income: { label: 'Investment Income', icon: <ArrowTrendingUpIcon className="w-5 h-5" /> },
+  rental_income: { label: 'Rental Income', icon: <HomeIcon className="w-5 h-5" /> },
+  other_income: { label: 'Other Income', icon: <BanknotesIcon className="w-5 h-5" /> },
 };
 
-const EXPENSE_CATEGORIES: Record<string, { label: string; icon: string }> = {
-  housing: { label: 'Housing (Rent/Mortgage)', icon: '🏡' },
-  utilities: { label: 'Utilities', icon: '💡' },
-  transportation: { label: 'Transportation', icon: '🚗' },
-  food: { label: 'Food & Groceries', icon: '🛒' },
-  healthcare: { label: 'Healthcare', icon: '🏥' },
-  insurance: { label: 'Insurance', icon: '🛡️' },
-  debt_payments: { label: 'Debt Payments', icon: '💳' },
-  entertainment: { label: 'Entertainment', icon: '🎬' },
-  shopping: { label: 'Shopping', icon: '🛍️' },
-  travel: { label: 'Travel', icon: '✈️' },
-  education: { label: 'Education', icon: '📚' },
-  childcare: { label: 'Childcare', icon: '👶' },
-  personal_care: { label: 'Personal Care', icon: '💅' },
-  subscriptions: { label: 'Subscriptions', icon: '📺' },
-  gifts: { label: 'Gifts & Donations', icon: '🎁' },
-  other_expense: { label: 'Other Expenses', icon: '📝' },
+const EXPENSE_CATEGORIES: Record<string, { label: string; icon: React.ReactNode }> = {
+  housing: { label: 'Housing (Rent/Mortgage)', icon: <HomeModernIcon className="w-5 h-5" /> },
+  utilities: { label: 'Utilities', icon: <BoltIcon className="w-5 h-5" /> },
+  transportation: { label: 'Transportation', icon: <TruckIcon className="w-5 h-5" /> },
+  food: { label: 'Food & Groceries', icon: <ShoppingCartIcon className="w-5 h-5" /> },
+  healthcare: { label: 'Healthcare', icon: <HeartIcon className="w-5 h-5" /> },
+  insurance: { label: 'Insurance', icon: <ShieldCheckIcon className="w-5 h-5" /> },
+  debt_payments: { label: 'Debt Payments', icon: <CreditCardIcon className="w-5 h-5" /> },
+  entertainment: { label: 'Entertainment', icon: <FilmIcon className="w-5 h-5" /> },
+  shopping: { label: 'Shopping', icon: <ShoppingBagIcon className="w-5 h-5" /> },
+  travel: { label: 'Travel', icon: <PaperAirplaneIcon className="w-5 h-5" /> },
+  education: { label: 'Education', icon: <AcademicCapIcon className="w-5 h-5" /> },
+  childcare: { label: 'Childcare', icon: <UserGroupIcon className="w-5 h-5" /> },
+  personal_care: { label: 'Personal Care', icon: <SparklesIcon className="w-5 h-5" /> },
+  subscriptions: { label: 'Subscriptions', icon: <TvIcon className="w-5 h-5" /> },
+  gifts: { label: 'Gifts & Donations', icon: <GiftIcon className="w-5 h-5" /> },
+  other_expense: { label: 'Other Expenses', icon: <DocumentTextIcon className="w-5 h-5" /> },
 };
 
-const SAVINGS_CATEGORIES: Record<string, { label: string; icon: string }> = {
-  retirement_contribution: { label: 'Retirement Contribution', icon: '🏖️' },
-  emergency_fund: { label: 'Emergency Fund', icon: '🚨' },
-  goal_savings: { label: 'Goal Savings', icon: '🎯' },
-  other_savings: { label: 'Other Savings', icon: '💰' },
+const SAVINGS_CATEGORIES: Record<string, { label: string; icon: React.ReactNode }> = {
+  retirement_contribution: { label: 'Retirement Contribution', icon: <CalendarDaysIcon className="w-5 h-5" /> },
+  emergency_fund: { label: 'Emergency Fund', icon: <ExclamationTriangleIcon className="w-5 h-5" /> },
+  goal_savings: { label: 'Goal Savings', icon: <FlagIcon className="w-5 h-5" /> },
+  other_savings: { label: 'Other Savings', icon: <BanknotesIcon className="w-5 h-5" /> },
 };
 
 const FREQUENCY_OPTIONS: Record<Frequency, { label: string; multiplier: number }> = {
@@ -253,7 +281,9 @@ export function BudgetForm({ entry, onSubmit, onCancel, mode = 'create' }: Budge
                     : 'border-gray-300 hover:border-gray-400'
                 }`}
               >
-                <div className="text-2xl mb-1">💰</div>
+                <div className="flex justify-center mb-2">
+                  <CurrencyDollarIcon className="w-8 h-8 text-green-600" />
+                </div>
                 <div className="text-sm font-semibold">Income</div>
               </button>
               <button
@@ -265,7 +295,9 @@ export function BudgetForm({ entry, onSubmit, onCancel, mode = 'create' }: Budge
                     : 'border-gray-300 hover:border-gray-400'
                 }`}
               >
-                <div className="text-2xl mb-1">💳</div>
+                <div className="flex justify-center mb-2">
+                  <CreditCardIcon className="w-8 h-8 text-red-600" />
+                </div>
                 <div className="text-sm font-semibold">Expense</div>
               </button>
               <button
@@ -277,7 +309,9 @@ export function BudgetForm({ entry, onSubmit, onCancel, mode = 'create' }: Budge
                     : 'border-gray-300 hover:border-gray-400'
                 }`}
               >
-                <div className="text-2xl mb-1">🎯</div>
+                <div className="flex justify-center mb-2">
+                  <ArchiveBoxIcon className="w-8 h-8 text-blue-600" />
+                </div>
                 <div className="text-sm font-semibold">Savings</div>
               </button>
             </div>
@@ -299,7 +333,7 @@ export function BudgetForm({ entry, onSubmit, onCancel, mode = 'create' }: Budge
                   }`}
                 >
                   <div className="flex items-center space-x-2">
-                    <span className="text-xl">{info.icon}</span>
+                    <div className="flex-shrink-0">{info.icon}</div>
                     <span className="text-sm font-medium">{info.label}</span>
                   </div>
                 </button>

@@ -2,6 +2,8 @@
  * Goal Feasibility Report Component
  *
  * Displays AI analysis of goal feasibility, conflicts, and recommendations.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import type {
@@ -10,6 +12,14 @@ import type {
   GoalConflict,
   UserContext,
 } from '../../types/aiGoalAssistance';
+import {
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  ExclamationCircleIcon,
+  BoltIcon,
+  InformationCircleIcon,
+  LightBulbIcon,
+} from '@heroicons/react/24/outline';
 
 export interface GoalFeasibilityReportProps {
   parsedGoal: ParsedGoalData;
@@ -39,18 +49,18 @@ export function GoalFeasibilityReport({
     }
   };
 
-  const getSeverityIcon = (severity: string) => {
+  const getSeverityIconComponent = (severity: string): React.ComponentType<{ className?: string }> => {
     switch (severity) {
       case 'critical':
-        return '🚨';
+        return ExclamationCircleIcon;
       case 'high':
-        return '⚠️';
+        return ExclamationTriangleIcon;
       case 'medium':
-        return '⚡';
+        return BoltIcon;
       case 'low':
-        return 'ℹ️';
+        return InformationCircleIcon;
       default:
-        return '📌';
+        return InformationCircleIcon;
     }
   };
 
@@ -88,12 +98,23 @@ export function GoalFeasibilityReport({
           />
         </div>
 
-        <p className="text-sm text-gray-700">
-          {feasibilityScore >= 80
-            ? '✅ This goal appears highly achievable with your current plan'
-            : feasibilityScore >= 60
-            ? '⚡ This goal is achievable but may require adjustments'
-            : '⚠️ This goal may be challenging with current parameters'}
+        <p className="text-sm text-gray-700 flex items-start gap-2">
+          {feasibilityScore >= 80 ? (
+            <>
+              <CheckCircleIcon className="w-5 h-5 text-success-600 flex-shrink-0" />
+              <span>This goal appears highly achievable with your current plan</span>
+            </>
+          ) : feasibilityScore >= 60 ? (
+            <>
+              <BoltIcon className="w-5 h-5 text-warning-600 flex-shrink-0" />
+              <span>This goal is achievable but may require adjustments</span>
+            </>
+          ) : (
+            <>
+              <ExclamationTriangleIcon className="w-5 h-5 text-error-600 flex-shrink-0" />
+              <span>This goal may be challenging with current parameters</span>
+            </>
+          )}
         </p>
       </div>
 
@@ -101,22 +122,24 @@ export function GoalFeasibilityReport({
       {conflicts.length > 0 && (
         <div className="space-y-3">
           <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-            <span>⚠️</span>
-            Potential Conflicts ({conflicts.length})
+            <ExclamationTriangleIcon className="w-5 h-5 text-warning-600" />
+            <span>Potential Conflicts ({conflicts.length})</span>
           </h4>
 
-          {conflicts.map((conflict, index) => (
-            <div
-              key={index}
-              className={`border rounded-lg p-4 ${getSeverityColor(conflict.severity)}`}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">{getSeverityIcon(conflict.severity)}</span>
-                  <h5 className="font-semibold capitalize">
-                    {conflict.conflict_type.replace('_', ' ')}
-                  </h5>
-                </div>
+          {conflicts.map((conflict, index) => {
+            const SeverityIconComponent = getSeverityIconComponent(conflict.severity);
+            return (
+              <div
+                key={index}
+                className={`border rounded-lg p-4 ${getSeverityColor(conflict.severity)}`}
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <SeverityIconComponent className="w-5 h-5" />
+                    <h5 className="font-semibold capitalize">
+                      {conflict.conflict_type.replace('_', ' ')}
+                    </h5>
+                  </div>
                 <span className={`text-xs px-2 py-1 rounded font-medium ${
                   conflict.severity === 'critical'
                     ? 'bg-red-200 text-red-800'
@@ -161,8 +184,9 @@ export function GoalFeasibilityReport({
                   </ul>
                 </div>
               )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -170,7 +194,7 @@ export function GoalFeasibilityReport({
       {conflicts.length === 0 && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">✅</span>
+            <CheckCircleIcon className="w-8 h-8 text-success-600" />
             <div>
               <h4 className="font-semibold text-green-900">No Conflicts Detected</h4>
               <p className="text-sm text-green-700">
@@ -185,8 +209,8 @@ export function GoalFeasibilityReport({
       {recommendations && (
         <div className="border border-blue-200 rounded-lg p-4 bg-blue-50">
           <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-            <span>💡</span>
-            Key Considerations
+            <LightBulbIcon className="w-5 h-5 text-primary-600" />
+            <span>Key Considerations</span>
           </h4>
 
           <div className="space-y-3">

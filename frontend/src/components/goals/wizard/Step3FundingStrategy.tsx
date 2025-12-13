@@ -3,12 +3,15 @@
  * Week 11 - UI Redesign Phase 3
  *
  * Funding inputs with real-time projection preview
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import React, { useEffect, useState } from 'react';
 import type { ValidationErrors, WizardFormData } from './types';
 import { SUCCESS_THRESHOLD_DEFAULT, SUCCESS_THRESHOLD_MAX, SUCCESS_THRESHOLD_MIN, GOAL_CATEGORIES } from './constants';
 import { calculateProjection, formatCurrency, formatPercent } from './projectionCalculations';
+import { LightBulbIcon } from '@heroicons/react/24/outline';
 
 interface Step3FundingStrategyProps {
   formData: WizardFormData;
@@ -122,8 +125,8 @@ export const Step3FundingStrategy: React.FC<Step3FundingStrategyProps> = ({
           />
           {categoryInfo && (
             <p id="return-hint" className="mt-1 text-sm text-gray-600 flex items-start gap-1">
-              <span className="text-info-500">💡</span>
-              Based on {categoryInfo.defaultReturn}% for typical {categoryInfo.label.toLowerCase()} allocation
+              <LightBulbIcon className="w-4 h-4 text-info-600 flex-shrink-0" />
+              <span>Based on {categoryInfo.defaultReturn}% for typical {categoryInfo.label.toLowerCase()} allocation</span>
             </p>
           )}
         </div>

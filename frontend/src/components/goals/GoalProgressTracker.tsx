@@ -3,10 +3,21 @@
  *
  * Implements REQ-GOAL-004: Comprehensive goal progress tracking with milestones,
  * velocity tracking, and visual progress indicators.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import React, { useState } from 'react';
 import { format, differenceInDays, parseISO } from 'date-fns';
+import {
+  CheckCircleIcon,
+  CheckIcon,
+  ExclamationTriangleIcon,
+  XCircleIcon,
+  MinusCircleIcon,
+  PencilIcon,
+  TrashIcon,
+} from '@heroicons/react/24/outline';
 
 export interface Milestone {
   id: string;
@@ -82,14 +93,16 @@ export const GoalProgressTracker: React.FC<GoalProgressTrackerProps> = ({
   const getStatusBadge = (on_track: boolean) => {
     if (on_track) {
       return (
-        <span className="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">
-          On Track ✓
+        <span className="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800 flex items-center gap-1">
+          <CheckCircleIcon className="w-4 h-4" />
+          <span>On Track</span>
         </span>
       );
     }
     return (
-      <span className="px-3 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-800">
-        Behind Schedule ⚠
+      <span className="px-3 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-800 flex items-center gap-1">
+        <ExclamationTriangleIcon className="w-4 h-4" />
+        <span>Behind Schedule</span>
       </span>
     );
   };
@@ -105,16 +118,16 @@ export const GoalProgressTracker: React.FC<GoalProgressTrackerProps> = ({
 
   const getMilestoneStatusIcon = (milestone: Milestone) => {
     if (milestone.completed) {
-      return <span className="text-2xl">✅</span>;
+      return <CheckCircleIcon className="w-6 h-6 text-success-600" />;
     }
 
     if (milestone.target_date) {
       const daysUntil = differenceInDays(parseISO(milestone.target_date), new Date());
-      if (daysUntil < 0) return <span className="text-2xl">❌</span>;
-      if (daysUntil <= 7) return <span className="text-2xl">⚠️</span>;
+      if (daysUntil < 0) return <XCircleIcon className="w-6 h-6 text-error-600" />;
+      if (daysUntil <= 7) return <ExclamationTriangleIcon className="w-6 h-6 text-warning-600" />;
     }
 
-    return <span className="text-2xl">⭕</span>;
+    return <MinusCircleIcon className="w-6 h-6 text-gray-400" />;
   };
 
   const sortedMilestones = [...milestones].sort((a, b) => {
@@ -194,7 +207,7 @@ export const GoalProgressTracker: React.FC<GoalProgressTrackerProps> = ({
       {progressMetrics && progressMetrics.velocity_gap > 100 && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
           <div className="flex items-center">
-            <span className="text-red-500 text-2xl mr-3">⚠️</span>
+            <ExclamationTriangleIcon className="w-6 h-6 text-error-600 mr-3 flex-shrink-0" />
             <div>
               <p className="font-semibold text-red-800">Increase Savings Required</p>
               <p className="text-sm text-red-700">
@@ -304,25 +317,25 @@ export const GoalProgressTracker: React.FC<GoalProgressTrackerProps> = ({
                   {!milestone.completed && (
                     <button
                       onClick={() => onCompleteMilestone?.(milestone.id)}
-                      className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                      className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm flex items-center justify-center"
                       title="Mark as complete"
                     >
-                      ✓
+                      <CheckIcon className="w-4 h-4" />
                     </button>
                   )}
                   <button
                     onClick={() => onEditMilestone?.(milestone)}
-                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm flex items-center justify-center"
                     title="Edit milestone"
                   >
-                    ✏️
+                    <PencilIcon className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => onDeleteMilestone?.(milestone.id)}
-                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm flex items-center justify-center"
                     title="Delete milestone"
                   >
-                    🗑️
+                    <TrashIcon className="w-4 h-4" />
                   </button>
                 </div>
               </div>

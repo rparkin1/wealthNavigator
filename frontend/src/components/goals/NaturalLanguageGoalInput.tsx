@@ -2,10 +2,18 @@
  * Natural Language Goal Input Component
  *
  * Provides a conversational text input for describing goals in natural language.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState } from 'react';
 import type { UserContext } from '../../types/aiGoalAssistance';
+import {
+  ChatBubbleLeftRightIcon,
+  CheckIcon,
+  LightBulbIcon,
+} from '@heroicons/react/24/outline';
+import { getCategoryIcon } from '../../utils/icons';
 
 export interface NaturalLanguageGoalInputProps {
   onSubmit: (input: string) => void;
@@ -50,7 +58,9 @@ export function NaturalLanguageGoalInput({
       {/* Introduction */}
       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
         <div className="flex items-start gap-4">
-          <div className="text-4xl">💬</div>
+          <div className="text-primary-600">
+            <ChatBubbleLeftRightIcon className="w-12 h-12" />
+          </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               {quickMode ? 'Quick Goal Setup' : 'Describe Your Goal Naturally'}
@@ -61,9 +71,18 @@ export function NaturalLanguageGoalInput({
                 : 'Tell me about your financial goal in your own words. Our AI will understand and help you refine it.'}
             </p>
             <ul className="text-sm text-gray-600 space-y-1">
-              <li>✓ No forms or complex fields</li>
-              <li>✓ AI understands context and intent</li>
-              <li>✓ Intelligent suggestions and clarifications</li>
+              <li className="flex items-center gap-1.5">
+                <CheckIcon className="w-4 h-4 text-success-600 flex-shrink-0" />
+                <span>No forms or complex fields</span>
+              </li>
+              <li className="flex items-center gap-1.5">
+                <CheckIcon className="w-4 h-4 text-success-600 flex-shrink-0" />
+                <span>AI understands context and intent</span>
+              </li>
+              <li className="flex items-center gap-1.5">
+                <CheckIcon className="w-4 h-4 text-success-600 flex-shrink-0" />
+                <span>Intelligent suggestions and clarifications</span>
+              </li>
             </ul>
           </div>
         </div>
@@ -142,36 +161,46 @@ export function NaturalLanguageGoalInput({
         <div className="space-y-3">
           <button
             onClick={() => setShowExamples(!showExamples)}
-            className="text-sm text-gray-600 hover:text-gray-800 flex items-center gap-1"
+            className="text-sm text-gray-600 hover:text-gray-800 flex items-center gap-1.5"
           >
-            <span>💡</span>
+            <LightBulbIcon className="w-4 h-4" />
             <span className="underline">See example goals</span>
           </button>
 
           <div className="grid gap-2">
-            {exampleGoals.map((example, index) => (
-              <button
-                key={index}
-                onClick={() => useExample(example)}
-                className="text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors group"
-              >
-                <div className="flex items-start gap-3">
-                  <span className="text-gray-400 group-hover:text-blue-600 text-lg">
-                    {index === 0 ? '🏖️' : index === 1 ? '🎓' : index === 2 ? '🏠' : index === 3 ? '💰' : '💒'}
-                  </span>
-                  <span className="text-sm text-gray-700 group-hover:text-gray-900">
-                    {example}
-                  </span>
-                </div>
-              </button>
-            ))}
+            {exampleGoals.map((example, index) => {
+              // Map example index to goal category
+              const categoryMap = ['retirement', 'education', 'home', 'emergency', 'major_expense'] as const;
+              const category = categoryMap[index] || 'retirement';
+              const IconComponent = getCategoryIcon(category);
+
+              return (
+                <button
+                  key={index}
+                  onClick={() => useExample(example)}
+                  className="text-left px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors group"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="text-gray-400 group-hover:text-primary-600">
+                      <IconComponent className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm text-gray-700 group-hover:text-gray-900">
+                      {example}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
 
       {/* Tips */}
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-        <h4 className="font-medium text-amber-900 mb-2">💡 Tips for better results:</h4>
+        <h4 className="font-medium text-amber-900 mb-2 flex items-center gap-1.5">
+          <LightBulbIcon className="w-5 h-5" />
+          <span>Tips for better results:</span>
+        </h4>
         <ul className="text-sm text-amber-800 space-y-1">
           <li>• Be specific about amounts and timeframes</li>
           <li>• Mention your current age and life stage</li>

@@ -2,6 +2,8 @@
  * Goals Manager Component
  *
  * Complete interface for managing financial goals with dashboard and forms.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState, useEffect } from 'react';
@@ -28,6 +30,20 @@ import type { GoalDependency } from '../../types/goalDependencies';
 import type { MentalAccountBucket } from '../../types/mentalAccounting';
 import * as dependencyApi from '../../services/goalDependenciesApi';
 import * as mentalAccountingApi from '../../services/mentalAccountingApi';
+import {
+  XMarkIcon,
+  LinkIcon,
+  PlusIcon,
+  CalendarIcon,
+  CheckCircleIcon,
+  SparklesIcon,
+  Cog6ToothIcon,
+  ChartBarIcon,
+  ArrowTrendingUpIcon,
+  Square3Stack3DIcon,
+  ArrowPathIcon,
+  CurrencyDollarIcon,
+} from '@heroicons/react/24/outline';
 
 export interface GoalsManagerProps {
   userId: string;
@@ -270,7 +286,7 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center justify-between">
           <span className="text-red-700">{error}</span>
           <button onClick={() => setError(null)} className="text-red-600 hover:text-red-800">
-            ✕
+            <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
       )}
@@ -286,7 +302,7 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
               disabled={goals.length === 0}
               className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              <span>🔗</span>
+              <LinkIcon className="w-5 h-5" />
               <span>Dependencies</span>
             </button>
             <button
@@ -294,7 +310,7 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
               disabled={goals.length < 2}
               className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              <span>➕</span>
+              <PlusIcon className="w-5 h-5" />
               <span>Add Dependency</span>
             </button>
             <button
@@ -302,7 +318,7 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
               disabled={goals.length === 0}
               className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              <span>📅</span>
+              <CalendarIcon className="w-5 h-5" />
               <span>Timeline</span>
             </button>
             <button
@@ -310,7 +326,7 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
               disabled={dependencies.length === 0}
               className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              <span>✅</span>
+              <CheckCircleIcon className="w-5 h-5" />
               <span>Validate</span>
             </button>
           </div>
@@ -321,7 +337,7 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
               onClick={handleNewGoalWithAI}
               className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 font-semibold shadow-lg flex items-center gap-2"
             >
-              <span>🤖</span>
+              <SparklesIcon className="w-5 h-5" />
               <span>Create Goal with AI</span>
             </button>
             <button
@@ -351,21 +367,21 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
                     onClick={() => handleManageMilestones(goal)}
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                   >
-                    <span>⚙️</span>
+                    <Cog6ToothIcon className="w-4 h-4" />
                     <span>Manage</span>
                   </button>
                   <button
                     onClick={() => handleShowTimeline(goal)}
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                   >
-                    <span>📊</span>
+                    <ChartBarIcon className="w-4 h-4" />
                     <span>Timeline</span>
                   </button>
                   <button
                     onClick={() => handleShowProgress(goal)}
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                   >
-                    <span>📈</span>
+                    <ArrowTrendingUpIcon className="w-4 h-4" />
                     <span>Progress</span>
                   </button>
                 </div>
@@ -382,21 +398,21 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
               onClick={() => setShowMentalAccountBuckets(true)}
               className="px-4 py-2 bg-teal-50 border border-teal-200 text-teal-700 rounded-lg hover:bg-teal-100 text-sm font-medium flex items-center gap-2"
             >
-              <span>🪣</span>
+              <Square3Stack3DIcon className="w-5 h-5" />
               <span>View Buckets</span>
             </button>
             <button
               onClick={() => setShowFundingWaterfall(true)}
               className="px-4 py-2 bg-teal-50 border border-teal-200 text-teal-700 rounded-lg hover:bg-teal-100 text-sm font-medium flex items-center gap-2"
             >
-              <span>💧</span>
+              <ChartBarIcon className="w-5 h-5" />
               <span>Funding Waterfall</span>
             </button>
             <button
               onClick={() => setShowBucketRebalancer(true)}
               className="px-4 py-2 bg-teal-50 border border-teal-200 text-teal-700 rounded-lg hover:bg-teal-100 text-sm font-medium flex items-center gap-2"
             >
-              <span>⚖️</span>
+              <ArrowPathIcon className="w-5 h-5" />
               <span>Rebalance</span>
             </button>
           </div>
@@ -415,7 +431,7 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
                   }}
                   className="px-3 py-1.5 bg-green-50 border border-green-200 text-green-700 rounded-md text-sm font-medium hover:bg-green-100 hover:border-green-300 transition-colors flex items-center gap-2"
                 >
-                  <span>💰</span>
+                  <CurrencyDollarIcon className="w-5 h-5" />
                   <span>{goal.title}</span>
                 </button>
               </div>
@@ -466,9 +482,9 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
                 <h2 className="text-2xl font-bold text-gray-900">Goal Dependency Graph</h2>
                 <button
                   onClick={() => setShowDependencyGraph(false)}
-                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  ✕
+                  <XMarkIcon className="w-6 h-6" />
                 </button>
               </div>
               <GoalDependencyGraph
@@ -512,9 +528,9 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
                 <h2 className="text-2xl font-bold text-gray-900">Sequential Goal Planner</h2>
                 <button
                   onClick={() => setShowGoalPlanner(false)}
-                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  ✕
+                  <XMarkIcon className="w-6 h-6" />
                 </button>
               </div>
               <SequentialGoalPlanner
@@ -538,9 +554,9 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
                 <h2 className="text-2xl font-bold text-gray-900">Dependency Validation</h2>
                 <button
                   onClick={() => setShowDependencyValidator(false)}
-                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  ✕
+                  <XMarkIcon className="w-6 h-6" />
                 </button>
               </div>
               <DependencyValidator
@@ -581,9 +597,9 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
                     setShowMilestoneTimeline(false);
                     setSelectedGoalForMilestones(null);
                   }}
-                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  ✕
+                  <XMarkIcon className="w-6 h-6" />
                 </button>
               </div>
               <MilestoneTimeline goal={selectedGoalForMilestones} />
@@ -604,9 +620,9 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
                     setShowMilestoneProgress(false);
                     setSelectedGoalForMilestones(null);
                   }}
-                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  ✕
+                  <XMarkIcon className="w-6 h-6" />
                 </button>
               </div>
               <MilestoneProgressBar goal={selectedGoalForMilestones} compact={false} />
@@ -624,9 +640,9 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
                 <h2 className="text-2xl font-bold text-gray-900">Mental Account Buckets</h2>
                 <button
                   onClick={() => setShowMentalAccountBuckets(false)}
-                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  ✕
+                  <XMarkIcon className="w-6 h-6" />
                 </button>
               </div>
               <MentalAccountBuckets
@@ -666,9 +682,9 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
                 <h2 className="text-2xl font-bold text-gray-900">Funding Waterfall Analysis</h2>
                 <button
                   onClick={() => setShowFundingWaterfall(false)}
-                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  ✕
+                  <XMarkIcon className="w-6 h-6" />
                 </button>
               </div>
               <FundingWaterfallChart
@@ -689,9 +705,9 @@ export function GoalsManager({ userId, userContext }: GoalsManagerProps) {
                 <h2 className="text-2xl font-bold text-gray-900">Portfolio Rebalancing</h2>
                 <button
                   onClick={() => setShowBucketRebalancer(false)}
-                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  ✕
+                  <XMarkIcon className="w-6 h-6" />
                 </button>
               </div>
               <BucketRebalancer

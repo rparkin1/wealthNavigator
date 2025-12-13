@@ -3,6 +3,8 @@
  *
  * Real-time validation warnings for circular dependencies and conflicts.
  * Provides actionable suggestions to resolve dependency issues.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import { useState, useEffect } from 'react';
@@ -12,6 +14,13 @@ import type {
   DependencyValidation,
 } from '../../types/goalDependencies';
 import * as dependencyApi from '../../services/goalDependenciesApi';
+import {
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  XCircleIcon,
+  ArrowPathIcon,
+  LightBulbIcon
+} from '@heroicons/react/24/outline';
 
 export interface DependencyValidatorProps {
   goals: Goal[];
@@ -113,9 +122,15 @@ export function DependencyValidator({
       <div className={`border rounded-lg p-4 ${summaryClasses}`}>
         <div className="flex items-start justify-between">
           <div className="flex items-start">
-            <span className="text-2xl mr-3">
-              {hasErrors ? '❌' : hasWarnings ? '⚠️' : '✅'}
-            </span>
+            <div className="mr-3">
+              {hasErrors ? (
+                <XCircleIcon className="w-8 h-8 text-error-600" />
+              ) : hasWarnings ? (
+                <ExclamationTriangleIcon className="w-8 h-8 text-warning-600" />
+              ) : (
+                <CheckCircleIcon className="w-8 h-8 text-success-600" />
+              )}
+            </div>
             <div>
               <div
                 className={`font-medium ${
@@ -167,8 +182,9 @@ export function DependencyValidator({
           {/* Circular Dependencies */}
           {validation.cycles_detected.length > 0 && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <h4 className="font-semibold text-red-900 mb-3">
-                🔄 Circular Dependencies Detected
+              <h4 className="font-semibold text-red-900 mb-3 flex items-center gap-2">
+                <ArrowPathIcon className="w-5 h-5" />
+                <span>Circular Dependencies Detected</span>
               </h4>
               <p className="text-sm text-red-700 mb-3">
                 Circular dependencies create impossible constraints. These must be resolved before
@@ -199,8 +215,9 @@ export function DependencyValidator({
                         {goals.find((g) => g.id === cycle[0])?.title || 'Unknown Goal'}
                       </span>
                     </div>
-                    <div className="mt-2 text-xs text-red-600">
-                      💡 Remove one of the dependencies in this chain to break the cycle
+                    <div className="mt-2 text-xs text-red-600 flex items-start gap-1.5">
+                      <LightBulbIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <span>Remove one of the dependencies in this chain to break the cycle</span>
                     </div>
                   </div>
                 ))}
@@ -226,7 +243,10 @@ export function DependencyValidator({
           {/* Warnings */}
           {validation.warnings.length > 0 && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h4 className="font-semibold text-yellow-900 mb-3">⚠️ Warnings</h4>
+              <h4 className="font-semibold text-yellow-900 mb-3 flex items-center gap-2">
+                <ExclamationTriangleIcon className="w-5 h-5" />
+                <span>Warnings</span>
+              </h4>
               <ul className="space-y-2">
                 {validation.warnings.map((warning, index) => (
                   <li key={index} className="flex items-start text-sm text-yellow-700">
@@ -241,7 +261,10 @@ export function DependencyValidator({
           {/* Suggestions */}
           {(hasErrors || hasWarnings) && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h4 className="font-semibold text-blue-900 mb-3">💡 Suggestions</h4>
+              <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                <LightBulbIcon className="w-5 h-5" />
+                <span>Suggestions</span>
+              </h4>
               <ul className="space-y-2 text-sm text-blue-700">
                 <li className="flex items-start">
                   <span className="mr-2">•</span>

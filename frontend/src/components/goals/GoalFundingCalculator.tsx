@@ -3,6 +3,8 @@
  * Comprehensive calculator for goal funding analysis with multiple calculation modes
  *
  * REQ-GOAL-007: Goal funding calculations UI
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import React, { useState, useEffect } from 'react';
@@ -16,6 +18,15 @@ import type {
   ComprehensiveAnalysisResult,
 } from '../../types/goalFunding';
 import * as goalFundingApi from '../../services/goalFundingApi';
+import {
+  BanknotesIcon,
+  ChartBarIcon,
+  ArrowTrendingUpIcon,
+  Cog6ToothIcon,
+  RocketLaunchIcon,
+  XCircleIcon,
+  ClockIcon,
+} from '@heroicons/react/24/outline';
 
 export interface GoalFundingCalculatorProps {
   goalId?: string;
@@ -393,7 +404,10 @@ export function GoalFundingCalculator({
 
         {/* Recommendations */}
         <div style={{ padding: '20px', backgroundColor: '#eff6ff', borderRadius: '8px', border: '1px solid #dbeafe' }}>
-          <h4 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: 600 }}>📊 Recommendations</h4>
+          <h4 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ChartBarIcon style={{ width: '20px', height: '20px' }} />
+            <span>Recommendations</span>
+          </h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div>
               <strong>Current Trajectory:</strong>{' '}
@@ -424,8 +438,9 @@ export function GoalFundingCalculator({
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
-          <h2 style={{ margin: '0 0 8px 0', fontSize: '24px', fontWeight: 700 }}>
-            💰 Goal Funding Calculator
+          <h2 style={{ margin: '0 0 8px 0', fontSize: '24px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <BanknotesIcon style={{ width: '32px', height: '32px', color: '#3b82f6' }} />
+            <span>Goal Funding Calculator</span>
           </h2>
           <p style={{ margin: 0, fontSize: '14px', color: '#6b7280' }}>
             Calculate savings requirements, success probability, and optimization strategies
@@ -451,36 +466,44 @@ export function GoalFundingCalculator({
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '2px solid #e5e7eb' }}>
         {[
-          { id: 'comprehensive', label: '📊 Comprehensive' },
-          { id: 'requirements', label: '💵 Requirements' },
-          { id: 'probability', label: '🎯 Probability' },
-          { id: 'optimization', label: '⚙️ Optimization' },
-          { id: 'catch-up', label: '🚀 Catch-Up' },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setSelectedTab(tab.id as FundingCalculatorTab)}
-            style={{
-              padding: '12px 20px',
-              backgroundColor: selectedTab === tab.id ? '#3b82f6' : 'transparent',
-              color: selectedTab === tab.id ? '#ffffff' : '#6b7280',
-              border: 'none',
-              borderBottom: selectedTab === tab.id ? '2px solid #3b82f6' : '2px solid transparent',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: 500,
-              transition: 'all 0.2s',
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
+          { id: 'comprehensive', label: 'Comprehensive', icon: ChartBarIcon },
+          { id: 'requirements', label: 'Requirements', icon: BanknotesIcon },
+          { id: 'probability', label: 'Probability', icon: ArrowTrendingUpIcon },
+          { id: 'optimization', label: 'Optimization', icon: Cog6ToothIcon },
+          { id: 'catch-up', label: 'Catch-Up', icon: RocketLaunchIcon },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setSelectedTab(tab.id as FundingCalculatorTab)}
+              style={{
+                padding: '12px 20px',
+                backgroundColor: selectedTab === tab.id ? '#3b82f6' : 'transparent',
+                color: selectedTab === tab.id ? '#ffffff' : '#6b7280',
+                border: 'none',
+                borderBottom: selectedTab === tab.id ? '2px solid #3b82f6' : '2px solid transparent',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: 500,
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <Icon style={{ width: '16px', height: '16px' }} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Error Display */}
       {error && (
-        <div style={{ padding: '16px', backgroundColor: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px', marginBottom: '24px', color: '#991b1b' }}>
-          ❌ {error}
+        <div style={{ padding: '16px', backgroundColor: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px', marginBottom: '24px', color: '#991b1b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <XCircleIcon style={{ width: '20px', height: '20px', flexShrink: 0 }} />
+          <span>{error}</span>
         </div>
       )}
 
@@ -529,7 +552,9 @@ export function GoalFundingCalculator({
       {/* Loading State */}
       {isCalculating && selectedTab === 'comprehensive' && (
         <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+            <ClockIcon style={{ width: '48px', height: '48px', color: '#3b82f6' }} />
+          </div>
           <div style={{ fontSize: '16px' }}>Running comprehensive analysis...</div>
         </div>
       )}

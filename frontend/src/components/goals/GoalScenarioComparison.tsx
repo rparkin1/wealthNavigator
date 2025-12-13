@@ -3,10 +3,13 @@
  *
  * Implements REQ-GOAL-010: Side-by-side comparison of different goal scenarios
  * with what-if analysis and interactive adjustments.
+ *
+ * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
 import React, { useState } from 'react';
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { TrophyIcon } from '@heroicons/react/24/outline';
 
 export interface GoalScenario {
   id: string;
@@ -164,7 +167,7 @@ export const GoalScenarioComparison: React.FC<GoalScenarioComparisonProps> = ({
       {bestScenario && (
         <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-lg p-4">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">🏆</span>
+            <TrophyIcon className="w-8 h-8 text-success-600" />
             <div>
               <p className="font-semibold text-green-800">Recommended Scenario</p>
               <p className="text-sm text-green-700">
@@ -292,7 +295,8 @@ export const GoalScenarioComparison: React.FC<GoalScenarioComparisonProps> = ({
               {bestScenario?.id === scenario.id && (
                 <div className="mt-3 text-center">
                   <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
-                    🏆 Recommended
+                    <TrophyIcon className="w-4 h-4" />
+                    <span>Recommended</span>
                   </span>
                 </div>
               )}
