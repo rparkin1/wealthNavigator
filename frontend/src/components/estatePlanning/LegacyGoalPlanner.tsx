@@ -5,6 +5,10 @@
  */
 
 import React, { useState } from 'react';
+import {
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+} from '@heroicons/react/24/outline';
 import { estatePlanningApi } from '../../services/estatePlanningApi';
 import type {
   LegacyGoalAnalysis,
@@ -173,7 +177,7 @@ const LegacyGoalPlanner: React.FC = () => {
           {/* Status Card */}
           <div className={`status-card ${analysis.is_on_track ? 'on-track' : 'off-track'}`}>
             <div className="status-icon">
-              {analysis.is_on_track ? '✓' : '⚠'}
+              {analysis.is_on_track ? <CheckCircleIcon className="w-8 h-8" /> : <ExclamationTriangleIcon className="w-8 h-8" />}
             </div>
             <div className="status-content">
               <div className="status-label">
@@ -374,8 +378,8 @@ const LegacyGoalPlanner: React.FC = () => {
         }
 
         .status-icon {
-          font-size: 2rem;
-          font-weight: bold;
+          display: flex;
+          align-items: center;
         }
 
         .status-card.on-track .status-icon {

@@ -4,6 +4,16 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import {
+  ChartBarIcon,
+  BoltIcon,
+  FlagIcon,
+  GlobeAltIcon,
+  ShieldCheckIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  ExclamationCircleIcon,
+} from '@heroicons/react/24/outline';
 import { useRiskManagement } from '../../hooks/useRiskManagement';
 import {
   formatCurrency,
@@ -158,13 +168,16 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
                 fontSize: '14px',
                 fontWeight: 500,
                 cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
               }}
             >
-              {tab === 'risk' && '📊 Risk Assessment'}
-              {tab === 'stress' && '⚡ Stress Testing'}
-              {tab === 'scenarios' && '🎯 Scenarios'}
-              {tab === 'diversification' && '🌐 Diversification'}
-              {tab === 'hedging' && '🛡️ Hedging'}
+              {tab === 'risk' && <><ChartBarIcon style={{ width: '20px', height: '20px' }} /> Risk Assessment</>}
+              {tab === 'stress' && <><BoltIcon style={{ width: '20px', height: '20px' }} /> Stress Testing</>}
+              {tab === 'scenarios' && <><FlagIcon style={{ width: '20px', height: '20px' }} /> Scenarios</>}
+              {tab === 'diversification' && <><GlobeAltIcon style={{ width: '20px', height: '20px' }} /> Diversification</>}
+              {tab === 'hedging' && <><ShieldCheckIcon style={{ width: '20px', height: '20px' }} /> Hedging</>}
             </button>
           ))}
         </div>
@@ -347,8 +360,9 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
                       marginBottom: '16px',
                     }}
                   >
-                    <h3 style={{ margin: '0 0 12px', fontSize: '16px', fontWeight: 600, color: '#065f46' }}>
-                      ✅ Recommendations
+                    <h3 style={{ margin: '0 0 12px', fontSize: '16px', fontWeight: 600, color: '#065f46', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <CheckCircleIcon style={{ width: '20px', height: '20px' }} />
+                      Recommendations
                     </h3>
                     <ul style={{ margin: 0, paddingLeft: '20px', color: '#047857' }}>
                       {riskResult.recommendations.map((rec, idx) => (
@@ -369,8 +383,9 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
                       borderRadius: '8px',
                     }}
                   >
-                    <h3 style={{ margin: '0 0 12px', fontSize: '16px', fontWeight: 600, color: '#92400e' }}>
-                      ⚠️ Warnings
+                    <h3 style={{ margin: '0 0 12px', fontSize: '16px', fontWeight: 600, color: '#92400e', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <ExclamationTriangleIcon style={{ width: '20px', height: '20px' }} />
+                      Warnings
                     </h3>
                     <ul style={{ margin: 0, paddingLeft: '20px', color: '#b45309' }}>
                       {riskResult.warnings.map((warning, idx) => (
@@ -467,8 +482,9 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
                     marginBottom: '24px',
                   }}
                 >
-                  <h3 style={{ margin: '0 0 16px', fontSize: '18px', fontWeight: 600, color: '#991b1b' }}>
-                    🚨 Worst Case: {stressResult.worst_case_scenario.scenario_name}
+                  <h3 style={{ margin: '0 0 16px', fontSize: '18px', fontWeight: 600, color: '#991b1b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <ExclamationCircleIcon style={{ width: '24px', height: '24px' }} />
+                    Worst Case: {stressResult.worst_case_scenario.scenario_name}
                   </h3>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
                     <div>

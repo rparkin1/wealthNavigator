@@ -9,6 +9,13 @@
  */
 
 import { useState } from 'react';
+import {
+  ChartBarSquareIcon,
+  BuildingColumnsIcon,
+  CurrencyDollarIcon,
+  ArrowTrendingUpIcon,
+  SparklesIcon,
+} from '@heroicons/react/24/outline';
 import { SocialSecurityCalculator } from './SocialSecurityCalculator';
 import { SpendingPatternEditor } from './SpendingPatternEditor';
 import { LongevityConfigurator } from './LongevityConfigurator';
@@ -42,12 +49,12 @@ export function RetirementDashboard() {
   const [spendingPattern, setSpendingPattern] = useState<SpendingPattern | null>(null);
   const [longevityData, setLongevityData] = useState<LongevityResult | null>(null);
 
-  const tabs: Array<{ id: TabView; label: string; icon: string }> = [
-    { id: 'overview', label: 'Overview', icon: '📊' },
-    { id: 'social-security', label: 'Social Security', icon: '🏛️' },
-    { id: 'spending', label: 'Spending Plan', icon: '💰' },
-    { id: 'longevity', label: 'Life Expectancy', icon: '📈' },
-    { id: 'projections', label: 'Income Projection', icon: '🔮' },
+  const tabs: Array<{ id: TabView; label: string; icon: React.ReactNode }> = [
+    { id: 'overview', label: 'Overview', icon: <ChartBarSquareIcon className="w-5 h-5" /> },
+    { id: 'social-security', label: 'Social Security', icon: <BuildingColumnsIcon className="w-5 h-5" /> },
+    { id: 'spending', label: 'Spending Plan', icon: <CurrencyDollarIcon className="w-5 h-5" /> },
+    { id: 'longevity', label: 'Life Expectancy', icon: <ArrowTrendingUpIcon className="w-5 h-5" /> },
+    { id: 'projections', label: 'Income Projection', icon: <SparklesIcon className="w-5 h-5" /> },
   ];
 
   return (
@@ -68,13 +75,13 @@ export function RetirementDashboard() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
                   activeTab === tab.id
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <span className="mr-2">{tab.icon}</span>
+                {tab.icon}
                 {tab.label}
               </button>
             ))}

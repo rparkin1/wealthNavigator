@@ -6,6 +6,12 @@
  */
 
 import { useState, useEffect } from 'react';
+import {
+  XMarkIcon,
+  BuildingLibraryIcon,
+  ChartBarIcon,
+  ArrowDownTrayIcon,
+} from '@heroicons/react/24/outline';
 import { AccountForm } from './AccountForm';
 import type { Account } from './AccountForm';
 import { HoldingForm } from './HoldingForm';
@@ -220,7 +226,7 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center justify-between">
           <span className="text-red-700">{error}</span>
           <button onClick={() => setError(null)} className="text-red-600 hover:text-red-800">
-            ✕
+            <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
       )}
@@ -229,33 +235,36 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
       <div className="bg-white border border-gray-200 rounded-lg p-3 flex gap-2">
         <button
           onClick={() => setCurrentView('accounts')}
-          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium ${
+          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2 ${
             currentView === 'accounts'
               ? 'bg-blue-600 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          🏦 Accounts ({accounts.length})
+          <BuildingLibraryIcon className="w-5 h-5" />
+          Accounts ({accounts.length})
         </button>
         <button
           onClick={() => setCurrentView('holdings')}
-          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium ${
+          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2 ${
             currentView === 'holdings'
               ? 'bg-blue-600 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          📈 Holdings ({holdings.length})
+          <ChartBarIcon className="w-5 h-5" />
+          Holdings ({holdings.length})
         </button>
         <button
           onClick={() => setCurrentView('import-export')}
-          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium ${
+          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2 ${
             currentView === 'import-export'
               ? 'bg-blue-600 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          📥 Import/Export
+          <ArrowDownTrayIcon className="w-5 h-5" />
+          Import/Export
         </button>
       </div>
 
@@ -514,7 +523,7 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
               // Warn about orphaned holdings
               if (orphanedHoldings.length > 0) {
                 const proceed = confirm(
-                  `⚠️ Warning: ${orphanedHoldings.length} holding(s) reference accounts that don't exist:\n\n` +
+                  `WARNING: ${orphanedHoldings.length} holding(s) reference accounts that don't exist:\n\n` +
                   `${orphanedHoldings.slice(0, 5).join('\n')}` +
                   `${orphanedHoldings.length > 5 ? `\n...and ${orphanedHoldings.length - 5} more` : ''}\n\n` +
                   `The system tried to match by both account ID and account name, but couldn't find these accounts.\n\n` +

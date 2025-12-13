@@ -8,6 +8,17 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import {
+  ChartBarIcon,
+  DocumentTextIcon,
+  LightBulbIcon,
+  BuildingOffice2Icon,
+  GlobeAltIcon,
+  BriefcaseIcon,
+  FlagIcon,
+  ArrowTrendingUpIcon,
+  ExclamationTriangleIcon,
+} from '@heroicons/react/24/outline';
 import type {
   DiversificationTab,
   DiversificationAnalysisResult,
@@ -192,8 +203,9 @@ export function DiversificationAnalysisDashboard({
 
         {/* Top Holdings */}
         <div style={{ marginBottom: '24px' }}>
-          <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>
-            📊 Top 5 Holdings
+          <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ChartBarIcon style={{ width: '20px', height: '20px' }} />
+            Top 5 Holdings
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {(analysis.top_10_holdings || []).slice(0, 5).map((holding, index) => (
@@ -243,7 +255,10 @@ export function DiversificationAnalysisDashboard({
 
         {/* Summary */}
         <div style={{ padding: '20px', backgroundColor: '#eff6ff', borderRadius: '8px', border: '1px solid #dbeafe' }}>
-          <h4 style={{ margin: '0 0 12px 0', fontSize: '16px', fontWeight: 600 }}>📝 Summary</h4>
+          <h4 style={{ margin: '0 0 12px 0', fontSize: '16px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <DocumentTextIcon style={{ width: '20px', height: '20px' }} />
+            Summary
+          </h4>
           <p style={{ margin: 0, fontSize: '14px', color: '#6b7280', lineHeight: '1.6' }}>
             {analysis.summary}
           </p>
@@ -369,8 +384,9 @@ export function DiversificationAnalysisDashboard({
                     border: '1px solid #dbeafe',
                   }}
                 >
-                  <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>
-                    💡 Recommendation:
+                  <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <LightBulbIcon style={{ width: '16px', height: '16px' }} />
+                    Recommendation:
                   </div>
                   <div style={{ fontSize: '13px', color: '#6b7280' }}>{risk.recommendation}</div>
                 </div>
@@ -475,7 +491,10 @@ export function DiversificationAnalysisDashboard({
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         {/* Sector Breakdown */}
         <div>
-          <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>🏭 Sector Breakdown</h3>
+          <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <BuildingOffice2Icon style={{ width: '20px', height: '20px' }} />
+            Sector Breakdown
+          </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {(analysis.concentration_breakdown?.sector || transformBreakdown(analysis.sector_breakdown)).map((item, index) => (
               <div
@@ -517,7 +536,10 @@ export function DiversificationAnalysisDashboard({
 
         {/* Geography Breakdown */}
         <div>
-          <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>🌍 Geography Breakdown</h3>
+          <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <GlobeAltIcon style={{ width: '20px', height: '20px' }} />
+            Geography Breakdown
+          </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {(analysis.concentration_breakdown?.geography || transformBreakdown(analysis.geography_breakdown)).map((item, index) => (
               <div
@@ -559,7 +581,10 @@ export function DiversificationAnalysisDashboard({
 
         {/* Asset Class Breakdown */}
         <div>
-          <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>💼 Asset Class Breakdown</h3>
+          <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <BriefcaseIcon style={{ width: '20px', height: '20px' }} />
+            Asset Class Breakdown
+          </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {(analysis.concentration_breakdown?.asset_class || transformBreakdown(analysis.asset_class_breakdown)).map((item, index) => (
               <div
@@ -606,8 +631,9 @@ export function DiversificationAnalysisDashboard({
     <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       {/* Header */}
       <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ margin: '0 0 8px 0', fontSize: '24px', fontWeight: 700 }}>
-          🎯 Diversification Analysis
+        <h2 style={{ margin: '0 0 8px 0', fontSize: '24px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <FlagIcon style={{ width: '28px', height: '28px' }} />
+          Diversification Analysis
         </h2>
         <p style={{ margin: 0, fontSize: '14px', color: '#6b7280' }}>
           Analyze portfolio diversification and identify concentration risks
@@ -671,10 +697,10 @@ export function DiversificationAnalysisDashboard({
         <>
           <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '2px solid #e5e7eb' }}>
             {[
-              { id: 'overview', label: '📊 Overview' },
-              { id: 'concentration', label: '⚠️ Concentration Risks' },
-              { id: 'recommendations', label: '💡 Recommendations' },
-              { id: 'breakdown', label: '📈 Breakdown' },
+              { id: 'overview', label: 'Overview', icon: <ChartBarIcon style={{ width: '18px', height: '18px' }} /> },
+              { id: 'concentration', label: 'Concentration Risks', icon: <ExclamationTriangleIcon style={{ width: '18px', height: '18px' }} /> },
+              { id: 'recommendations', label: 'Recommendations', icon: <LightBulbIcon style={{ width: '18px', height: '18px' }} /> },
+              { id: 'breakdown', label: 'Breakdown', icon: <ArrowTrendingUpIcon style={{ width: '18px', height: '18px' }} /> },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -689,8 +715,12 @@ export function DiversificationAnalysisDashboard({
                   fontSize: '14px',
                   fontWeight: 500,
                   transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
                 }}
               >
+                {tab.icon}
                 {tab.label}
               </button>
             ))}
@@ -707,7 +737,9 @@ export function DiversificationAnalysisDashboard({
       {/* Empty State */}
       {!analysis && !isAnalyzing && holdings.length === 0 && (
         <div style={{ padding: '60px 20px', textAlign: 'center', color: '#6b7280' }}>
-          <div style={{ fontSize: '64px', marginBottom: '16px' }}>📊</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+            <ChartBarIcon style={{ width: '64px', height: '64px', color: '#9ca3af' }} />
+          </div>
           <div style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>
             No Holdings Data
           </div>

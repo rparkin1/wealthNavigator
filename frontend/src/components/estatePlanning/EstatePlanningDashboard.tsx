@@ -10,6 +10,13 @@
  */
 
 import React, { useState } from 'react';
+import {
+  CurrencyDollarIcon,
+  BuildingLibraryIcon,
+  UsersIcon,
+  FlagIcon,
+  GiftIcon,
+} from '@heroicons/react/24/outline';
 import EstateTaxProjection from './EstateTaxProjection';
 import TrustStructureBuilder from './TrustStructureBuilder';
 import BeneficiaryManager from './BeneficiaryManager';
@@ -22,11 +29,11 @@ const EstatePlanningDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('tax');
 
   const tabs = [
-    { id: 'tax' as TabType, label: 'Estate Tax', icon: '💰' },
-    { id: 'trusts' as TabType, label: 'Trust Structures', icon: '🏛️' },
-    { id: 'beneficiaries' as TabType, label: 'Beneficiaries', icon: '👥' },
-    { id: 'legacy' as TabType, label: 'Legacy Goals', icon: '🎯' },
-    { id: 'gifting' as TabType, label: 'Gifting Strategy', icon: '🎁' },
+    { id: 'tax' as TabType, label: 'Estate Tax', icon: <CurrencyDollarIcon className="w-5 h-5" /> },
+    { id: 'trusts' as TabType, label: 'Trust Structures', icon: <BuildingLibraryIcon className="w-5 h-5" /> },
+    { id: 'beneficiaries' as TabType, label: 'Beneficiaries', icon: <UsersIcon className="w-5 h-5" /> },
+    { id: 'legacy' as TabType, label: 'Legacy Goals', icon: <FlagIcon className="w-5 h-5" /> },
+    { id: 'gifting' as TabType, label: 'Gifting Strategy', icon: <GiftIcon className="w-5 h-5" /> },
   ];
 
   return (
@@ -46,7 +53,7 @@ const EstatePlanningDashboard: React.FC = () => {
             className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
             onClick={() => setActiveTab(tab.id)}
           >
-            <span className="tab-icon">{tab.icon}</span>
+            {tab.icon}
             <span className="tab-label">{tab.label}</span>
           </button>
         ))}
@@ -115,9 +122,6 @@ const EstatePlanningDashboard: React.FC = () => {
           font-weight: 600;
         }
 
-        .tab-icon {
-          font-size: 1.25rem;
-        }
 
         .tab-content {
           background: white;

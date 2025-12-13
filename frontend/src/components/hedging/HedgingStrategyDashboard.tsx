@@ -5,6 +5,15 @@
 
 import React, { useState, useEffect } from 'react';
 import {
+  CogIcon,
+  ChartBarIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  XMarkIcon,
+  ClipboardDocumentListIcon,
+  FlagIcon,
+} from '@heroicons/react/24/outline';
+import {
   getHedgingRecommendations,
   getHedgingRecommendationsAuto,
   formatCurrency,
@@ -141,8 +150,14 @@ export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> =
                 fontWeight: 500,
                 cursor: 'pointer',
               }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
             >
-              ⚙️ Objectives
+              <CogIcon style={{ width: '18px', height: '18px' }} />
+              Objectives
             </button>
             <button
               onClick={handleRunExample}
@@ -352,8 +367,14 @@ export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> =
                     fontSize: '14px',
                     color: '#92400e',
                   }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
                 >
-                  📊 {recommendation.market_conditions_note}
+                  <ChartBarIcon style={{ width: '16px', height: '16px', flexShrink: 0 }} />
+                  {recommendation.market_conditions_note}
                 </div>
               )}
 
@@ -372,8 +393,14 @@ export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> =
                         backgroundColor: met ? '#d1fae5' : '#fee2e2',
                         color: met ? '#065f46' : '#991b1b',
                       }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
                     >
-                      {met ? '✅' : '❌'} {key.replace('_', ' ')}
+                      {met ? <CheckCircleIcon style={{ width: '14px', height: '14px' }} /> : <XCircleIcon style={{ width: '14px', height: '14px' }} />}
+                      {key.replace('_', ' ')}
                     </span>
                   ))}
                 </div>
@@ -546,28 +573,32 @@ export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> =
                       fontSize: '14px',
                       fontWeight: 500,
                       cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
                     }}
                   >
-                    ✕ Close
+                    <XMarkIcon style={{ width: '16px', height: '16px' }} />
+                    Close
                   </button>
                 </div>
 
                 {/* Implementation */}
-                <Section title="📋 Implementation">
+                <Section title={<><ClipboardDocumentListIcon style={{ width: '20px', height: '20px' }} /> Implementation</>}>
                   <p style={{ margin: 0, fontSize: '14px', color: '#374151' }}>
                     {selectedStrategy.implementation}
                   </p>
                 </Section>
 
                 {/* When to Use */}
-                <Section title="🎯 When to Use">
+                <Section title={<><FlagIcon style={{ width: '20px', height: '20px' }} /> When to Use</>}>
                   <p style={{ margin: 0, fontSize: '14px', color: '#374151' }}>
                     {selectedStrategy.when_to_use}
                   </p>
                 </Section>
 
                 {/* Implementation Steps */}
-                <Section title="✅ Implementation Steps">
+                <Section title={<><CheckCircleIcon style={{ width: '20px', height: '20px' }} /> Implementation Steps</>}>
                   <ol style={{ margin: 0, paddingLeft: '20px' }}>
                     {selectedStrategy.implementation_steps.map((step, index) => (
                       <li key={index} style={{ marginBottom: '8px', fontSize: '14px', color: '#374151' }}>
@@ -579,7 +610,7 @@ export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> =
 
                 {/* Pros and Cons */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '16px' }}>
-                  <Section title="✅ Pros">
+                  <Section title={<><CheckCircleIcon style={{ width: '20px', height: '20px' }} /> Pros</>}>
                     <ul style={{ margin: 0, paddingLeft: '20px' }}>
                       {selectedStrategy.pros.map((pro, index) => (
                         <li key={index} style={{ marginBottom: '4px', fontSize: '14px', color: '#059669' }}>
@@ -588,7 +619,7 @@ export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> =
                       ))}
                     </ul>
                   </Section>
-                  <Section title="❌ Cons">
+                  <Section title={<><XCircleIcon style={{ width: '20px', height: '20px' }} /> Cons</>}>
                     <ul style={{ margin: 0, paddingLeft: '20px' }}>
                       {selectedStrategy.cons.map((con, index) => (
                         <li key={index} style={{ marginBottom: '4px', fontSize: '14px', color: '#dc2626' }}>
@@ -600,7 +631,7 @@ export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> =
                 </div>
 
                 {/* Key Metrics */}
-                <Section title="📊 Key Metrics">
+                <Section title={<><ChartBarIcon style={{ width: '20px', height: '20px' }} /> Key Metrics</>}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
                     <MetricBox
                       label="Cost Estimate"

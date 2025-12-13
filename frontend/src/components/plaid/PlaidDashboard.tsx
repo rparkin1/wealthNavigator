@@ -4,6 +4,12 @@
  */
 
 import { useState } from 'react';
+import {
+  BuildingLibraryIcon,
+  BanknotesIcon,
+  ArrowTrendingUpIcon,
+  ChartBarIcon,
+} from '@heroicons/react/24/outline';
 import { PlaidLinkButton } from './PlaidLinkButton';
 import { ConnectedAccounts } from './ConnectedAccounts';
 import { TransactionsList } from './TransactionsList';
@@ -21,11 +27,11 @@ export function PlaidDashboard() {
     setRefreshKey((prev) => prev + 1);
   };
 
-  const tabs: { id: Tab; label: string; icon: string }[] = [
-    { id: 'accounts', label: 'Accounts', icon: '🏦' },
-    { id: 'transactions', label: 'Bank Transactions', icon: '💸' },
-    { id: 'investments', label: 'Holdings', icon: '📈' },
-    { id: 'investment-transactions', label: 'Investment Trades', icon: '📊' },
+  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
+    { id: 'accounts', label: 'Accounts', icon: <BuildingLibraryIcon className="w-5 h-5" /> },
+    { id: 'transactions', label: 'Bank Transactions', icon: <BanknotesIcon className="w-5 h-5" /> },
+    { id: 'investments', label: 'Holdings', icon: <ArrowTrendingUpIcon className="w-5 h-5" /> },
+    { id: 'investment-transactions', label: 'Investment Trades', icon: <ChartBarIcon className="w-5 h-5" /> },
   ];
 
   return (
@@ -51,7 +57,7 @@ export function PlaidDashboard() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`
-                    whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm
+                    whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2
                     ${
                       activeTab === tab.id
                         ? 'border-blue-500 text-blue-600'
@@ -59,7 +65,7 @@ export function PlaidDashboard() {
                     }
                   `}
                 >
-                  <span className="mr-2">{tab.icon}</span>
+                  {tab.icon}
                   {tab.label}
                 </button>
               ))}

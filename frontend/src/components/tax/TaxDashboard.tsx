@@ -4,6 +4,15 @@
  */
 
 import React, { useState } from 'react';
+import {
+  ChartBarSquareIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  DocumentTextIcon,
+  BuildingColumnsIcon,
+  CurrencyDollarIcon,
+  SparklesIcon,
+} from '@heroicons/react/24/outline';
 import { TLHReporting } from './TLHReporting';
 import { TaxExport } from './TaxExport';
 import { MunicipalBondOptimizer } from './MunicipalBondOptimizer';
@@ -39,12 +48,12 @@ export const TaxDashboard: React.FC<TaxDashboardProps> = ({
   const { taxAlpha, loadingAlpha, calculateTaxAlphaAction } = useTaxManagement();
 
   const tabs = [
-    { id: 'overview' as TabType, label: 'Overview', icon: '📊' },
-    { id: 'projection' as TabType, label: 'Tax Projection', icon: '📈' },
-    { id: 'tlh' as TabType, label: 'Tax-Loss Harvesting', icon: '📉' },
-    { id: 'export' as TabType, label: 'Tax Export', icon: '📄' },
-    { id: 'muni' as TabType, label: 'Municipal Bonds', icon: '🏛️' },
-    { id: 'roth' as TabType, label: 'Roth Conversion', icon: '💰' },
+    { id: 'overview' as TabType, label: 'Overview', icon: <ChartBarSquareIcon className="w-5 h-5" /> },
+    { id: 'projection' as TabType, label: 'Tax Projection', icon: <ArrowTrendingUpIcon className="w-5 h-5" /> },
+    { id: 'tlh' as TabType, label: 'Tax-Loss Harvesting', icon: <ArrowTrendingDownIcon className="w-5 h-5" /> },
+    { id: 'export' as TabType, label: 'Tax Export', icon: <DocumentTextIcon className="w-5 h-5" /> },
+    { id: 'muni' as TabType, label: 'Municipal Bonds', icon: <BuildingColumnsIcon className="w-5 h-5" /> },
+    { id: 'roth' as TabType, label: 'Roth Conversion', icon: <CurrencyDollarIcon className="w-5 h-5" /> },
   ];
 
   // Calculate tax alpha on mount
@@ -126,13 +135,13 @@ export const TaxDashboard: React.FC<TaxDashboardProps> = ({
             <button
               key={tab.id}
               onClick={() => setSelectedTab(tab.id)}
-              className={`py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
+              className={`py-4 px-2 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 ${
                 selectedTab === tab.id
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              <span className="mr-2">{tab.icon}</span>
+              {tab.icon}
               {tab.label}
             </button>
           ))}
@@ -150,7 +159,10 @@ export const TaxDashboard: React.FC<TaxDashboardProps> = ({
                 className="bg-white border rounded-lg p-6 cursor-pointer hover:shadow-lg transition-shadow"
                 onClick={() => setSelectedTab('projection')}
               >
-                <h3 className="text-lg font-semibold mb-3">📈 Tax Projection</h3>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <ArrowTrendingUpIcon className="w-6 h-6 text-blue-600" />
+                  Tax Projection
+                </h3>
                 <p className="text-gray-600 mb-4">
                   Multi-year tax liability estimates with federal, state, and NIIT calculations
                 </p>
@@ -246,7 +258,10 @@ export const TaxDashboard: React.FC<TaxDashboardProps> = ({
                 className="bg-white border rounded-lg p-6 cursor-pointer hover:shadow-lg transition-shadow"
                 onClick={() => setSelectedTab('roth')}
               >
-                <h3 className="text-lg font-semibold mb-3">💰 Roth Conversion</h3>
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <CurrencyDollarIcon className="w-6 h-6 text-orange-600" />
+                  Roth Conversion
+                </h3>
                 <p className="text-gray-600 mb-4">
                   Backdoor Roth analysis for high-income earners and tax optimization
                 </p>
@@ -270,7 +285,10 @@ export const TaxDashboard: React.FC<TaxDashboardProps> = ({
                   onClick={() => setSelectedTab('projection')}
                   className="p-4 border rounded hover:border-green-500 hover:bg-green-50 transition-colors text-left"
                 >
-                  <div className="font-medium">📈 Calculate Tax Projection</div>
+                  <div className="font-medium flex items-center gap-2">
+                    <ArrowTrendingUpIcon className="w-5 h-5" />
+                    Calculate Tax Projection
+                  </div>
                   <div className="text-sm text-gray-600 mt-1">
                     Multi-year liability estimates
                   </div>
@@ -306,7 +324,10 @@ export const TaxDashboard: React.FC<TaxDashboardProps> = ({
                   onClick={() => setSelectedTab('roth')}
                   className="p-4 border rounded hover:border-orange-500 hover:bg-orange-50 transition-colors text-left"
                 >
-                  <div className="font-medium">💰 Analyze Roth Conversion</div>
+                  <div className="font-medium flex items-center gap-2">
+                    <CurrencyDollarIcon className="w-5 h-5" />
+                    Analyze Roth Conversion
+                  </div>
                   <div className="text-sm text-gray-600 mt-1">
                     Backdoor Roth & tax impact
                   </div>
@@ -335,8 +356,9 @@ export const TaxDashboard: React.FC<TaxDashboardProps> = ({
                 <li>
                   Review asset location annually during rebalancing
                 </li>
-                <li>
-                  💰 <strong>NEW!</strong> Consider Backdoor Roth conversions if income exceeds direct Roth IRA limits
+                <li className="flex items-start gap-2">
+                  <SparklesIcon className="w-5 h-5 flex-shrink-0 text-blue-600 mt-0.5" />
+                  <span><strong>NEW!</strong> Consider Backdoor Roth conversions if income exceeds direct Roth IRA limits</span>
                 </li>
               </ul>
             </div>

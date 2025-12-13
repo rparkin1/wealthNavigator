@@ -9,6 +9,17 @@
  */
 
 import React, { useState } from 'react';
+import {
+  ShieldCheckIcon,
+  CurrencyDollarIcon,
+  HeartIcon,
+  HomeIcon,
+  ChartBarIcon,
+  MagnifyingGlassIcon,
+  ExclamationCircleIcon,
+  ExclamationTriangleIcon,
+  LightBulbIcon,
+} from '@heroicons/react/24/outline';
 import LifeInsuranceCalculator from './LifeInsuranceCalculator';
 import DisabilityCoverageAnalyzer from './DisabilityCoverageAnalyzer';
 import LongTermCarePlanner from './LongTermCarePlanner';
@@ -34,10 +45,10 @@ const InsuranceOptimizationDashboard: React.FC<InsuranceOptimizationDashboardPro
   const [gapAnalysis, setGapAnalysis] = useState<IGapAnalysis | null>(null);
 
   const tabs = [
-    { id: 'life' as TabType, label: '💰 Life Insurance', icon: '🛡️' },
-    { id: 'disability' as TabType, label: '🏥 Disability Coverage', icon: '⚕️' },
-    { id: 'ltc' as TabType, label: '🏠 Long-Term Care', icon: '🏥' },
-    { id: 'gaps' as TabType, label: '📊 Gap Analysis', icon: '🔍' },
+    { id: 'life' as TabType, label: 'Life Insurance', icon: <CurrencyDollarIcon className="w-5 h-5" /> },
+    { id: 'disability' as TabType, label: 'Disability Coverage', icon: <HeartIcon className="w-5 h-5" /> },
+    { id: 'ltc' as TabType, label: 'Long-Term Care', icon: <HomeIcon className="w-5 h-5" /> },
+    { id: 'gaps' as TabType, label: 'Gap Analysis', icon: <MagnifyingGlassIcon className="w-5 h-5" /> },
   ];
 
   const handleLifeAnalysisComplete = (analysis: LifeInsuranceAnalysis) => {
@@ -98,8 +109,9 @@ const InsuranceOptimizationDashboard: React.FC<InsuranceOptimizationDashboardPro
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                🛡️ Insurance Optimization
+              <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                <ShieldCheckIcon className="w-8 h-8 text-blue-600" />
+                Insurance Optimization
               </h1>
               <p className="text-gray-600">
                 Comprehensive analysis of your life, disability, and long-term care insurance needs
@@ -126,9 +138,11 @@ const InsuranceOptimizationDashboard: React.FC<InsuranceOptimizationDashboardPro
               }`}
             >
               <div className="flex items-center gap-3">
-                <span className="text-2xl">
-                  {gapAnalysis.overall_risk_level === 'high' ? '🚨' : '⚠️'}
-                </span>
+                {gapAnalysis.overall_risk_level === 'high' ? (
+                  <ExclamationCircleIcon className="w-8 h-8 text-red-600" />
+                ) : (
+                  <ExclamationTriangleIcon className="w-8 h-8 text-yellow-600" />
+                )}
                 <div>
                   <div className="font-semibold text-gray-900">
                     {gapAnalysis.critical_gaps} Critical Gap{gapAnalysis.critical_gaps !== 1 ? 's' : ''} Identified
@@ -159,7 +173,7 @@ const InsuranceOptimizationDashboard: React.FC<InsuranceOptimizationDashboardPro
                     }
                   `}
                 >
-                  <span className="mr-2">{tab.icon}</span>
+                  <span className="mr-2 inline-flex">{tab.icon}</span>
                   {tab.label}
                 </button>
               ))}
@@ -202,8 +216,9 @@ const InsuranceOptimizationDashboard: React.FC<InsuranceOptimizationDashboardPro
 
         {/* Educational Footer */}
         <div className="mt-6 bg-blue-50 rounded-lg p-6 border border-blue-200">
-          <h3 className="text-lg font-semibold text-blue-900 mb-3">
-            💡 Insurance Planning Tips
+          <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center gap-2">
+            <LightBulbIcon className="w-5 h-5" />
+            Insurance Planning Tips
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-blue-800">
             <div>
