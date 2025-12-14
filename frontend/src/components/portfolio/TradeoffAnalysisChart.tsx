@@ -7,6 +7,7 @@
  */
 
 import React, { useState } from 'react';
+import { BanknotesIcon, FlagIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import {
   formatCurrency,
   formatPercentage,
@@ -320,7 +321,9 @@ export const TradeoffAnalysisChart: React.FC<TradeoffAnalysisChartProps> = ({
           <h3>Recommendations</h3>
           <div className="recommendation-cards">
             <div className="recommendation-card">
-              <div className="rec-icon">💰</div>
+              <div className="rec-icon">
+                <BanknotesIcon className="w-8 h-8 text-green-600" />
+              </div>
               <h4>Increase Contributions</h4>
               <p>
                 Consider increasing monthly contributions by{' '}
@@ -330,7 +333,9 @@ export const TradeoffAnalysisChart: React.FC<TradeoffAnalysisChartProps> = ({
             </div>
 
             <div className="recommendation-card">
-              <div className="rec-icon">🎯</div>
+              <div className="rec-icon">
+                <FlagIcon className="w-8 h-8 text-blue-600" />
+              </div>
               <h4>Adjust Goal Priorities</h4>
               <p>
                 Review goal priorities to ensure essential goals are fully funded first.
@@ -339,7 +344,9 @@ export const TradeoffAnalysisChart: React.FC<TradeoffAnalysisChartProps> = ({
             </div>
 
             <div className="recommendation-card">
-              <div className="rec-icon">📅</div>
+              <div className="rec-icon">
+                <CalendarIcon className="w-8 h-8 text-purple-600" />
+              </div>
               <h4>Extend Timelines</h4>
               <p>
                 Extending goal timelines by a few years can significantly reduce required

@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { ChartBarIcon } from '@heroicons/react/24/outline';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import type { NetWorthDataPoint } from './NetWorthTrendChart';
 
@@ -316,7 +317,10 @@ export const NetWorthProjection: React.FC<NetWorthProjectionProps> = ({
       {/* Breakdown */}
       {projectionStats && (
         <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">📈 Projection Breakdown</h3>
+          <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <ChartBarIcon className="w-5 h-5 text-blue-600" />
+            Projection Breakdown
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
               <p className="text-gray-600 mb-1">Total Contributions</p>

@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import type { ReserveRecommendation } from '../../types/reserveMonitoring';
 
 export interface ReserveReplenishmentPlanProps {
@@ -143,9 +144,13 @@ export const ReserveReplenishmentPlan: React.FC<ReserveReplenishmentPlanProps> =
                       borderRadius: '6px',
                       fontSize: '13px',
                       color: '#374151',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
                     }}
                   >
-                    ⏱️ Reach target in <strong>{rec.time_to_goal} months</strong>
+                    <ClockIcon style={{ width: '16px', height: '16px', color: '#6b7280', flexShrink: 0 }} />
+                    Reach target in <strong>{rec.time_to_goal} months</strong>
                   </div>
                 )}
               </div>
@@ -227,8 +232,9 @@ export const ReserveReplenishmentPlan: React.FC<ReserveReplenishmentPlanProps> =
               </div>
             </div>
             {remainingDisposable < 0 && (
-              <div style={{ fontSize: '12px', color: '#991b1b', marginTop: '4px' }}>
-                ⚠️ This exceeds your disposable income
+              <div style={{ fontSize: '12px', color: '#991b1b', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <ExclamationTriangleIcon style={{ width: '14px', height: '14px', color: '#991b1b', flexShrink: 0 }} />
+                This exceeds your disposable income
               </div>
             )}
           </div>

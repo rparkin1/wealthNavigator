@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { FlagIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useRiskManagement } from '../../hooks/useRiskManagement';
 import {
   formatCurrency,
@@ -144,8 +145,9 @@ export const HedgingStrategies: React.FC<HedgingStrategiesProps> = ({
                 border: '2px solid #3b82f6',
               }}
             >
-              <h3 style={{ margin: '0 0 16px', fontSize: '18px', fontWeight: 600, color: '#1e40af' }}>
-                🎯 Optimal Strategy: {hedgingResult.optimal_strategy.name}
+              <h3 style={{ margin: '0 0 16px', fontSize: '18px', fontWeight: 600, color: '#1e40af', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FlagIcon style={{ width: '24px', height: '24px', color: '#3b82f6' }} />
+                Optimal Strategy: {hedgingResult.optimal_strategy.name}
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px' }}>
                 <SummaryMetric
@@ -355,8 +357,9 @@ export const HedgingStrategies: React.FC<HedgingStrategiesProps> = ({
 
                   {/* Pros */}
                   <div style={{ marginBottom: '24px' }}>
-                    <h3 style={{ margin: '0 0 12px', fontSize: '16px', fontWeight: 600, color: '#059669' }}>
-                      ✅ Advantages
+                    <h3 style={{ margin: '0 0 12px', fontSize: '16px', fontWeight: 600, color: '#059669', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <CheckCircleIcon style={{ width: '20px', height: '20px', color: '#059669' }} />
+                      Advantages
                     </h3>
                     <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '14px', color: '#047857' }}>
                       {selectedStrategy.pros.map((pro, idx) => (
@@ -369,8 +372,9 @@ export const HedgingStrategies: React.FC<HedgingStrategiesProps> = ({
 
                   {/* Cons */}
                   <div style={{ marginBottom: '24px' }}>
-                    <h3 style={{ margin: '0 0 12px', fontSize: '16px', fontWeight: 600, color: '#dc2626' }}>
-                      ⚠️ Disadvantages
+                    <h3 style={{ margin: '0 0 12px', fontSize: '16px', fontWeight: 600, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <ExclamationTriangleIcon style={{ width: '20px', height: '20px', color: '#dc2626' }} />
+                      Disadvantages
                     </h3>
                     <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '14px', color: '#b91c1c' }}>
                       {selectedStrategy.cons.map((con, idx) => (

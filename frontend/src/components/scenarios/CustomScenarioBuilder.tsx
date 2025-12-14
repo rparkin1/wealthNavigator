@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ChartBarIcon, FolderIcon, ArrowDownTrayIcon, PlayIcon } from '@heroicons/react/24/outline';
 
 interface ReturnSequence {
   year: number;
@@ -51,11 +52,13 @@ export function CustomScenarioBuilder() {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">Custom Scenario Builder</h3>
         <div className="flex gap-2">
-          <button onClick={() => setMode('table')} className={'px-3 py-1 text-sm border rounded ' + (mode === 'table' ? 'bg-blue-50 border-blue-500' : '')}>
-            📊 Table
+          <button onClick={() => setMode('table')} className={'px-3 py-1 text-sm border rounded flex items-center gap-2 ' + (mode === 'table' ? 'bg-blue-50 border-blue-500' : '')}>
+            <ChartBarIcon className="w-4 h-4" />
+            Table
           </button>
-          <button onClick={() => setMode('csv')} className={'px-3 py-1 text-sm border rounded ' + (mode === 'csv' ? 'bg-blue-50 border-blue-500' : '')}>
-            📁 CSV
+          <button onClick={() => setMode('csv')} className={'px-3 py-1 text-sm border rounded flex items-center gap-2 ' + (mode === 'csv' ? 'bg-blue-50 border-blue-500' : '')}>
+            <FolderIcon className="w-4 h-4" />
+            CSV
           </button>
         </div>
       </div>
@@ -90,15 +93,17 @@ export function CustomScenarioBuilder() {
             <input type="file" accept=".csv" onChange={importCSV} className="block w-full text-sm border rounded px-3 py-2" />
             <p className="text-xs text-gray-600 mt-1">Format: Year,Stocks,Bonds,Cash</p>
           </div>
-          <button onClick={exportCSV} className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-            💾 Download CSV
+          <button onClick={exportCSV} className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center justify-center gap-2">
+            <ArrowDownTrayIcon className="w-5 h-5" />
+            Download CSV
           </button>
         </div>
       )}
 
       <div className="mt-4 flex gap-2">
-        <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-          ▶️ Run Simulation
+        <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2">
+          <PlayIcon className="w-5 h-5" />
+          Run Simulation
         </button>
         <button onClick={() => setSequence(sequence.concat({ year: sequence[sequence.length - 1].year + 1, stocks: 8.0, bonds: 4.0, cash: 2.0 }))}
           className="px-4 py-2 border rounded hover:bg-gray-50">

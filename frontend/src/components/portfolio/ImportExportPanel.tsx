@@ -6,6 +6,7 @@
  */
 
 import { useState, useRef } from 'react';
+import { BuildingLibraryIcon, ChartBarIcon, ArrowDownTrayIcon, XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import type { Holding } from './HoldingForm';
 import type { Account } from './AccountForm';
 
@@ -161,12 +162,12 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
 
       // Sanity check - detect if CSV has fields from wrong template
       if (dataType === 'holdings' && (item.account_type || item.institution)) {
-        console.error(`[ImportExportPanel] ⚠️ WARNING: Holdings CSV contains account fields!`, item);
-        errors.push('⚠️ This CSV contains account fields (account_type, institution). Please use the HOLDINGS template, not the ACCOUNTS template.');
+        console.error(`[ImportExportPanel] [WARNING] Holdings CSV contains account fields!`, item);
+        errors.push('[WARNING] This CSV contains account fields (account_type, institution). Please use the HOLDINGS template, not the ACCOUNTS template.');
       }
       if (dataType === 'accounts' && (item.ticker || item.shares)) {
-        console.error(`[ImportExportPanel] ⚠️ WARNING: Accounts CSV contains holding fields!`, item);
-        errors.push('⚠️ This CSV contains holding fields (ticker, shares). Please use the ACCOUNTS template, not the HOLDINGS template.');
+        console.error(`[ImportExportPanel] [WARNING] Accounts CSV contains holding fields!`, item);
+        errors.push('[WARNING] This CSV contains holding fields (ticker, shares). Please use the ACCOUNTS template, not the HOLDINGS template.');
       }
 
       // Type-specific validation
@@ -180,26 +181,26 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
         });
 
         if (!item.ticker || typeof item.ticker !== 'string') {
-          console.log(`[ImportExportPanel] ❌ Row ${index + 2}: Missing or invalid ticker`);
+          console.log(`[ImportExportPanel] [ERROR] Row ${index + 2}: Missing or invalid ticker`);
           errors.push('Ticker is required');
         }
         if (!item.account_id || typeof item.account_id !== 'string') {
-          console.log(`[ImportExportPanel] ❌ Row ${index + 2}: Missing or invalid account_id (got ${typeof item.account_id}): ${item.account_id}`);
+          console.log(`[ImportExportPanel] [ERROR] Row ${index + 2}: Missing or invalid account_id (got ${typeof item.account_id}): ${item.account_id}`);
           errors.push('Account ID (account_id) is required and must be a string');
         }
         if (typeof item.shares !== 'number' || item.shares === 0) {
-          console.log(`[ImportExportPanel] ❌ Row ${index + 2}: Invalid shares (got ${typeof item.shares}): ${item.shares}`);
+          console.log(`[ImportExportPanel] [ERROR] Row ${index + 2}: Invalid shares (got ${typeof item.shares}): ${item.shares}`);
           errors.push('Shares must be a non-zero number (negative for short positions)');
         }
         if (item.cost_basis !== null && item.cost_basis !== undefined) {
           if (typeof item.cost_basis !== 'number') {
-            console.log(`[ImportExportPanel] ❌ Row ${index + 2}: Invalid cost_basis: ${item.cost_basis}`);
+            console.log(`[ImportExportPanel] [ERROR] Row ${index + 2}: Invalid cost_basis: ${item.cost_basis}`);
             errors.push('Cost basis must be a number (can be negative for short positions)');
           }
         }
         if (item.current_value !== null && item.current_value !== undefined) {
           if (typeof item.current_value !== 'number') {
-            console.log(`[ImportExportPanel] ❌ Row ${index + 2}: Invalid current_value: ${item.current_value}`);
+            console.log(`[ImportExportPanel] [ERROR] Row ${index + 2}: Invalid current_value: ${item.current_value}`);
             errors.push('Current value must be a number (can be negative for short positions)');
           }
         }
@@ -214,7 +215,7 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
           duplicates.push({ row: index + 2, data: item, existing: duplicate });
         }
       } else if (dataType === 'accounts') {
-        console.log(`[ImportExportPanel] ✓ In ACCOUNTS validation branch for row ${index + 2}:`, item);
+        console.log(`[ImportExportPanel] [VALID] In ACCOUNTS validation branch for row ${index + 2}:`, item);
 
         if (!item.name || typeof item.name !== 'string') {
           errors.push('Account name is required');
@@ -380,13 +381,13 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
       'border-gray-200 bg-white'
     }`}>
       <div className="mb-4">
-        <h2 className={`text-xl font-bold ${
+        <h2 className={`text-xl font-bold flex items-center gap-2 ${
           dataType === 'accounts' ? 'text-blue-900' :
           dataType === 'holdings' ? 'text-green-900' :
           'text-gray-900'
         }`}>
-          {dataType === 'accounts' && '🏦 '}
-          {dataType === 'holdings' && '📈 '}
+          {dataType === 'accounts' && <BuildingLibraryIcon className="w-6 h-6 text-blue-600" />}
+          {dataType === 'holdings' && <ChartBarIcon className="w-6 h-6 text-green-600" />}
           Import/Export {dataType.toUpperCase()}
         </h2>
         <p className="text-sm text-gray-700 mt-1 font-medium">
@@ -461,9 +462,10 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
 
               <button
                 onClick={handleDownloadTemplate}
-                className="block w-full px-4 py-2 text-sm text-blue-600 hover:text-blue-700"
+                className="flex items-center justify-center gap-2 w-full px-4 py-2 text-sm text-blue-600 hover:text-blue-700"
               >
-                ↓ Download Template
+                <ArrowDownTrayIcon className="w-4 h-4" />
+                Download Template
               </button>
             </div>
           </div>
@@ -544,7 +546,10 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
               {/* Invalid Entries */}
               {preview.invalid.length > 0 && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-red-900 mb-2">❌ Invalid Entries (will be skipped)</h4>
+                  <h4 className="font-semibold text-red-900 mb-2 flex items-center gap-2">
+                    <XCircleIcon className="w-5 h-5 text-red-600" />
+                    Invalid Entries (will be skipped)
+                  </h4>
                   <div className="space-y-2 max-h-40 overflow-y-auto">
                     {preview.invalid.map((item) => (
                       <div key={item.row} className="text-sm text-red-800">
@@ -558,7 +563,10 @@ export function ImportExportPanel({ dataType, onImport, onExport, existingData =
               {/* Duplicates */}
               {preview.duplicates.length > 0 && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-yellow-900 mb-2">⚠️ Duplicate Entries (will be skipped)</h4>
+                  <h4 className="font-semibold text-yellow-900 mb-2 flex items-center gap-2">
+                    <ExclamationTriangleIcon className="w-5 h-5 text-yellow-600" />
+                    Duplicate Entries (will be skipped)
+                  </h4>
                   <div className="space-y-2 max-h-40 overflow-y-auto">
                     {preview.duplicates.map((item) => (
                       <div key={item.row} className="text-sm text-yellow-800">

@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { LightBulbIcon } from '@heroicons/react/24/outline';
 import { insuranceOptimizationApi } from '../../services/insuranceOptimizationApi';
 import type { DisabilityCoverageAnalysis, DisabilityForm } from '../../types/insurance';
 
@@ -338,7 +339,10 @@ const DisabilityCoverageAnalyzer: React.FC<DisabilityCoverageAnalyzerProps> = ({
 
           {/* Key Features to Consider */}
           <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-            <h4 className="font-semibold text-gray-900 mb-3">💡 Key Features to Consider</h4>
+            <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <LightBulbIcon className="w-5 h-5 text-blue-600" />
+              Key Features to Consider
+            </h4>
             <ul className="text-sm text-gray-700 space-y-2">
               {analysis.key_features_to_consider.map((feature, idx) => (
                 <li key={idx}>• {feature}</li>

@@ -5,6 +5,16 @@
 
 import React, { useState, useEffect } from 'react';
 import {
+  BookOpenIcon,
+  ClipboardDocumentListIcon,
+  DocumentTextIcon,
+  BoltIcon,
+  AcademicCapIcon,
+  FlagIcon,
+  LightBulbIcon,
+  ExclamationTriangleIcon,
+} from '@heroicons/react/24/outline';
+import {
   getHedgingEducation,
   getHedgingEducationTopic,
 } from '../../services/hedgingStrategiesApi';
@@ -58,8 +68,9 @@ export const HedgeEducationPanel: React.FC = () => {
           backgroundColor: '#ffffff',
         }}
       >
-        <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 600, color: '#111827' }}>
-          📚 Hedging Education Center
+        <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 600, color: '#111827', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <BookOpenIcon style={{ width: '28px', height: '28px', color: '#3b82f6' }} />
+          Hedging Education Center
         </h1>
         <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#6b7280' }}>
           Learn about hedging strategies, when to use them, and their trade-offs
@@ -84,9 +95,24 @@ export const HedgeEducationPanel: React.FC = () => {
                 opacity: tab === 'topic' && !selectedTopic ? 0.5 : 1,
               }}
             >
-              {tab === 'overview' && '📋 Overview'}
-              {tab === 'topic' && '📖 Topic'}
-              {tab === 'glossary' && '📚 Glossary'}
+              {tab === 'overview' && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <ClipboardDocumentListIcon style={{ width: '16px', height: '16px' }} />
+                  Overview
+                </span>
+              )}
+              {tab === 'topic' && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <DocumentTextIcon style={{ width: '16px', height: '16px' }} />
+                  Topic
+                </span>
+              )}
+              {tab === 'glossary' && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <BookOpenIcon style={{ width: '16px', height: '16px' }} />
+                  Glossary
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -127,8 +153,9 @@ export const HedgeEducationPanel: React.FC = () => {
                     marginBottom: '24px',
                   }}
                 >
-                  <h2 style={{ margin: '0 0 16px', fontSize: '20px', fontWeight: 600 }}>
-                    ⚡ Quick Reference
+                  <h2 style={{ margin: '0 0 16px', fontSize: '20px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <BoltIcon style={{ width: '24px', height: '24px', color: '#eab308' }} />
+                    Quick Reference
                   </h2>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     {Object.entries(content.quick_reference).map(([key, value]) => (
@@ -138,8 +165,9 @@ export const HedgeEducationPanel: React.FC = () => {
                 </div>
 
                 {/* Topics */}
-                <h2 style={{ margin: '0 0 16px', fontSize: '20px', fontWeight: 600 }}>
-                  📚 Educational Topics
+                <h2 style={{ margin: '0 0 16px', fontSize: '20px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <AcademicCapIcon style={{ width: '24px', height: '24px', color: '#3b82f6' }} />
+                  Educational Topics
                 </h2>
                 <div style={{ display: 'grid', gap: '12px' }}>
                   {content.topics.map((topic, index) => (
@@ -200,7 +228,7 @@ export const HedgeEducationPanel: React.FC = () => {
                   </div>
 
                   {/* Key Points */}
-                  <Section title="🎯 Key Points">
+                  <Section title="Key Points" icon={<FlagIcon style={{ width: '20px', height: '20px', color: '#3b82f6' }} />}>
                     <ul style={{ margin: 0, paddingLeft: '20px' }}>
                       {selectedTopic.key_points.map((point, index) => (
                         <li key={index} style={{ marginBottom: '8px', fontSize: '14px', color: '#059669' }}>
@@ -212,7 +240,7 @@ export const HedgeEducationPanel: React.FC = () => {
 
                   {/* Examples */}
                   {selectedTopic.examples.length > 0 && (
-                    <Section title="💡 Examples">
+                    <Section title="Examples" icon={<LightBulbIcon style={{ width: '20px', height: '20px', color: '#eab308' }} />}>
                       <div style={{ display: 'grid', gap: '12px' }}>
                         {selectedTopic.examples.map((example, index) => (
                           <div
@@ -234,7 +262,7 @@ export const HedgeEducationPanel: React.FC = () => {
 
                   {/* Common Mistakes */}
                   {selectedTopic.common_mistakes.length > 0 && (
-                    <Section title="⚠️ Common Mistakes to Avoid">
+                    <Section title="Common Mistakes to Avoid" icon={<ExclamationTriangleIcon style={{ width: '20px', height: '20px', color: '#ef4444' }} />}>
                       <ul style={{ margin: 0, paddingLeft: '20px' }}>
                         {selectedTopic.common_mistakes.map((mistake, index) => (
                           <li key={index} style={{ marginBottom: '8px', fontSize: '14px', color: '#dc2626' }}>
@@ -251,8 +279,9 @@ export const HedgeEducationPanel: React.FC = () => {
             {/* Glossary */}
             {view === 'glossary' && (
               <div>
-                <h2 style={{ margin: '0 0 16px', fontSize: '20px', fontWeight: 600 }}>
-                  📖 Hedging Glossary
+                <h2 style={{ margin: '0 0 16px', fontSize: '20px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <BookOpenIcon style={{ width: '24px', height: '24px', color: '#3b82f6' }} />
+                  Hedging Glossary
                 </h2>
                 <div style={{ display: 'grid', gap: '12px' }}>
                   {Object.entries(content.glossary).map(([term, definition]) => (
@@ -332,9 +361,10 @@ const GlossaryItem: React.FC<{ term: string; definition: string }> = ({ term, de
   </div>
 );
 
-const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
+const Section: React.FC<{ title: string; icon?: React.ReactNode; children: React.ReactNode }> = ({ title, icon, children }) => (
   <div style={{ marginTop: '24px' }}>
-    <h3 style={{ margin: '0 0 12px', fontSize: '18px', fontWeight: 600, color: '#111827' }}>
+    <h3 style={{ margin: '0 0 12px', fontSize: '18px', fontWeight: 600, color: '#111827', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      {icon}
       {title}
     </h3>
     {children}

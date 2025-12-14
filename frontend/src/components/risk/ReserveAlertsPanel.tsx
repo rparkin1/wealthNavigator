@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { ExclamationCircleIcon, ExclamationTriangleIcon, LightBulbIcon, InformationCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import type { ReserveAlert } from '../../types/reserveMonitoring';
 
 export interface ReserveAlertsPanelProps {
@@ -46,13 +47,14 @@ export const ReserveAlertsPanel: React.FC<ReserveAlertsPanelProps> = ({
     return backgrounds[severity as keyof typeof backgrounds] || '#f9fafb';
   };
 
-  const getSeverityIcon = (severity: string): string => {
-    const icons = {
-      critical: '🚨',
-      warning: '⚠️',
-      info: '💡',
+  const getSeverityIcon = (severity: string) => {
+    const iconStyle = { width: '24px', height: '24px' };
+    const iconMap = {
+      critical: <ExclamationCircleIcon style={{ ...iconStyle, color: '#ef4444' }} />,
+      warning: <ExclamationTriangleIcon style={{ ...iconStyle, color: '#f97316' }} />,
+      info: <LightBulbIcon style={{ ...iconStyle, color: '#3b82f6' }} />,
     };
-    return icons[severity as keyof typeof icons] || 'ℹ️';
+    return iconMap[severity as keyof typeof iconMap] || <InformationCircleIcon style={{ ...iconStyle, color: '#6b7280' }} />;
   };
 
   const getPriorityLabel = (priority: number): string => {
@@ -81,7 +83,9 @@ export const ReserveAlertsPanel: React.FC<ReserveAlertsPanelProps> = ({
           textAlign: 'center',
         }}
       >
-        <div style={{ fontSize: '32px', marginBottom: '8px' }}>✅</div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
+          <CheckCircleIcon style={{ width: '48px', height: '48px', color: '#10b981' }} />
+        </div>
         <div style={{ fontSize: '16px', fontWeight: 600, color: '#059669' }}>
           No Active Alerts
         </div>
@@ -141,7 +145,7 @@ export const ReserveAlertsPanel: React.FC<ReserveAlertsPanelProps> = ({
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '20px' }}>{getSeverityIcon(alert.severity)}</span>
+                    {getSeverityIcon(alert.severity)}
                     <div
                       data-testid={`reserve-alert-title-${index}`}
                       style={{

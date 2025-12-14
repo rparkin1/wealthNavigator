@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { ShieldCheckIcon, LightBulbIcon } from '@heroicons/react/24/outline';
 import { formatCurrency, formatPercentage } from '../../services/hedgingStrategiesApi';
 
 export interface ProtectivePutCalculatorProps {
@@ -68,8 +69,9 @@ export const ProtectivePutCalculator: React.FC<ProtectivePutCalculatorProps> = (
           border: '1px solid #e5e7eb',
         }}
       >
-        <h2 style={{ margin: '0 0 16px', fontSize: '20px', fontWeight: 600 }}>
-          🛡️ Protective Put Calculator
+        <h2 style={{ margin: '0 0 16px', fontSize: '20px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <ShieldCheckIcon style={{ width: '24px', height: '24px', color: '#22c55e' }} />
+          Protective Put Calculator
         </h2>
         <p style={{ margin: '0 0 24px', fontSize: '14px', color: '#6b7280' }}>
           Calculate the cost and protection level for protective put options on your portfolio.
@@ -228,10 +230,13 @@ export const ProtectivePutCalculator: React.FC<ProtectivePutCalculatorProps> = (
             borderRadius: '6px',
             fontSize: '13px',
             color: '#1e40af',
+            display: 'flex',
+            gap: '8px',
           }}
         >
-          💡 <strong>Tip:</strong> Protective puts should be rolled quarterly to maintain continuous protection.
-          Lower strike prices (more protection) cost more, while higher strikes (less protection) are cheaper.
+          <LightBulbIcon style={{ width: '20px', height: '20px', flexShrink: 0 }} />
+          <span><strong>Tip:</strong> Protective puts should be rolled quarterly to maintain continuous protection.
+          Lower strike prices (more protection) cost more, while higher strikes (less protection) are cheaper.</span>
         </div>
       </div>
     </div>

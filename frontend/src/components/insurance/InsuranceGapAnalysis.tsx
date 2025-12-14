@@ -5,6 +5,17 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import {
+  ChartBarIcon,
+  CheckCircleIcon,
+  Cog6ToothIcon,
+  ExclamationCircleIcon,
+  ExclamationTriangleIcon,
+  FlagIcon,
+  LightBulbIcon,
+  SparklesIcon,
+  XCircleIcon,
+} from '@heroicons/react/24/outline';
 import { insuranceOptimizationApi } from '../../services/insuranceOptimizationApi';
 import type {
   LifeInsuranceAnalysis,
@@ -73,21 +84,23 @@ const InsuranceGapAnalysis: React.FC<InsuranceGapAnalysisProps> = ({
   if (!lifeAnalysis || !disabilityAnalysis || !ltcAnalysis) {
     return (
       <div className="text-center py-12">
-        <div className="text-6xl mb-4">📊</div>
+        <div className="flex justify-center mb-4">
+          <ChartBarIcon className="w-24 h-24 text-gray-400" />
+        </div>
         <h3 className="text-xl font-bold text-gray-900 mb-2">Complete All Analyses First</h3>
         <p className="text-gray-600">
           Please complete the Life Insurance, Disability Coverage, and Long-Term Care analyses
           to see your comprehensive insurance gap analysis.
         </p>
         <div className="mt-6 flex justify-center gap-4">
-          <div className={`px-4 py-2 rounded-lg ${lifeAnalysis ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-            {lifeAnalysis ? '✓' : '○'} Life Insurance
+          <div className={`px-4 py-2 rounded-lg flex items-center gap-2 ${lifeAnalysis ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+            {lifeAnalysis ? <CheckCircleIcon className="w-5 h-5" /> : <XCircleIcon className="w-5 h-5" />} Life Insurance
           </div>
-          <div className={`px-4 py-2 rounded-lg ${disabilityAnalysis ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-            {disabilityAnalysis ? '✓' : '○'} Disability
+          <div className={`px-4 py-2 rounded-lg flex items-center gap-2 ${disabilityAnalysis ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+            {disabilityAnalysis ? <CheckCircleIcon className="w-5 h-5" /> : <XCircleIcon className="w-5 h-5" />} Disability
           </div>
-          <div className={`px-4 py-2 rounded-lg ${ltcAnalysis ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-            {ltcAnalysis ? '✓' : '○'} Long-Term Care
+          <div className={`px-4 py-2 rounded-lg flex items-center gap-2 ${ltcAnalysis ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+            {ltcAnalysis ? <CheckCircleIcon className="w-5 h-5" /> : <XCircleIcon className="w-5 h-5" />} Long-Term Care
           </div>
         </div>
       </div>
@@ -97,7 +110,9 @@ const InsuranceGapAnalysis: React.FC<InsuranceGapAnalysisProps> = ({
   if (isLoading) {
     return (
       <div className="text-center py-12">
-        <div className="animate-spin text-6xl mb-4">⚙️</div>
+        <div className="flex justify-center mb-4">
+          <Cog6ToothIcon className="w-24 h-24 text-blue-600 animate-spin" />
+        </div>
         <p className="text-gray-600">Analyzing insurance gaps...</p>
       </div>
     );
@@ -106,7 +121,9 @@ const InsuranceGapAnalysis: React.FC<InsuranceGapAnalysisProps> = ({
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-        <div className="text-4xl mb-3">⚠️</div>
+        <div className="flex justify-center mb-3">
+          <ExclamationTriangleIcon className="w-16 h-16 text-red-600" />
+        </div>
         <p className="text-red-800">{error}</p>
         <button
           onClick={analyzeGaps}
@@ -160,13 +177,19 @@ const InsuranceGapAnalysis: React.FC<InsuranceGapAnalysisProps> = ({
       {/* Priority Actions */}
       <div className="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <span>🎯</span>
+          <FlagIcon className="w-6 h-6 text-yellow-600" />
           Priority Actions
         </h3>
         <div className="space-y-3">
           {gapAnalysis.priority_actions.map((action, idx) => (
             <div key={idx} className="flex items-start gap-3">
-              <span className="text-xl">{action.startsWith('🚨') ? '🚨' : action.startsWith('⚠️') ? '⚠️' : '✅'}</span>
+              {action.startsWith('🚨') ? (
+                <ExclamationCircleIcon className="w-6 h-6 text-red-600 flex-shrink-0" />
+              ) : action.startsWith('⚠️') ? (
+                <ExclamationTriangleIcon className="w-6 h-6 text-yellow-600 flex-shrink-0" />
+              ) : (
+                <CheckCircleIcon className="w-6 h-6 text-green-600 flex-shrink-0" />
+              )}
               <div className="flex-1 text-gray-800">{action.replace(/^[🚨⚠️✅]\s*/, '')}</div>
             </div>
           ))}
@@ -181,8 +204,12 @@ const InsuranceGapAnalysis: React.FC<InsuranceGapAnalysisProps> = ({
             : 'bg-green-50 border-green-200'
         }`}>
           <div className="text-center">
-            <div className="text-3xl mb-2">
-              {gapAnalysis.summary.has_life_insurance_gap ? '⚠️' : '✅'}
+            <div className="flex justify-center mb-2">
+              {gapAnalysis.summary.has_life_insurance_gap ? (
+                <ExclamationTriangleIcon className="w-12 h-12 text-red-600" />
+              ) : (
+                <CheckCircleIcon className="w-12 h-12 text-green-600" />
+              )}
             </div>
             <div className="font-semibold text-gray-900">Life Insurance</div>
             <div className={`text-sm mt-1 ${
@@ -199,8 +226,12 @@ const InsuranceGapAnalysis: React.FC<InsuranceGapAnalysisProps> = ({
             : 'bg-green-50 border-green-200'
         }`}>
           <div className="text-center">
-            <div className="text-3xl mb-2">
-              {gapAnalysis.summary.has_disability_gap ? '⚠️' : '✅'}
+            <div className="flex justify-center mb-2">
+              {gapAnalysis.summary.has_disability_gap ? (
+                <ExclamationTriangleIcon className="w-12 h-12 text-red-600" />
+              ) : (
+                <CheckCircleIcon className="w-12 h-12 text-green-600" />
+              )}
             </div>
             <div className="font-semibold text-gray-900">Disability Insurance</div>
             <div className={`text-sm mt-1 ${
@@ -217,8 +248,12 @@ const InsuranceGapAnalysis: React.FC<InsuranceGapAnalysisProps> = ({
             : 'bg-green-50 border-green-200'
         }`}>
           <div className="text-center">
-            <div className="text-3xl mb-2">
-              {gapAnalysis.summary.has_ltc_gap ? '⚠️' : '✅'}
+            <div className="flex justify-center mb-2">
+              {gapAnalysis.summary.has_ltc_gap ? (
+                <ExclamationTriangleIcon className="w-12 h-12 text-red-600" />
+              ) : (
+                <CheckCircleIcon className="w-12 h-12 text-green-600" />
+              )}
             </div>
             <div className="font-semibold text-gray-900">Long-Term Care</div>
             <div className={`text-sm mt-1 ${
@@ -315,7 +350,9 @@ const InsuranceGapAnalysis: React.FC<InsuranceGapAnalysisProps> = ({
       {/* No Gaps Message */}
       {gapAnalysis.gaps.length === 0 && (
         <div className="bg-green-50 p-12 rounded-lg border border-green-200 text-center">
-          <div className="text-6xl mb-4">🎉</div>
+          <div className="flex justify-center mb-4">
+            <SparklesIcon className="w-24 h-24 text-green-600" />
+          </div>
           <h3 className="text-2xl font-bold text-green-900 mb-2">
             Excellent! No Insurance Gaps Detected
           </h3>
@@ -328,8 +365,9 @@ const InsuranceGapAnalysis: React.FC<InsuranceGapAnalysisProps> = ({
 
       {/* Next Steps */}
       <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-        <h3 className="text-lg font-semibold text-blue-900 mb-3">
-          💡 Next Steps
+        <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center gap-2">
+          <LightBulbIcon className="w-6 h-6 text-blue-600" />
+          Next Steps
         </h3>
         <ul className="text-sm text-blue-800 space-y-2">
           <li>• Schedule consultations with licensed insurance agents for quotes</li>

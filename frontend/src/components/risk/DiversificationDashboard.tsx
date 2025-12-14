@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { ChartBarIcon, ExclamationTriangleIcon, LightBulbIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import {
   getExampleDiversificationAnalysis,
   getDiversificationLevelColor,
@@ -142,9 +143,26 @@ export const DiversificationDashboard: React.FC<DiversificationDashboardProps> =
                 textTransform: 'capitalize',
               }}
             >
-              {view === 'overview' && '📊 Overview'}
-              {view === 'risks' && '⚠️ Concentration Risks'}
-              {view === 'recommendations' && '💡 Recommendations'}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {view === 'overview' && (
+                  <>
+                    <ChartBarIcon style={{ width: '18px', height: '18px' }} />
+                    Overview
+                  </>
+                )}
+                {view === 'risks' && (
+                  <>
+                    <ExclamationTriangleIcon style={{ width: '18px', height: '18px' }} />
+                    Concentration Risks
+                  </>
+                )}
+                {view === 'recommendations' && (
+                  <>
+                    <LightBulbIcon style={{ width: '18px', height: '18px' }} />
+                    Recommendations
+                  </>
+                )}
+              </div>
             </button>
           ))}
         </div>
@@ -344,7 +362,9 @@ export const DiversificationDashboard: React.FC<DiversificationDashboardProps> =
                   borderRadius: '8px',
                 }}
               >
-                <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                  <CheckCircleIcon style={{ width: '64px', height: '64px', color: '#10b981' }} />
+                </div>
                 <div style={{ fontSize: '18px', fontWeight: 600, color: '#047857' }}>
                   No Significant Concentration Risks
                 </div>

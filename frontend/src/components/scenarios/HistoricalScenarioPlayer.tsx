@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { PauseIcon, PlayIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import * as d3 from 'd3';
 
 interface HistoricalScenario {
@@ -97,11 +98,22 @@ export function HistoricalScenarioPlayer({ scenario }: HistoricalScenarioPlayerP
 
       <div className="flex items-center gap-4 mt-4">
         <button onClick={() => setIsPlaying(!isPlaying)}
-          className={'px-4 py-2 rounded ' + (isPlaying ? 'bg-red-600 text-white' : 'bg-blue-600 text-white')}>
-          {isPlaying ? '⏸️ Pause' : '▶️ Play'}
+          className={'px-4 py-2 rounded flex items-center gap-2 ' + (isPlaying ? 'bg-red-600 text-white' : 'bg-blue-600 text-white')}>
+          {isPlaying ? (
+            <>
+              <PauseIcon className="w-5 h-5" />
+              Pause
+            </>
+          ) : (
+            <>
+              <PlayIcon className="w-5 h-5" />
+              Play
+            </>
+          )}
         </button>
-        <button onClick={() => { setCurrentMonth(0); setIsPlaying(false); }} className="px-4 py-2 border rounded">
-          🔄 Reset
+        <button onClick={() => { setCurrentMonth(0); setIsPlaying(false); }} className="px-4 py-2 border rounded flex items-center gap-2">
+          <ArrowPathIcon className="w-5 h-5" />
+          Reset
         </button>
         <div className="flex gap-2">
           {[1, 2, 4].map(s => (

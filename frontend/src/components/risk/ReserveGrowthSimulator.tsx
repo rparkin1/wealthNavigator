@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { ChartBarIcon } from '@heroicons/react/24/outline';
 import { simulateReserveGrowth } from '../../services/reserveMonitoringApi';
 import type { ReserveGrowthSimulation } from '../../types/reserveMonitoring';
 
@@ -70,7 +71,9 @@ export const ReserveGrowthSimulator: React.FC<ReserveGrowthSimulatorProps> = ({
   if (loading) {
     return (
       <div style={{ padding: '48px', textAlign: 'center', color: '#6b7280', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-        <div style={{ fontSize: '24px', marginBottom: '8px' }}>📊</div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
+          <ChartBarIcon style={{ width: '32px', height: '32px', color: '#3b82f6' }} />
+        </div>
         Running simulation...
       </div>
     );

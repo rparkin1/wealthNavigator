@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { CheckCircleIcon, ExclamationTriangleIcon, LightBulbIcon } from '@heroicons/react/24/outline';
 import { insuranceOptimizationApi } from '../../services/insuranceOptimizationApi';
 import type { LifeInsuranceAnalysis, LifeInsuranceForm } from '../../types/insurance';
 
@@ -219,17 +220,28 @@ const LifeInsuranceCalculator: React.FC<LifeInsuranceCalculatorProps> = ({
                 <div className="text-3xl font-bold text-gray-900">
                   {formatCurrency(analysis.net_insurance_need)}
                 </div>
-                <div className={`mt-2 text-sm font-medium ${
+                <div className={`mt-2 text-sm font-medium flex items-center gap-2 ${
                   analysis.has_adequate_coverage ? 'text-green-700' : 'text-red-700'
                 }`}>
-                  {analysis.has_adequate_coverage
-                    ? '✓ You have adequate coverage'
-                    : `✗ Coverage gap of ${formatCurrency(analysis.coverage_gap)}`
-                  }
+                  {analysis.has_adequate_coverage ? (
+                    <>
+                      <CheckCircleIcon className="w-5 h-5" />
+                      You have adequate coverage
+                    </>
+                  ) : (
+                    <>
+                      <ExclamationTriangleIcon className="w-5 h-5" />
+                      Coverage gap of {formatCurrency(analysis.coverage_gap)}
+                    </>
+                  )}
                 </div>
               </div>
-              <div className="text-6xl">
-                {analysis.has_adequate_coverage ? '✅' : '⚠️'}
+              <div>
+                {analysis.has_adequate_coverage ? (
+                  <CheckCircleIcon className="w-24 h-24 text-green-600" />
+                ) : (
+                  <ExclamationTriangleIcon className="w-24 h-24 text-red-600" />
+                )}
               </div>
             </div>
           </div>
@@ -292,7 +304,7 @@ const LifeInsuranceCalculator: React.FC<LifeInsuranceCalculatorProps> = ({
           {/* Recommendation */}
           <div className="bg-green-50 p-6 rounded-lg border border-green-200">
             <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <span>💡</span>
+              <LightBulbIcon className="w-6 h-6 text-green-600" />
               Recommended Policy Type
             </h4>
             <div className="space-y-2">

@@ -18,6 +18,8 @@ import {
   FlagIcon,
   ArrowTrendingUpIcon,
   ExclamationTriangleIcon,
+  CheckCircleIcon,
+  XCircleIcon,
 } from '@heroicons/react/24/outline';
 import type {
   DiversificationTab,
@@ -317,7 +319,9 @@ export function DiversificationAnalysisDashboard({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {filteredRisks.length === 0 ? (
             <div style={{ padding: '40px', textAlign: 'center', color: '#6b7280' }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                <CheckCircleIcon style={{ width: '64px', height: '64px', color: '#10b981' }} />
+              </div>
               <div style={{ fontSize: '16px' }}>No concentration risks match your filters</div>
             </div>
           ) : (
@@ -686,9 +690,13 @@ export function DiversificationAnalysisDashboard({
             borderRadius: '8px',
             marginBottom: '24px',
             color: '#991b1b',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
           }}
         >
-          ❌ {error}
+          <XCircleIcon style={{ width: '20px', height: '20px', color: '#991b1b', flexShrink: 0 }} />
+          {error}
         </div>
       )}
 

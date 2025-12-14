@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { ClockIcon, BanknotesIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 export interface ReserveMonitoringProps {
   currentReserves: number;
@@ -334,8 +335,9 @@ export const ReserveMonitoring: React.FC<ReserveMonitoringProps> = ({
                 </div>
                 {rec.time_to_goal > 0 && (
                   <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#f9fafb', borderRadius: '6px' }}>
-                    <div style={{ fontSize: '14px', color: '#374151' }}>
-                      ⏱️ Time to goal: <strong>{rec.time_to_goal} months</strong>
+                    <div style={{ fontSize: '14px', color: '#374151', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <ClockIcon style={{ width: '16px', height: '16px', color: '#6b7280', flexShrink: 0 }} />
+                      Time to goal: <strong>{rec.time_to_goal} months</strong>
                     </div>
                   </div>
                 )}
@@ -359,8 +361,9 @@ export const ReserveMonitoring: React.FC<ReserveMonitoringProps> = ({
             border: '2px solid #f59e0b',
           }}
         >
-          <div style={{ fontSize: '16px', fontWeight: 600, color: '#92400e', marginBottom: '8px' }}>
-            💰 Reserve Shortfall
+          <div style={{ fontSize: '16px', fontWeight: 600, color: '#92400e', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <BanknotesIcon style={{ width: '20px', height: '20px', color: '#f59e0b', flexShrink: 0 }} />
+            Reserve Shortfall
           </div>
           <div style={{ fontSize: '14px', color: '#78350f' }}>
             You need an additional <strong>{formatCurrency(result.shortfall)}</strong> to reach your recommended reserve target of {formatCurrency(result.recommended_target)}.
@@ -399,7 +402,7 @@ const TargetCard: React.FC<TargetCardProps> = ({ title, amount, met }) => {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-        {met && <span style={{ fontSize: '20px' }}>✅</span>}
+        {met && <CheckCircleIcon style={{ width: '24px', height: '24px', color: '#10b981' }} />}
         <div style={{ fontSize: '14px', fontWeight: 600, color: '#374151' }}>
           {title}
         </div>

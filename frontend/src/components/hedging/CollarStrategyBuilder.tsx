@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { FlagIcon, CheckCircleIcon, LightBulbIcon } from '@heroicons/react/24/outline';
 import { formatCurrency, formatPercentage } from '../../services/hedgingStrategiesApi';
 
 export interface CollarStrategyBuilderProps {
@@ -86,8 +87,9 @@ export const CollarStrategyBuilder: React.FC<CollarStrategyBuilderProps> = ({
           border: '1px solid #e5e7eb',
         }}
       >
-        <h2 style={{ margin: '0 0 16px', fontSize: '20px', fontWeight: 600 }}>
-          🎯 Collar Strategy Builder
+        <h2 style={{ margin: '0 0 16px', fontSize: '20px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <FlagIcon style={{ width: '24px', height: '24px', color: '#3b82f6' }} />
+          Collar Strategy Builder
         </h2>
         <p style={{ margin: '0 0 24px', fontSize: '14px', color: '#6b7280' }}>
           Build a collar strategy by buying protective puts and selling covered calls.
@@ -173,8 +175,9 @@ export const CollarStrategyBuilder: React.FC<CollarStrategyBuilderProps> = ({
             />
           </div>
           {isZeroCost && (
-            <div style={{ marginTop: '12px', fontSize: '13px', color: '#059669', fontWeight: 500 }}>
-              ✅ Near-zero cost collar! Call premium covers most/all of the put cost.
+            <div style={{ marginTop: '12px', fontSize: '13px', color: '#059669', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <CheckCircleIcon style={{ width: '20px', height: '20px' }} />
+              Near-zero cost collar! Call premium covers most/all of the put cost.
             </div>
           )}
         </div>
@@ -330,14 +333,17 @@ export const CollarStrategyBuilder: React.FC<CollarStrategyBuilderProps> = ({
             borderRadius: '6px',
             fontSize: '13px',
             color: '#1e40af',
+            display: 'flex',
+            gap: '8px',
           }}
         >
-          💡 <strong>Summary:</strong> Your collar provides {formatPercentage(1 - putStrike)} downside protection
+          <LightBulbIcon style={{ width: '20px', height: '20px', flexShrink: 0 }} />
+          <span><strong>Summary:</strong> Your collar provides {formatPercentage(1 - putStrike)} downside protection
           while capping upside at {formatPercentage(callStrike - 1)}.
           {isZeroCost
             ? ' The near-zero cost makes this an excellent long-term hedge.'
             : ` Net cost is ${formatCurrency(results.netCost)} (${formatPercentage(results.effectiveCost)}).`
-          }
+          }</span>
         </div>
       </div>
     </div>

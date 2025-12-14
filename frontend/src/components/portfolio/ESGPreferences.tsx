@@ -5,6 +5,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { NoSymbolIcon, CheckCircleIcon, StarIcon, XCircleIcon, LightBulbIcon } from '@heroicons/react/24/outline';
 import { usePortfolioOptimization } from '../../hooks/usePortfolioOptimization';
 import {
   getESGRatingColor,
@@ -159,7 +160,10 @@ export const ESGPreferences: React.FC<ESGPreferencesProps> = ({ onPreferencesCha
 
       {/* Exclusions */}
       <div className="criteria-section">
-        <h3>🚫 Exclusions</h3>
+        <h3 className="flex items-center gap-2">
+          <NoSymbolIcon className="w-6 h-6 text-red-600" />
+          Exclusions
+        </h3>
         <p className="section-description">Industries and practices to avoid</p>
 
         <div className="checkbox-grid">
@@ -212,7 +216,10 @@ export const ESGPreferences: React.FC<ESGPreferencesProps> = ({ onPreferencesCha
 
       {/* Required Criteria */}
       <div className="criteria-section">
-        <h3>✅ Required Criteria</h3>
+        <h3 className="flex items-center gap-2">
+          <CheckCircleIcon className="w-6 h-6 text-green-600" />
+          Required Criteria
+        </h3>
         <p className="section-description">Positive screens for specific practices</p>
 
         <div className="checkbox-grid">
@@ -247,7 +254,10 @@ export const ESGPreferences: React.FC<ESGPreferencesProps> = ({ onPreferencesCha
 
       {/* Rating Requirements */}
       <div className="criteria-section">
-        <h3>⭐ Rating Requirements</h3>
+        <h3 className="flex items-center gap-2">
+          <StarIcon className="w-6 h-6 text-yellow-500" />
+          Rating Requirements
+        </h3>
 
         <div className="rating-controls">
           <div className="control-group">
@@ -323,7 +333,10 @@ export const ESGPreferences: React.FC<ESGPreferencesProps> = ({ onPreferencesCha
 
           <div className="assets-lists">
             <div className="eligible-list">
-              <h4>✅ Eligible Assets</h4>
+              <h4 className="flex items-center gap-2">
+                <CheckCircleIcon className="w-5 h-5 text-green-600" />
+                Eligible Assets
+              </h4>
               <ul>
                 {esgResult.eligible_assets.map((asset) => (
                   <li key={asset}>{asset}</li>
@@ -333,7 +346,10 @@ export const ESGPreferences: React.FC<ESGPreferencesProps> = ({ onPreferencesCha
 
             {Object.keys(esgResult.excluded_assets).length > 0 && (
               <div className="excluded-list">
-                <h4>❌ Excluded Assets</h4>
+                <h4 className="flex items-center gap-2">
+                  <XCircleIcon className="w-5 h-5 text-red-600" />
+                  Excluded Assets
+                </h4>
                 <ul>
                   {Object.entries(esgResult.excluded_assets).map(([asset, reason]) => (
                     <li key={asset}>
@@ -347,7 +363,10 @@ export const ESGPreferences: React.FC<ESGPreferencesProps> = ({ onPreferencesCha
 
           {esgResult.recommendations.length > 0 && (
             <div className="recommendations">
-              <h4>💡 Recommendations</h4>
+              <h4 className="flex items-center gap-2">
+                <LightBulbIcon className="w-5 h-5 text-blue-600" />
+                Recommendations
+              </h4>
               <ul>
                 {esgResult.recommendations.map((rec, index) => (
                   <li key={index}>{rec}</li>

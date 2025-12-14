@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { CheckCircleIcon, LightBulbIcon } from '@heroicons/react/24/outline';
 import { insuranceOptimizationApi } from '../../services/insuranceOptimizationApi';
 import type { LongTermCareAnalysis, LongTermCareForm } from '../../types/insurance';
 
@@ -255,8 +256,12 @@ const LongTermCarePlanner: React.FC<LongTermCarePlannerProps> = ({
                   Current assets: {formatCurrency(analysis.current_assets)}
                 </div>
               </div>
-              <div className="text-4xl">
-                {analysis.can_self_insure ? '✅' : '💡'}
+              <div>
+                {analysis.can_self_insure ? (
+                  <CheckCircleIcon className="w-16 h-16 text-green-600" />
+                ) : (
+                  <LightBulbIcon className="w-16 h-16 text-yellow-600" />
+                )}
               </div>
             </div>
           </div>
