@@ -7,7 +7,6 @@
  * Following UI Redesign specifications - Week 8
  */
 
-import React from 'react';
 import type { GoalDetailTab } from './GoalDetailView';
 
 export interface Tab {

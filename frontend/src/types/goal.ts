@@ -52,14 +52,4 @@ export interface GoalProgress {
   successProbability: number;
 }
 
-// Explicit type re-exports for Vite/TypeScript compatibility
-export type {
-  FundingSource,
-  Goal,
-  GoalCategory,
-  GoalPriority,
-  GoalProgress,
-  GoalProjections,
-  GoalStatus,
-  GoalTimeline,
-};
+// Note: All types are already exported inline above, no need for duplicate exports

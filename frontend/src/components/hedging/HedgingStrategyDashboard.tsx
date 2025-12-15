@@ -12,6 +12,7 @@ import {
   XMarkIcon,
   ClipboardDocumentListIcon,
   FlagIcon,
+  StarIcon,
 } from '@heroicons/react/24/outline';
 import {
   getHedgingRecommendations,
@@ -425,8 +426,9 @@ export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> =
                         {getStrategyIcon(recommendation.optimal_strategy.strategy_type)}
                       </span>
                       <div>
-                        <div style={{ fontSize: '12px', color: '#059669', fontWeight: 600 }}>
-                          ⭐ OPTIMAL STRATEGY
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#059669', fontWeight: 600 }}>
+                          <StarIcon style={{ width: '16px', height: '16px', flexShrink: 0 }} />
+                          OPTIMAL STRATEGY
                         </div>
                         <div
                           data-testid="optimal-strategy-name"

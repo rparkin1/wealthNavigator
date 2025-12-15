@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { ExclamationCircleIcon, ExclamationTriangleIcon, LightBulbIcon, InformationCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { ExclamationCircleIcon, ExclamationTriangleIcon, LightBulbIcon, InformationCircleIcon, CheckCircleIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import type { ReserveAlert } from '../../types/reserveMonitoring';
 
 export interface ReserveAlertsPanelProps {
@@ -214,9 +214,23 @@ export const ReserveAlertsPanel: React.FC<ReserveAlertsPanelProps> = ({
                     fontSize: '12px',
                     color: '#6b7280',
                     textAlign: 'center',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px',
                   }}
                 >
-                  {isExpanded ? '▲ Click to collapse' : '▼ Click to expand'}
+                  {isExpanded ? (
+                    <>
+                      <ChevronUpIcon style={{ width: '14px', height: '14px' }} />
+                      Click to collapse
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDownIcon style={{ width: '14px', height: '14px' }} />
+                      Click to expand
+                    </>
+                  )}
                 </div>
               )}
             </div>

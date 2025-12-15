@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { LightBulbIcon } from '@heroicons/react/24/outline';
+import { LightBulbIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { insuranceOptimizationApi } from '../../services/insuranceOptimizationApi';
 import type { DisabilityCoverageAnalysis, DisabilityForm } from '../../types/insurance';
 
@@ -248,13 +248,20 @@ const DisabilityCoverageAnalyzer: React.FC<DisabilityCoverageAnalyzerProps> = ({
                 </div>
               </div>
             </div>
-            <div className={`text-sm font-medium ${
+            <div className={`flex items-center gap-2 text-sm font-medium ${
               analysis.short_term_disability.has_adequate_coverage ? 'text-green-700' : 'text-red-700'
             }`}>
-              {analysis.short_term_disability.has_adequate_coverage
-                ? '✓ Adequate short-term disability coverage'
-                : '✗ Insufficient short-term disability coverage'
-              }
+              {analysis.short_term_disability.has_adequate_coverage ? (
+                <>
+                  <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
+                  <span>Adequate short-term disability coverage</span>
+                </>
+              ) : (
+                <>
+                  <XMarkIcon className="w-4 h-4 flex-shrink-0" />
+                  <span>Insufficient short-term disability coverage</span>
+                </>
+              )}
             </div>
           </div>
 
@@ -287,13 +294,20 @@ const DisabilityCoverageAnalyzer: React.FC<DisabilityCoverageAnalyzerProps> = ({
                 </div>
               </div>
             </div>
-            <div className={`text-sm font-medium ${
+            <div className={`flex items-center gap-2 text-sm font-medium ${
               analysis.long_term_disability.has_adequate_coverage ? 'text-green-700' : 'text-red-700'
             }`}>
-              {analysis.long_term_disability.has_adequate_coverage
-                ? '✓ Adequate long-term disability coverage'
-                : '✗ Insufficient long-term disability coverage'
-              }
+              {analysis.long_term_disability.has_adequate_coverage ? (
+                <>
+                  <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
+                  <span>Adequate long-term disability coverage</span>
+                </>
+              ) : (
+                <>
+                  <XMarkIcon className="w-4 h-4 flex-shrink-0" />
+                  <span>Insufficient long-term disability coverage</span>
+                </>
+              )}
             </div>
           </div>
 

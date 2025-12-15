@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { handleActivation } from '../../utils/accessibility';
 
 export interface AccessibleButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /**

@@ -276,30 +276,4 @@ export interface ComprehensiveAnalysisResponse {
 
 // API types moved to ../types/api.ts to avoid circular dependencies
 
-// Explicit type re-exports for Vite/TypeScript compatibility
-export type {
-  Account,
-  AccountType,
-  AssetAllocation,
-  AttributionResult,
-  ComprehensiveAnalysisRequest,
-  ComprehensiveAnalysisResponse,
-  ConnectionStatus,
-  Holding,
-  OptimizationConstraints,
-  OptimizationParams,
-  OptimizationResult,
-  PerformanceMetricDetail,
-  PerformanceMetrics,
-  PerformanceRequest,
-  PerformanceResponse,
-  Portfolio,
-  RebalanceRequest,
-  RebalanceResponse,
-  RebalancingTrade,
-  ReplacementSecurity,
-  RiskMetrics,
-  TaxLossHarvestRequest,
-  TaxLossHarvestResponse,
-  TLHOpportunity,
-};
+// Note: All types are already exported inline above, no need for duplicate exports

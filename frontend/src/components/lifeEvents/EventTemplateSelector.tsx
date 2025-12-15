@@ -17,6 +17,7 @@ import {
   TruckIcon,
   SparklesIcon,
   ClipboardDocumentListIcon,
+  StarIcon,
 } from '@heroicons/react/24/outline';
 import type { EventTemplate, LifeEventType } from '../../types/lifeEvents';
 import { getEventTemplates } from '../../services/lifeEventsApi';
@@ -206,8 +207,9 @@ export function EventTemplateSelector({
                           Used {template.usage_count} times
                         </div>
                         {template.average_rating && (
-                          <div className="text-xs text-gray-500">
-                            ⭐ {template.average_rating.toFixed(1)}
+                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                            <StarIcon className="w-3 h-3 text-yellow-500" />
+                            {template.average_rating.toFixed(1)}
                           </div>
                         )}
                       </div>

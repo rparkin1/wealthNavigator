@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 export interface UserProfile {
   id: string;
@@ -163,8 +164,12 @@ export function UserSettings({ userId }: UserSettingsProps) {
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center justify-between">
           <span className="text-red-700">{error}</span>
-          <button onClick={() => setError(null)} className="text-red-600 hover:text-red-800">
-            ✕
+          <button
+            onClick={() => setError(null)}
+            className="text-red-600 hover:text-red-800 transition-colors"
+            aria-label="Close error message"
+          >
+            <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
       )}

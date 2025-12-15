@@ -3,7 +3,6 @@
  * Displays factor betas with significance indicators
  */
 
-import React from 'react';
 import {
   BarChart,
   Bar,

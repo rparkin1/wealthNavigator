@@ -7,6 +7,18 @@
  */
 
 import React, { useState } from 'react';
+import {
+  MagnifyingGlassIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  ClipboardDocumentListIcon,
+  XMarkIcon,
+  BanknotesIcon,
+  ArrowUpIcon,
+  LightBulbIcon,
+  QuestionMarkCircleIcon,
+  CalendarIcon,
+} from '@heroicons/react/24/outline';
 import { analyzeRothConversion, formatCurrency, formatPercentage } from '@/services/taxManagementApi';
 import type { BackdoorRothAnalysis } from '@/services/taxManagementApi';
 
@@ -241,9 +253,16 @@ export const RothConversionAnalysis: React.FC = () => {
         <button
           onClick={handleAnalyze}
           disabled={loading}
-          className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+          className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold flex items-center justify-center gap-2"
         >
-          {loading ? 'Analyzing...' : '🔍 Analyze Roth Conversion'}
+          {loading ? (
+            'Analyzing...'
+          ) : (
+            <>
+              <MagnifyingGlassIcon className="w-5 h-5" />
+              Analyze Roth Conversion
+            </>
+          )}
         </button>
       </div>
 
@@ -261,8 +280,18 @@ export const RothConversionAnalysis: React.FC = () => {
           <div className={`border rounded-lg p-6 ${analysis.recommendation.recommended ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-2xl font-bold mb-2">
-                  {analysis.recommendation.recommended ? '✅ Roth Conversion Recommended' : '⚠️ Consider Alternatives'}
+                <h3 className="flex items-center gap-2 text-2xl font-bold mb-2">
+                  {analysis.recommendation.recommended ? (
+                    <>
+                      <CheckCircleIcon className="w-7 h-7 text-green-600" />
+                      Roth Conversion Recommended
+                    </>
+                  ) : (
+                    <>
+                      <ExclamationTriangleIcon className="w-7 h-7 text-yellow-600" />
+                      Consider Alternatives
+                    </>
+                  )}
                 </h3>
                 <p className="text-lg mb-4">
                   <strong>Strategy:</strong> {analysis.recommendation.strategy.replace('_', ' ').toUpperCase()} |{' '}
@@ -301,13 +330,26 @@ export const RothConversionAnalysis: React.FC = () => {
 
           {/* Eligibility */}
           <div className="bg-white border rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4">📋 Eligibility Analysis</h3>
+            <h3 className="flex items-center gap-2 text-xl font-bold mb-4">
+              <ClipboardDocumentListIcon className="w-6 h-6 text-blue-600" />
+              Eligibility Analysis
+            </h3>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
               <div>
                 <div className="text-sm text-gray-600">Eligible</div>
-                <div className="text-lg font-semibold">
-                  {analysis.eligibility.is_eligible ? '✅ Yes' : '❌ No'}
+                <div className="flex items-center gap-2 text-lg font-semibold">
+                  {analysis.eligibility.is_eligible ? (
+                    <>
+                      <CheckCircleIcon className="w-5 h-5 text-green-600" />
+                      Yes
+                    </>
+                  ) : (
+                    <>
+                      <XMarkIcon className="w-5 h-5 text-red-600" />
+                      No
+                    </>
+                  )}
                 </div>
               </div>
               <div>
@@ -326,7 +368,10 @@ export const RothConversionAnalysis: React.FC = () => {
 
             {analysis.eligibility.pro_rata_rule_applies && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                <h4 className="font-semibold mb-2">⚠️ Pro-Rata Rule Applies</h4>
+                <h4 className="flex items-center gap-2 font-semibold mb-2">
+                  <ExclamationTriangleIcon className="w-5 h-5 text-yellow-600" />
+                  Pro-Rata Rule Applies
+                </h4>
                 <p className="text-sm mb-2">
                   {analysis.eligibility.pro_rata_taxable_percentage.toFixed(1)}% of your conversion will be taxable due to existing pre-tax IRA balances.
                 </p>
@@ -346,7 +391,10 @@ export const RothConversionAnalysis: React.FC = () => {
               <div className="mt-4 space-y-2">
                 <h4 className="font-semibold text-orange-700">Warnings:</h4>
                 {analysis.eligibility.warnings.map((warning, idx) => (
-                  <p key={idx} className="text-sm text-orange-700">⚠️ {warning}</p>
+                  <p key={idx} className="flex items-start gap-2 text-sm text-orange-700">
+                    <ExclamationTriangleIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    {warning}
+                  </p>
                 ))}
               </div>
             )}
@@ -354,7 +402,10 @@ export const RothConversionAnalysis: React.FC = () => {
 
           {/* Tax Impact */}
           <div className="bg-white border rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4">💰 Tax Impact Analysis</h3>
+            <h3 className="flex items-center gap-2 text-xl font-bold mb-4">
+              <BanknotesIcon className="w-6 h-6 text-green-600" />
+              Tax Impact Analysis
+            </h3>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               <div>
@@ -386,18 +437,19 @@ export const RothConversionAnalysis: React.FC = () => {
               </div>
               <div>
                 <div className="text-sm text-gray-600">After Conversion Bracket</div>
-                <div className={`text-lg font-semibold ${analysis.tax_impact.marginal_rate_impact ? 'text-orange-600' : ''}`}>
+                <div className={`flex items-center gap-1 text-lg font-semibold ${analysis.tax_impact.marginal_rate_impact ? 'text-orange-600' : ''}`}>
                   {analysis.tax_impact.tax_bracket_after}
-                  {analysis.tax_impact.marginal_rate_impact && ' ⬆️'}
+                  {analysis.tax_impact.marginal_rate_impact && <ArrowUpIcon className="w-4 h-4" />}
                 </div>
               </div>
             </div>
 
             {analysis.tax_impact.marginal_rate_impact && (
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                <p className="text-sm text-orange-800">
-                  <strong>⚠️ Tax Bracket Impact:</strong> This conversion would push you into a higher tax bracket.
-                  Consider converting up to {formatCurrency(analysis.tax_impact.recommended_max_conversion)} to stay in your current bracket.
+                <p className="flex items-start gap-2 text-sm text-orange-800">
+                  <ExclamationTriangleIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <span><strong>Tax Bracket Impact:</strong> This conversion would push you into a higher tax bracket.
+                  Consider converting up to {formatCurrency(analysis.tax_impact.recommended_max_conversion)} to stay in your current bracket.</span>
                 </p>
               </div>
             )}
@@ -405,7 +457,10 @@ export const RothConversionAnalysis: React.FC = () => {
 
           {/* Reasoning */}
           <div className="bg-white border rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4">💡 Recommendation Reasoning</h3>
+            <h3 className="flex items-center gap-2 text-xl font-bold mb-4">
+              <LightBulbIcon className="w-6 h-6 text-yellow-500" />
+              Recommendation Reasoning
+            </h3>
             <div className="space-y-2">
               {analysis.recommendation.reasoning.map((reason, idx) => (
                 <p key={idx} className="text-gray-700">{reason}</p>
@@ -415,7 +470,10 @@ export const RothConversionAnalysis: React.FC = () => {
 
           {/* Action Steps */}
           <div className="bg-white border rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4">✅ Action Steps</h3>
+            <h3 className="flex items-center gap-2 text-xl font-bold mb-4">
+              <CheckCircleIcon className="w-6 h-6 text-green-600" />
+              Action Steps
+            </h3>
             <ol className="space-y-3">
               {analysis.recommendation.action_steps.map((step, idx) => (
                 <li key={idx} className="flex">
@@ -427,7 +485,10 @@ export const RothConversionAnalysis: React.FC = () => {
 
           {/* Considerations */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4">🤔 Important Considerations</h3>
+            <h3 className="flex items-center gap-2 text-xl font-bold mb-4">
+              <QuestionMarkCircleIcon className="w-6 h-6 text-blue-600" />
+              Important Considerations
+            </h3>
             <div className="space-y-2">
               {analysis.recommendation.considerations.map((consideration, idx) => (
                 <p key={idx} className="text-gray-700">{consideration}</p>
@@ -436,7 +497,10 @@ export const RothConversionAnalysis: React.FC = () => {
 
             {analysis.five_year_rule_date && (
               <div className="mt-4 p-4 bg-white rounded-lg">
-                <p className="font-semibold">📅 Five-Year Rule:</p>
+                <p className="flex items-center gap-2 font-semibold">
+                  <CalendarIcon className="w-5 h-5 text-blue-600" />
+                  Five-Year Rule:
+                </p>
                 <p className="text-sm text-gray-700">
                   Converted amounts will be penalty-free after {analysis.five_year_rule_date}
                 </p>

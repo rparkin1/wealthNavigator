@@ -381,37 +381,4 @@ export const EVENT_TYPE_METADATA: Record<LifeEventType, EventTypeMetadata> = {
   },
 };
 
-// Explicit type re-exports for Vite/TypeScript compatibility
-export type {
-  BusinessStartImpact,
-  CareerChangeImpact,
-  ChildBirthImpact,
-  CreateLifeEventRequest,
-  DisabilityImpact,
-  DivorceImpact,
-  EventTemplate,
-  EventTemplateSelectorProps,
-  EventTypeMetadata,
-  FinancialImpact,
-  GetEventsParams,
-  HomePurchaseImpact,
-  ImpactAnalysis,
-  InheritanceImpact,
-  JobLossImpact,
-  LifeEvent,
-  LifeEventFormProps,
-  LifeEventImpactComparisonProps,
-  LifeEventManagerProps,
-  LifeEventTimelineProps,
-  LifeEventType,
-  MajorMedicalImpact,
-  MarriageImpact,
-  RecoveryAnalysis,
-  RelocationImpact,
-  ScenarioResult,
-  SimulateEventRequest,
-  SimulationResults,
-  TimelineEvent,
-  UpdateLifeEventRequest,
-  WindfallImpact,
-};
+// Note: All types are already exported inline above, no need for duplicate exports

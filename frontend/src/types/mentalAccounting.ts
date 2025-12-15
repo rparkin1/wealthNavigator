@@ -205,22 +205,4 @@ export interface AnalyzeRebalancingRequest {
   total_portfolio_value: number;
 }
 
-// Explicit type re-exports for Vite/TypeScript compatibility
-export type {
-  AccountAllocation,
-  AllMentalAccountsResponse,
-  AllocateAccountRequest,
-  AnalyzeRebalancingRequest,
-  CreateBucketRequest,
-  DashboardAlert,
-  DashboardRecommendation,
-  DedicatedAccount,
-  GrowthProjection,
-  GrowthProjectionPoint,
-  MentalAccountBucket,
-  MentalAccountingDashboard,
-  MentalAccountSummary,
-  ProjectGrowthRequest,
-  RebalancingAnalysis,
-  RebalancingRecommendation,
-};
+// Note: All types are already exported inline above, no need for duplicate exports

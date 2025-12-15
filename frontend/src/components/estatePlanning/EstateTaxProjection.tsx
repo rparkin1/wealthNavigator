@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import { estatePlanningApi } from '../../services/estatePlanningApi';
 import type {
   EstateTaxCalculation,
@@ -271,7 +272,10 @@ const EstateTaxProjection: React.FC = () => {
           {/* Tax Liability Alert */}
           {calculation.has_federal_tax_liability && (
             <div className="alert warning">
-              <strong>⚠️ Federal Estate Tax Liability</strong>
+              <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <ExclamationTriangleIcon style={{ width: '20px', height: '20px', flexShrink: 0 }} />
+                Federal Estate Tax Liability
+              </strong>
               <p>
                 Your estate exceeds the federal exemption. Consider estate planning
                 strategies to reduce your tax burden.
@@ -281,7 +285,10 @@ const EstateTaxProjection: React.FC = () => {
 
           {calculation.has_state_tax_liability && (
             <div className="alert info">
-              <strong>ℹ️ State Estate Tax Liability</strong>
+              <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <InformationCircleIcon style={{ width: '20px', height: '20px', flexShrink: 0 }} />
+                State Estate Tax Liability
+              </strong>
               <p>
                 Your estate is subject to state estate tax. Explore state-specific planning
                 strategies.

@@ -6,6 +6,7 @@
  */
 
 import { useState } from 'react';
+import { ChartBarIcon, LightBulbIcon } from '@heroicons/react/24/outline';
 import {
   LineChart,
   Line,
@@ -42,7 +43,9 @@ export function IncomeProjection({
   if (!projections || projections.length === 0) {
     return (
       <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-        <div className="text-gray-400 text-4xl mb-3">📊</div>
+        <div className="flex justify-center mb-3">
+          <ChartBarIcon className="w-10 h-10 text-gray-400" />
+        </div>
         <p className="text-gray-600">No projection data available</p>
       </div>
     );
@@ -417,7 +420,10 @@ export function IncomeProjection({
 
       {/* Insights */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="font-semibold text-blue-900 mb-2">💡 Key Insights</h4>
+        <h4 className="flex items-center gap-2 font-semibold text-blue-900 mb-2">
+          <LightBulbIcon className="w-5 h-5" />
+          Key Insights
+        </h4>
         <ul className="space-y-1 text-sm text-blue-800">
           <li>
             • Your average annual income in retirement is projected to be{' '}

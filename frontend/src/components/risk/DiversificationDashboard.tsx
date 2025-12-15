@@ -394,7 +394,9 @@ export const DiversificationDashboard: React.FC<DiversificationDashboardProps> =
                   borderRadius: '8px',
                 }}
               >
-                <div style={{ fontSize: '48px', marginBottom: '16px' }}>👍</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                  <CheckCircleIcon style={{ width: '64px', height: '64px', color: '#10b981' }} />
+                </div>
                 <div style={{ fontSize: '18px', fontWeight: 600, color: '#047857' }}>
                   Portfolio Optimization Complete
                 </div>

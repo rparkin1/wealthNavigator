@@ -69,7 +69,7 @@ class MockResizeObserver {
   disconnect() {}
 }
 
-global.ResizeObserver = MockResizeObserver as any;
+globalThis.ResizeObserver = MockResizeObserver as any;
 
 // Mock localStorage
 class MockStorage implements Storage {
@@ -101,5 +101,5 @@ class MockStorage implements Storage {
   }
 }
 
-global.localStorage = new MockStorage();
-global.sessionStorage = new MockStorage();
+globalThis.localStorage = new MockStorage();
+globalThis.sessionStorage = new MockStorage();

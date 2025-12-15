@@ -261,26 +261,4 @@ export interface DiversificationChartData {
   };
 }
 
-// Explicit type re-exports for Vite/TypeScript compatibility
-export type {
-  ConcentrationBreakdown,
-  ConcentrationCard,
-  ConcentrationRisk,
-  ConcentrationSeverity,
-  ConcentrationThresholds,
-  ConcentrationType,
-  DiversificationAnalysisRequest,
-  DiversificationAnalysisResult,
-  DiversificationChartData,
-  DiversificationDashboardState,
-  DiversificationLevel,
-  DiversificationMetrics,
-  DiversificationRecommendation,
-  DiversificationScoreDisplay,
-  DiversificationTab,
-  HoldingInfo,
-  RiskBadge,
-  SimplifiedDiversificationRequest,
-  SimplifiedHolding,
-  TopHolding,
-};
+// Note: All types are already exported inline above, no need for duplicate exports

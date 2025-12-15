@@ -10,7 +10,7 @@
  * - Icon support
  */
 
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Card } from './Card';
 
 export interface StatCardProps {

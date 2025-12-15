@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { ClockIcon, BanknotesIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, BanknotesIcon, CheckCircleIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 
 export interface ReserveMonitoringProps {
   currentReserves: number;
@@ -260,8 +260,9 @@ export const ReserveMonitoring: React.FC<ReserveMonitoringProps> = ({
                   <div style={{ fontSize: '14px', color: '#374151', marginBottom: '12px' }}>
                     {alert.message}
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: 500, color: getSeverityColor(alert.severity) }}>
-                    ➜ {alert.action_required}
+                  <div style={{ fontSize: '14px', fontWeight: 500, color: getSeverityColor(alert.severity), display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ArrowRightIcon style={{ width: '16px', height: '16px', flexShrink: 0 }} />
+                    {alert.action_required}
                   </div>
                 </div>
               ))}

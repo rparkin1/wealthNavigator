@@ -6,6 +6,7 @@
  */
 
 import { useRef, useEffect } from 'react';
+import { CheckCircleIcon, ExclamationTriangleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import * as d3 from 'd3';
 import type { LifeEvent } from './types';
 
@@ -175,11 +176,11 @@ export function LifeEventImpactComparison({ event, onClose }: LifeEventImpactCom
           {/* Severity Badge */}
           <div className={`p-4 rounded-lg border ${severityStyle.bg} ${severityStyle.border}`}>
             <div className="flex items-center gap-3">
-              <div className={`text-2xl ${severityStyle.text}`}>
-                {severity === 'minimal' && '✓'}
-                {severity === 'moderate' && '⚠'}
-                {severity === 'significant' && '⚠'}
-                {severity === 'severe' && '⚠'}
+              <div className={severityStyle.text}>
+                {severity === 'minimal' && <CheckCircleIcon className="w-8 h-8" />}
+                {severity === 'moderate' && <ExclamationTriangleIcon className="w-8 h-8" />}
+                {severity === 'significant' && <ExclamationTriangleIcon className="w-8 h-8" />}
+                {severity === 'severe' && <ExclamationTriangleIcon className="w-8 h-8" />}
               </div>
               <div>
                 <h3 className={`text-sm font-semibold ${severityStyle.text} uppercase`}>
@@ -263,8 +264,16 @@ export function LifeEventImpactComparison({ event, onClose }: LifeEventImpactCom
                 </div>
                 <div>
                   <div className="text-xs text-blue-700">Recovery Feasible?</div>
-                  <div className="text-lg font-semibold text-blue-900">
-                    {results.recovery_analysis.recovery_feasible ? 'Yes ✓' : 'No ✗'}
+                  <div className="flex items-center gap-1 text-lg font-semibold text-blue-900">
+                    {results.recovery_analysis.recovery_feasible ? (
+                      <>
+                        Yes <CheckCircleIcon className="w-5 h-5 text-green-600" />
+                      </>
+                    ) : (
+                      <>
+                        No <XMarkIcon className="w-5 h-5 text-red-600" />
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

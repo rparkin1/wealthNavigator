@@ -11,6 +11,7 @@ import {
   ShieldCheckIcon,
   ScaleIcon,
   RocketLaunchIcon,
+  BoltIcon,
 } from '@heroicons/react/24/outline';
 import { createScenario, quickCompareScenarios } from '../../services/goalScenariosApi';
 import type { ScenarioCreationRequest, QuickCompareResponse } from '../../types/goalScenarios';
@@ -231,7 +232,7 @@ export const ScenarioCreationWizard: React.FC<ScenarioCreationWizardProps> = ({
                   className="p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left group"
                 >
                   <div className="flex items-start gap-3">
-                    <span className="text-3xl">⚡</span>
+                    <BoltIcon className="w-12 h-12 text-yellow-500" />
                     <div>
                       <h4 tabIndex={-1} className="font-semibold text-gray-900 group-hover:text-blue-600">
                         Quick Setup

@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { ChartBarIcon } from '@heroicons/react/24/outline';
+import { ChartBarIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { simulateReserveGrowth } from '../../services/reserveMonitoringApi';
 import type { ReserveGrowthSimulation } from '../../types/reserveMonitoring';
 
@@ -177,8 +177,9 @@ export const ReserveGrowthSimulator: React.FC<ReserveGrowthSimulatorProps> = ({
             {formatCurrency(simulation.target_amount)}
           </div>
           {simulation.target_reached_month ? (
-            <div style={{ fontSize: '12px', color: '#059669', marginTop: '4px' }}>
-              ✓ Reached in month {simulation.target_reached_month}
+            <div style={{ fontSize: '12px', color: '#059669', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <CheckCircleIcon style={{ width: '16px', height: '16px', color: '#059669', flexShrink: 0 }} />
+              Reached in month {simulation.target_reached_month}
             </div>
           ) : (
             <div style={{ fontSize: '12px', color: '#d97706', marginTop: '4px' }}>

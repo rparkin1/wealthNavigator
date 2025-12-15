@@ -84,15 +84,4 @@ export interface SimulationResult {
   statistics: SimulationStatistics;
 }
 
-// Explicit type re-exports for Vite/TypeScript compatibility
-export type {
-  DepletionRisk,
-  MarketScenario,
-  MonteCarloSimulation,
-  PortfolioProjection,
-  SimulationAssumptions,
-  SimulationParams,
-  SimulationResult,
-  SimulationStatistics,
-  SimulationStatus,
-};
+// Note: All types are already exported inline above, no need for duplicate exports

@@ -5,6 +5,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { ChartBarIcon } from '@heroicons/react/24/outline';
 import type { NetWorthDataPoint } from './NetWorthTrendChart';
 
 interface NetWorthGrowthMetricsProps {
@@ -219,7 +220,10 @@ export const NetWorthGrowthMetrics: React.FC<NetWorthGrowthMetricsProps> = ({
 
       {/* Interpretation Guide */}
       <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">📊 Metric Interpretations</h3>
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+          <ChartBarIcon className="w-5 h-5 text-blue-600" />
+          Metric Interpretations
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-gray-600">
           <div>
             <span className="font-medium">Annualized Return:</span> Historical average yearly growth rate

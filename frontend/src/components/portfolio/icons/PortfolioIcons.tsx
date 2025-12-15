@@ -5,7 +5,6 @@
  * Following UI Redesign specifications - Week 10
  */
 
-import React from 'react';
 
 export interface IconProps {
   size?: number;

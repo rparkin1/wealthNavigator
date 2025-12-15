@@ -88,17 +88,4 @@ export interface DependencyUpdateRequest {
   condition?: string;
 }
 
-// Explicit type re-exports for Vite/TypeScript compatibility
-export type {
-  DependencyCreationRequest,
-  DependencyGraph,
-  DependencyGraphLink,
-  DependencyGraphNode,
-  DependencyOptimization,
-  DependencyTimeline,
-  DependencyType,
-  DependencyUpdateRequest,
-  DependencyValidation,
-  GoalDependency,
-  GoalWithDependencies,
-};
+// Note: All types are already exported inline above, no need for duplicate exports

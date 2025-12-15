@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { educationFundingApi } from '../../services/educationFundingApi';
 import type {
   ChildEducation,
@@ -127,7 +128,7 @@ export const EducationFundingDashboard: React.FC<EducationFundingDashboardProps>
                     className="btn-icon btn-danger"
                     aria-label="Remove child"
                   >
-                    ✕
+                    <XMarkIcon className="w-4 h-4" />
                   </button>
                 </div>
 

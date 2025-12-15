@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, ExclamationTriangleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import type { ReserveRecommendation } from '../../types/reserveMonitoring';
 
 export interface ReserveReplenishmentPlanProps {
@@ -76,7 +76,9 @@ export const ReserveReplenishmentPlan: React.FC<ReserveReplenishmentPlanProps> =
           fontFamily: 'system-ui, -apple-system, sans-serif',
         }}
       >
-        <div style={{ fontSize: '48px', marginBottom: '12px' }}>🎉</div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+          <CheckCircleIcon style={{ width: '48px', height: '48px', color: '#059669' }} />
+        </div>
         <div style={{ fontSize: '20px', fontWeight: 600, color: '#059669', marginBottom: '8px' }}>
           Reserve Target Met!
         </div>

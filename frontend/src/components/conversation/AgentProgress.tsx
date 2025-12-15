@@ -11,7 +11,7 @@ import {
   ChartBarIcon,
   CurrencyDollarIcon,
   ShieldCheckIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   BeakerIcon,
   BanknotesIcon,
   SparklesIcon,
@@ -35,7 +35,7 @@ export function AgentProgress({ currentAgent, agentUpdates }: AgentProgressProps
     'Risk Manager': ShieldCheckIcon,
     'Tax Strategist': CurrencyDollarIcon,
     'Budgeting Agent': BanknotesIcon,
-    'Retirement Planner': TrendingUpIcon,
+    'Retirement Planner': ArrowTrendingUpIcon,
     'Visualization Agent': ChartBarIcon,
   };
 

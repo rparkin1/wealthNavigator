@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { BuildingLibraryIcon, CreditCardIcon, ChartBarIcon, HomeIcon, BanknotesIcon } from '@heroicons/react/24/outline';
 import { plaidApi } from '../../services/plaidApi';
 import type { PlaidAccount, PlaidItem } from '../../types/plaid';
 
@@ -72,18 +73,19 @@ export function ConnectedAccounts() {
     }).format(amount);
   }
 
-  function getAccountTypeIcon(type: string): string {
+  function getAccountTypeIcon(type: string) {
+    const iconClass = "w-10 h-10";
     switch (type) {
       case 'depository':
-        return '🏦';
+        return <BuildingLibraryIcon className={iconClass} />;
       case 'credit':
-        return '💳';
+        return <CreditCardIcon className={iconClass} />;
       case 'investment':
-        return '📈';
+        return <ChartBarIcon className={iconClass} />;
       case 'loan':
-        return '🏠';
+        return <HomeIcon className={iconClass} />;
       default:
-        return '💰';
+        return <BanknotesIcon className={iconClass} />;
     }
   }
 
@@ -187,7 +189,7 @@ export function ConnectedAccounts() {
                 <div key={account.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <span className="text-2xl">{getAccountTypeIcon(account.type)}</span>
+                      <div className="text-blue-600">{getAccountTypeIcon(account.type)}</div>
                       <div>
                         <div className="font-medium text-gray-900">
                           {account.name}

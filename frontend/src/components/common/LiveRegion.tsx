@@ -4,7 +4,7 @@
  * ARIA live region for announcing dynamic content changes to screen readers
  */
 
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 export interface LiveRegionProps {
   /**

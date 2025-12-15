@@ -140,17 +140,4 @@ export interface CAPMAnalysisState {
   error: string | null;
 }
 
-// Explicit type re-exports for Vite/TypeScript compatibility
-export type {
-  CAPMAnalysisRequest,
-  CAPMAnalysisState,
-  CAPMMetrics,
-  CAPMPortfolioRequest,
-  CAPMPortfolioResponse,
-  FactorAnalysisRequest,
-  FactorAnalysisResponse,
-  FactorAnalysisState,
-  FactorAttribution,
-  FactorExposure,
-  SecurityMarketLineResponse,
-};
+// Note: All types are already exported inline above, no need for duplicate exports

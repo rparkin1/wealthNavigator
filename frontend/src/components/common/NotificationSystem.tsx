@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { CheckCircleIcon, InformationCircleIcon, ExclamationTriangleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 export type NotificationType = 'success' | 'info' | 'warning' | 'error';
 
@@ -124,15 +125,16 @@ export const NotificationSystem: React.FC<NotificationSystemProps> = ({
   };
 
   const getIconForType = (type: NotificationType) => {
+    const iconClass = "w-4 h-4";
     switch (type) {
       case NotificationType.SUCCESS:
-        return '✓';
+        return <CheckCircleIcon className={iconClass} />;
       case NotificationType.INFO:
-        return 'ℹ';
+        return <InformationCircleIcon className={iconClass} />;
       case NotificationType.WARNING:
-        return '⚠';
+        return <ExclamationTriangleIcon className={iconClass} />;
       case NotificationType.ERROR:
-        return '✕';
+        return <XMarkIcon className={iconClass} />;
     }
   };
 
@@ -224,8 +226,9 @@ export const NotificationSystem: React.FC<NotificationSystemProps> = ({
                             dismissNotification(notification.id);
                           }}
                           className="text-gray-400 hover:text-gray-600 ml-2"
+                          aria-label="Dismiss notification"
                         >
-                          ✕
+                          <XMarkIcon className="w-4 h-4" />
                         </button>
                       </div>
                       <p className="text-sm text-gray-600 mt-1">

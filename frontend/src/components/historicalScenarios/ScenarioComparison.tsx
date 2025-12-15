@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { CheckIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import type { ScenarioListItem, ScenarioComparison as ComparisonResult } from '../../types/historicalScenarios';
 import * as historicalScenariosApi from '../../services/historicalScenariosApi';
 import { formatReturn, formatCurrency, isScenarioResult } from '../../types/historicalScenarios';
@@ -171,13 +172,15 @@ export function ScenarioComparison({
                       {scenario.scenario_name}
                     </h3>
                     {isBest && (
-                      <span className="px-2 py-1 bg-green-600 text-white text-xs font-medium rounded">
-                        ✓ Best
+                      <span className="px-2 py-1 bg-green-600 text-white text-xs font-medium rounded flex items-center gap-1">
+                        <CheckIcon className="w-3 h-3" />
+                        Best
                       </span>
                     )}
                     {isWorst && (
-                      <span className="px-2 py-1 bg-red-600 text-white text-xs font-medium rounded">
-                        ⚠ Worst
+                      <span className="px-2 py-1 bg-red-600 text-white text-xs font-medium rounded flex items-center gap-1">
+                        <ExclamationTriangleIcon className="w-3 h-3" />
+                        Worst
                       </span>
                     )}
                   </div>

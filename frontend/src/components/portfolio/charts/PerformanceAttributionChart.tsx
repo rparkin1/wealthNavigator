@@ -3,7 +3,6 @@
  * Displays contribution breakdown by factor
  */
 
-import React from 'react';
 import {
   PieChart,
   Pie,

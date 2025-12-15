@@ -77,13 +77,4 @@ export interface HedgingEducationContent {
   glossary: Record<string, string>;
 }
 
-// Explicit type re-exports for Vite/TypeScript compatibility
-export type {
-  HedgingStrategyType,
-  HedgingStrategy,
-  HedgingObjectives,
-  HedgingRecommendation,
-  HedgingRequest,
-  HedgingEducationTopic,
-  HedgingEducationContent,
-};
+// Note: All types are already exported inline above, no need for duplicate exports

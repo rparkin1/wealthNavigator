@@ -4,7 +4,6 @@
  * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
-import React from 'react';
 import { ArrowUpIcon, ArrowDownIcon } from './GoalIcons';
 import type { ComparisonResult } from '../../utils/whatIfCalculations';
 import { formatCurrency, formatPercentage, formatDifference } from '../../utils/whatIfCalculations';

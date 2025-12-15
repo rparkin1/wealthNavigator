@@ -203,7 +203,7 @@ export const ThresholdAnalysisChart: React.FC<ThresholdAnalysisChartProps> = ({
           )}
           {isOnTrack && (
             <li className="flex items-start">
-              <span className="text-green-600 mr-2">✓</span>
+              <CheckCircleIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
               <span>
                 Your current {formatVariableName(variable).toLowerCase()} is
                 sufficient to achieve your target success probability.

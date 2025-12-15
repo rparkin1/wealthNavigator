@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { ExclamationTriangleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { estatePlanningApi } from '../../services/estatePlanningApi';
 import type {
   GiftingStrategyAnalysis,
@@ -173,7 +174,10 @@ const GiftingStrategyAnalyzer: React.FC = () => {
           {/* Compliance Alert */}
           {!analysis.is_within_annual_exclusion && (
             <div className="alert warning">
-              <strong>⚠️ Gift Tax May Apply</strong>
+              <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <ExclamationTriangleIcon style={{ width: '20px', height: '20px', flexShrink: 0 }} />
+                Gift Tax May Apply
+              </strong>
               <p>
                 Your annual gift amount of {formatCurrency(analysis.annual_gift_amount)} exceeds
                 the annual exclusion limit. Consider consulting with a tax professional.
@@ -183,7 +187,10 @@ const GiftingStrategyAnalyzer: React.FC = () => {
 
           {analysis.is_within_annual_exclusion && (
             <div className="alert success">
-              <strong>✓ Within Annual Exclusion</strong>
+              <strong style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <CheckCircleIcon style={{ width: '20px', height: '20px', flexShrink: 0 }} />
+                Within Annual Exclusion
+              </strong>
               <p>
                 Your gifts are within the annual exclusion limit, so no gift tax return is
                 required for these gifts.

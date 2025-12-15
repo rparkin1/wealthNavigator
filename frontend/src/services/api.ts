@@ -5,19 +5,19 @@
 
 import axios, { type AxiosInstance, AxiosError } from 'axios';
 import type {
-  type Thread,
-  type ThreadListItem
+  Thread,
+  ThreadListItem
 } from '../types/thread';
 import type {
-  type Goal
+  Goal
 } from '../types/goal';
 import type {
-  type Portfolio,
-  type OptimizationParams,
-  type OptimizationResult
+  Portfolio,
+  OptimizationParams,
+  OptimizationResult
 } from '../types/portfolio';
 import type {
-  type SimulationParams,
+  SimulationParams,
   type SimulationResult
 } from '../types/simulation';
 

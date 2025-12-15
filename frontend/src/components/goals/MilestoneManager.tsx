@@ -15,7 +15,7 @@ import type {
   MilestoneUpdateRequest,
 } from '../../types/goalMilestones';
 import * as milestoneApi from '../../services/goalMilestonesApi';
-import { SparklesIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { SparklesIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 export interface MilestoneManagerProps {
   goal: Goal;
@@ -194,9 +194,10 @@ export function MilestoneManager({
         </div>
         <button
           onClick={onClose}
-          className="text-gray-500 hover:text-gray-700 text-2xl"
+          className="text-gray-500 hover:text-gray-700"
+          aria-label="Close"
         >
-          ✕
+          <XMarkIcon className="w-6 h-6" />
         </button>
       </div>
 

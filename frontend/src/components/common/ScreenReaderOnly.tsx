@@ -11,7 +11,7 @@ export interface ScreenReaderOnlyProps {
   /**
    * HTML element type
    */
-  as?: keyof JSX.IntrinsicElements;
+  as?: React.ElementType;
 }
 
 export function ScreenReaderOnly({ children, as: Component = 'span' }: ScreenReaderOnlyProps) {

@@ -1046,7 +1046,7 @@ function HomeView({ onStartChat, onNavigate }: { onStartChat: () => void; onNavi
   );
 }
 
-function WhatIfAnalysisView({ userId }: { userId: string }) {
+function WhatIfAnalysisView({ userId: _userId }: { userId: string }) {
   const mockBaseValues = {
     monthlyContribution: 1000,
     expectedReturnStocks: 0.08,

@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { LightBulbIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { educationFundingApi } from '../../services/educationFundingApi';
 import type {
   Plan529Request,
@@ -260,7 +261,9 @@ export const Plan529Calculator: React.FC<Plan529CalculatorProps> = ({
             </div>
 
             <div className="recommendation-box">
-              <div className="recommendation-icon">💡</div>
+              <div className="recommendation-icon">
+                <LightBulbIcon style={{ width: '32px', height: '32px' }} />
+              </div>
               <p>{strategy.recommendation}</p>
             </div>
 
@@ -292,7 +295,10 @@ export const Plan529Calculator: React.FC<Plan529CalculatorProps> = ({
                     <h5>Advantages</h5>
                     <ul>
                       {vehicleRecommendation.pros.map((pro, index) => (
-                        <li key={index}>✓ {pro}</li>
+                        <li key={index} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+                          <CheckCircleIcon style={{ width: '16px', height: '16px', color: '#2f855a', flexShrink: 0, marginTop: '2px' }} />
+                          <span>{pro}</span>
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -301,7 +307,10 @@ export const Plan529Calculator: React.FC<Plan529CalculatorProps> = ({
                     <h5>Considerations</h5>
                     <ul>
                       {vehicleRecommendation.cons.map((con, index) => (
-                        <li key={index}>⚠ {con}</li>
+                        <li key={index} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+                          <ExclamationTriangleIcon style={{ width: '16px', height: '16px', color: '#c05621', flexShrink: 0, marginTop: '2px' }} />
+                          <span>{con}</span>
+                        </li>
                       ))}
                     </ul>
                   </div>

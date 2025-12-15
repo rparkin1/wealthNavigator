@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { ExclamationTriangleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { useComprehensiveAnalysis } from '../../hooks/usePortfolio';
 import { AnalysisType } from '../../types/portfolio';
 import type { ComprehensiveAnalysisRequest } from '../../types/portfolio';
@@ -268,15 +269,23 @@ export const ComprehensiveAnalysis: React.FC<ComprehensiveAnalysisProps> = ({
                   data.rebalancing.needs_rebalancing ? 'bg-yellow-50' : 'bg-green-50'
                 }`}
               >
-                <p
-                  className={`font-semibold ${
+                <div
+                  className={`flex items-center gap-2 font-semibold ${
                     data.rebalancing.needs_rebalancing ? 'text-yellow-900' : 'text-green-900'
                   }`}
                 >
-                  {data.rebalancing.needs_rebalancing
-                    ? '⚠️ Rebalancing Recommended'
-                    : '✓ Portfolio Within Tolerance'}
-                </p>
+                  {data.rebalancing.needs_rebalancing ? (
+                    <>
+                      <ExclamationTriangleIcon className="w-5 h-5" />
+                      Rebalancing Recommended
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircleIcon className="w-5 h-5" />
+                      Portfolio Within Tolerance
+                    </>
+                  )}
+                </div>
                 <p
                   className={`text-sm mt-1 ${
                     data.rebalancing.needs_rebalancing ? 'text-yellow-700' : 'text-green-700'

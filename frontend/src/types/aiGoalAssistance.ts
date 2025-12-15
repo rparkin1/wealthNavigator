@@ -125,18 +125,4 @@ export interface UserContext {
   [key: string]: any;
 }
 
-// Explicit type re-exports for Vite/TypeScript compatibility
-export type {
-  AIGoalAssistanceState,
-  AlternativeScenario,
-  ClarifyingQuestion,
-  CostEstimate,
-  EducationalContext,
-  GoalConflict,
-  GoalRecommendations,
-  GoalTemplate,
-  ParsedGoalData,
-  QuickSetupData,
-  TimelineRecommendation,
-  UserContext,
-};
+// Note: All types are already exported inline above, no need for duplicate exports

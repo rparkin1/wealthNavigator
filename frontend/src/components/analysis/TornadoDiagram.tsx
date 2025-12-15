@@ -61,15 +61,6 @@ export function TornadoDiagram({ variables, width = 600, height = 400 }: Tornado
     g.append('g').attr('transform', 'translate(0,' + innerHeight + ')').call(d3.axisBottom(x).ticks(5));
   }, [variables, width, height]);
 
-  const mockVariables: SensitivityVariable[] = variables || [
-    { name: 'Stock Returns', lowValue: 60, highValue: 92, baseValue: 76 },
-    { name: 'Monthly Contribution', lowValue: 68, highValue: 84, baseValue: 76 },
-    { name: 'Retirement Age', lowValue: 70, highValue: 82, baseValue: 76 },
-    { name: 'Inflation Rate', lowValue: 72, highValue: 80, baseValue: 76 },
-    { name: 'Bond Returns', lowValue: 73, highValue: 79, baseValue: 76 },
-    { name: 'Life Expectancy', lowValue: 74, highValue: 78, baseValue: 76 }
-  ];
-
   return (
     <div className="card">
       <h3 className="text-lg font-semibold text-gray-900 mb-2">Sensitivity Analysis</h3>

@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { ChevronUpIcon, ChevronDownIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { estatePlanningApi } from '../../services/estatePlanningApi';
 import type {
   TrustStructure,
@@ -227,7 +228,11 @@ const TrustStructureBuilder: React.FC = () => {
                       <div className="score-badge">{trust.suitability_score}/100</div>
                     )}
                     <span className="expand-icon">
-                      {expandedTrust === trust.name ? '▲' : '▼'}
+                      {expandedTrust === trust.name ? (
+                        <ChevronUpIcon style={{ width: '16px', height: '16px' }} />
+                      ) : (
+                        <ChevronDownIcon style={{ width: '16px', height: '16px' }} />
+                      )}
                     </span>
                   </div>
                 </div>
@@ -243,22 +248,52 @@ const TrustStructureBuilder: React.FC = () => {
                     <div className="detail-grid">
                       <div className="detail-item">
                         <span className="detail-label">Estate Tax Benefit</span>
-                        <span className={`detail-value ${trust.estate_tax_benefit ? 'positive' : ''}`}>
-                          {trust.estate_tax_benefit ? '✓ Yes' : '✗ No'}
+                        <span className={`detail-value ${trust.estate_tax_benefit ? 'positive' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          {trust.estate_tax_benefit ? (
+                            <>
+                              <CheckIcon style={{ width: '16px', height: '16px', color: '#10b981' }} />
+                              Yes
+                            </>
+                          ) : (
+                            <>
+                              <XMarkIcon style={{ width: '16px', height: '16px', color: '#ef4444' }} />
+                              No
+                            </>
+                          )}
                         </span>
                       </div>
 
                       <div className="detail-item">
                         <span className="detail-label">Probate Avoidance</span>
-                        <span className={`detail-value ${trust.probate_avoidance ? 'positive' : ''}`}>
-                          {trust.probate_avoidance ? '✓ Yes' : '✗ No'}
+                        <span className={`detail-value ${trust.probate_avoidance ? 'positive' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          {trust.probate_avoidance ? (
+                            <>
+                              <CheckIcon style={{ width: '16px', height: '16px', color: '#10b981' }} />
+                              Yes
+                            </>
+                          ) : (
+                            <>
+                              <XMarkIcon style={{ width: '16px', height: '16px', color: '#ef4444' }} />
+                              No
+                            </>
+                          )}
                         </span>
                       </div>
 
                       <div className="detail-item">
                         <span className="detail-label">Asset Protection</span>
-                        <span className={`detail-value ${trust.asset_protection ? 'positive' : ''}`}>
-                          {trust.asset_protection ? '✓ Yes' : '✗ No'}
+                        <span className={`detail-value ${trust.asset_protection ? 'positive' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          {trust.asset_protection ? (
+                            <>
+                              <CheckIcon style={{ width: '16px', height: '16px', color: '#10b981' }} />
+                              Yes
+                            </>
+                          ) : (
+                            <>
+                              <XMarkIcon style={{ width: '16px', height: '16px', color: '#ef4444' }} />
+                              No
+                            </>
+                          )}
                         </span>
                       </div>
 

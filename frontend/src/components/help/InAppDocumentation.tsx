@@ -50,8 +50,8 @@ Example recommendation:
 Instead of one projection, we run **5,000 different scenarios**:
 
 **Success Probability: 87%**
-- ✅ In 87% of scenarios, you reach your goal
-- ❌ In 13% of scenarios, you fall short
+- **Success:** In 87% of scenarios, you reach your goal
+- **Shortfall:** In 13% of scenarios, you fall short
 
 ## Next Steps
 

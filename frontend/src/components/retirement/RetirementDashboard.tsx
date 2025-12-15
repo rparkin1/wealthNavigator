@@ -15,6 +15,10 @@ import {
   CurrencyDollarIcon,
   ArrowTrendingUpIcon,
   SparklesIcon,
+  BanknotesIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  InformationCircleIcon,
 } from '@heroicons/react/24/outline';
 import { SocialSecurityCalculator } from './SocialSecurityCalculator';
 import { SpendingPatternEditor } from './SpendingPatternEditor';
@@ -178,7 +182,9 @@ function OverviewTab({ socialSecurity, spending, longevity, onNavigate }: Overvi
           onClick={() => onNavigate('social-security')}
         >
           <div className="flex items-start justify-between mb-4">
-            <div className="text-blue-600 text-3xl">🏛️</div>
+            <div className="text-blue-600">
+              <BuildingColumnsIcon className="w-8 h-8" />
+            </div>
             <div className="text-right">
               {socialSecurity ? (
                 <div>
@@ -207,7 +213,9 @@ function OverviewTab({ socialSecurity, spending, longevity, onNavigate }: Overvi
           onClick={() => onNavigate('spending')}
         >
           <div className="flex items-start justify-between mb-4">
-            <div className="text-green-600 text-3xl">💰</div>
+            <div className="text-green-600">
+              <BanknotesIcon className="w-8 h-8" />
+            </div>
             <div className="text-right">
               {spending ? (
                 <div>
@@ -236,7 +244,9 @@ function OverviewTab({ socialSecurity, spending, longevity, onNavigate }: Overvi
           onClick={() => onNavigate('longevity')}
         >
           <div className="flex items-start justify-between mb-4">
-            <div className="text-purple-600 text-3xl">📈</div>
+            <div className="text-purple-600">
+              <ArrowTrendingUpIcon className="w-8 h-8" />
+            </div>
             <div className="text-right">
               {longevity ? (
                 <div>
@@ -262,7 +272,10 @@ function OverviewTab({ socialSecurity, spending, longevity, onNavigate }: Overvi
 
       {/* Getting Started Guide */}
       <div className="card bg-blue-50 border-blue-200">
-        <h3 className="font-semibold text-blue-900 mb-3">🚀 Getting Started</h3>
+        <h3 className="flex items-center gap-2 font-semibold text-blue-900 mb-3">
+          <SparklesIcon className="w-5 h-5" />
+          Getting Started
+        </h3>
         <div className="space-y-2 text-sm text-blue-800">
           <div className="flex items-start">
             <span className="font-bold mr-2">1.</span>
@@ -297,11 +310,14 @@ function OverviewTab({ socialSecurity, spending, longevity, onNavigate }: Overvi
 
       {/* Phase 3 Features */}
       <div className="card">
-        <h3 className="font-semibold text-gray-900 mb-4">✨ Phase 3 Advanced Features</h3>
+        <h3 className="flex items-center gap-2 font-semibold text-gray-900 mb-4">
+          <SparklesIcon className="w-5 h-5 text-blue-600" />
+          Phase 3 Advanced Features
+        </h3>
         <div className="grid md:grid-cols-2 gap-4">
           <div className="border border-gray-200 rounded-lg p-4">
             <div className="flex items-center mb-2">
-              <span className="text-green-600 mr-2">✓</span>
+              <CheckCircleIcon className="w-5 h-5 text-green-600 mr-2" />
               <span className="font-medium text-gray-900">Social Security Calculator</span>
             </div>
             <p className="text-sm text-gray-600">
@@ -311,7 +327,7 @@ function OverviewTab({ socialSecurity, spending, longevity, onNavigate }: Overvi
           </div>
           <div className="border border-gray-200 rounded-lg p-4">
             <div className="flex items-center mb-2">
-              <span className="text-green-600 mr-2">✓</span>
+              <CheckCircleIcon className="w-5 h-5 text-green-600 mr-2" />
               <span className="font-medium text-gray-900">Spending Phase Modeling</span>
             </div>
             <p className="text-sm text-gray-600">
@@ -321,7 +337,7 @@ function OverviewTab({ socialSecurity, spending, longevity, onNavigate }: Overvi
           </div>
           <div className="border border-gray-200 rounded-lg p-4">
             <div className="flex items-center mb-2">
-              <span className="text-green-600 mr-2">✓</span>
+              <CheckCircleIcon className="w-5 h-5 text-green-600 mr-2" />
               <span className="font-medium text-gray-900">Longevity Analysis</span>
             </div>
             <p className="text-sm text-gray-600">
@@ -330,7 +346,7 @@ function OverviewTab({ socialSecurity, spending, longevity, onNavigate }: Overvi
           </div>
           <div className="border border-gray-200 rounded-lg p-4">
             <div className="flex items-center mb-2">
-              <span className="text-green-600 mr-2">✓</span>
+              <CheckCircleIcon className="w-5 h-5 text-green-600 mr-2" />
               <span className="font-medium text-gray-900">Income Projections</span>
             </div>
             <p className="text-sm text-gray-600">
@@ -382,7 +398,9 @@ function ProjectionsTab({ socialSecurity, spending, longevity }: ProjectionsTabP
   if (!socialSecurity || !spending || !longevity) {
     return (
       <div className="text-center py-12">
-        <div className="text-gray-400 text-5xl mb-4">🔮</div>
+        <div className="flex justify-center mb-4">
+          <SparklesIcon className="w-12 h-12 text-gray-400" />
+        </div>
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
           Configure All Components First
         </h3>
@@ -392,22 +410,28 @@ function ProjectionsTab({ socialSecurity, spending, longevity }: ProjectionsTabP
         </p>
         <div className="space-y-2 text-sm text-left max-w-md mx-auto">
           <div className="flex items-center">
-            <span className={socialSecurity ? 'text-green-600' : 'text-gray-400'}>
-              {socialSecurity ? '✓' : '○'}
-            </span>
-            <span className="ml-2">Social Security Benefits</span>
+            {socialSecurity ? (
+              <CheckCircleIcon className="w-5 h-5 text-green-600 mr-2" />
+            ) : (
+              <div className="w-5 h-5 border-2 border-gray-400 rounded-full mr-2" />
+            )}
+            <span>Social Security Benefits</span>
           </div>
           <div className="flex items-center">
-            <span className={spending ? 'text-green-600' : 'text-gray-400'}>
-              {spending ? '✓' : '○'}
-            </span>
-            <span className="ml-2">Spending Pattern</span>
+            {spending ? (
+              <CheckCircleIcon className="w-5 h-5 text-green-600 mr-2" />
+            ) : (
+              <div className="w-5 h-5 border-2 border-gray-400 rounded-full mr-2" />
+            )}
+            <span>Spending Pattern</span>
           </div>
           <div className="flex items-center">
-            <span className={longevity ? 'text-green-600' : 'text-gray-400'}>
-              {longevity ? '✓' : '○'}
-            </span>
-            <span className="ml-2">Life Expectancy</span>
+            {longevity ? (
+              <CheckCircleIcon className="w-5 h-5 text-green-600 mr-2" />
+            ) : (
+              <div className="w-5 h-5 border-2 border-gray-400 rounded-full mr-2" />
+            )}
+            <span>Life Expectancy</span>
           </div>
         </div>
       </div>
@@ -426,7 +450,9 @@ function ProjectionsTab({ socialSecurity, spending, longevity }: ProjectionsTabP
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-        <div className="text-red-600 text-2xl mb-2">⚠️</div>
+        <div className="flex justify-center mb-2">
+          <ExclamationTriangleIcon className="w-6 h-6 text-red-600" />
+        </div>
         <h3 className="font-semibold text-red-900 mb-2">Error Loading Projections</h3>
         <p className="text-sm text-red-800">{error}</p>
         <button
@@ -442,7 +468,9 @@ function ProjectionsTab({ socialSecurity, spending, longevity }: ProjectionsTabP
   if (!projections || projections.length === 0) {
     return (
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-        <div className="text-yellow-600 text-2xl mb-2">⚠️</div>
+        <div className="flex justify-center mb-2">
+          <ExclamationTriangleIcon className="w-6 h-6 text-yellow-600" />
+        </div>
         <h3 className="font-semibold text-yellow-900 mb-2">No Projections Available</h3>
         <p className="text-sm text-yellow-800">
           Unable to generate projections with the current configuration.
@@ -467,11 +495,11 @@ function ProjectionsTab({ socialSecurity, spending, longevity }: ProjectionsTabP
           <div className="flex items-start">
             <div className="flex-shrink-0">
               {metadata.portfolio_source === 'plaid' ? (
-                <span className="text-2xl">✓</span>
+                <CheckCircleIcon className="w-6 h-6 text-green-600" />
               ) : metadata.portfolio_source === 'default' ? (
-                <span className="text-2xl">⚠️</span>
+                <ExclamationTriangleIcon className="w-6 h-6 text-yellow-600" />
               ) : (
-                <span className="text-2xl">ℹ️</span>
+                <InformationCircleIcon className="w-6 h-6 text-blue-600" />
               )}
             </div>
             <div className="ml-3 flex-1">
@@ -504,8 +532,9 @@ function ProjectionsTab({ socialSecurity, spending, longevity }: ProjectionsTabP
                     <p>
                       Portfolio Value: <strong>${metadata.portfolio_value.toLocaleString()}</strong>
                     </p>
-                    <p className="text-xs mt-1">
-                      ✓ Fetched from {metadata.accounts_count} connected Plaid account
+                    <p className="flex items-center gap-1 text-xs mt-1">
+                      <CheckCircleIcon className="w-3 h-3" />
+                      Fetched from {metadata.accounts_count} connected Plaid account
                       {metadata.accounts_count !== 1 ? 's' : ''}
                     </p>
                   </>

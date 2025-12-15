@@ -5,7 +5,6 @@
  * Following WealthNavigator UI redesign design system
  */
 
-import React from 'react';
 
 interface ThreadSearchInputProps {
   value: string;

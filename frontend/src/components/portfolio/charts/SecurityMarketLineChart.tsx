@@ -3,7 +3,6 @@
  * Displays SML with portfolio position and efficient portfolios
  */
 
-import React from 'react';
 import {
   LineChart,
   Line,

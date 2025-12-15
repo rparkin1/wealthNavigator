@@ -21,6 +21,7 @@ import {
   formatVariableValue,
 } from '../../services/sensitivityAnalysisApi';
 import { CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid';
+import { CheckIcon } from '@heroicons/react/24/outline';
 
 interface BreakEvenCalculatorProps {
   data: BreakEvenAnalysisResult;
@@ -451,7 +452,7 @@ export const BreakEvenCalculator: React.FC<BreakEvenCalculatorProps> = ({
           ) : (
             <>
               <li className="flex items-start">
-                <span className="text-green-600 mr-2">✓</span>
+                <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                 <span>
                   Current position is{' '}
                   {Math.abs(current_delta.delta_percentage).toFixed(1)}% above
@@ -459,7 +460,7 @@ export const BreakEvenCalculator: React.FC<BreakEvenCalculatorProps> = ({
                 </span>
               </li>
               <li className="flex items-start">
-                <span className="text-green-600 mr-2">✓</span>
+                <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                 <span>
                   You have a safety margin to absorb unexpected changes in{' '}
                   {formatVariableName(variable1).toLowerCase()}.

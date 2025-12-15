@@ -7,7 +7,7 @@
  * Updated: 2025-12-13 - Using professional SVG icons (no emoji)
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type {
   FundingCalculatorTab,
   FundingRequirementsResult,
@@ -38,7 +38,7 @@ export interface GoalFundingCalculatorProps {
 }
 
 export function GoalFundingCalculator({
-  goalId,
+  goalId: _goalId,
   initialTargetAmount = 500000,
   initialCurrentAmount = 50000,
   initialMonthlyContribution = 1500,
@@ -55,17 +55,17 @@ export function GoalFundingCalculator({
   const [yearsToGoal, setYearsToGoal] = useState(initialYearsToGoal);
   const [expectedReturn, setExpectedReturn] = useState(0.07);
   const [returnVolatility, setReturnVolatility] = useState(0.15);
-  const [inflationRate, setInflationRate] = useState(0.03);
-  const [targetProbability, setTargetProbability] = useState(0.90);
-  const [maxMonthlyContribution, setMaxMonthlyContribution] = useState(2000);
-  const [yearsBehindSchedule, setYearsBehindSchedule] = useState(0);
+  const [inflationRate, _setInflationRate] = useState(0.03);
+  const [targetProbability, _setTargetProbability] = useState(0.90);
+  const [maxMonthlyContribution, _setMaxMonthlyContribution] = useState(2000);
+  const [yearsBehindSchedule, _setYearsBehindSchedule] = useState(0);
 
   // Results state
-  const [fundingRequirements, setFundingRequirements] = useState<FundingRequirementsResult | null>(null);
-  const [successProbability, setSuccessProbability] = useState<SuccessProbabilityResult | null>(null);
-  const [requiredSavings, setRequiredSavings] = useState<RequiredSavingsForProbabilityResult | null>(null);
-  const [optimization, setOptimization] = useState<ContributionOptimizationResult | null>(null);
-  const [catchUpStrategy, setCatchUpStrategy] = useState<CatchUpStrategyResult | null>(null);
+  const [_fundingRequirements, setFundingRequirements] = useState<FundingRequirementsResult | null>(null);
+  const [_successProbability, setSuccessProbability] = useState<SuccessProbabilityResult | null>(null);
+  const [_requiredSavings, setRequiredSavings] = useState<RequiredSavingsForProbabilityResult | null>(null);
+  const [_optimization, setOptimization] = useState<ContributionOptimizationResult | null>(null);
+  const [_catchUpStrategy, setCatchUpStrategy] = useState<CatchUpStrategyResult | null>(null);
   const [comprehensiveAnalysis, setComprehensiveAnalysis] = useState<ComprehensiveAnalysisResult | null>(null);
 
   // UI state
@@ -123,7 +123,7 @@ export function GoalFundingCalculator({
     }
   };
 
-  const handleCalculateRequiredSavings = async () => {
+  const _handleCalculateRequiredSavings = async () => {
     setIsCalculating(true);
     setError(null);
     try {

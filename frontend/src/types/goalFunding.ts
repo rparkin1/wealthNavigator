@@ -241,25 +241,4 @@ export interface FundingScenarioComparison {
   projectedFinalAmount: number;
 }
 
-// Explicit type re-exports for Vite/TypeScript compatibility
-export type {
-  AlternativeStrategy,
-  CalculatorInfo,
-  CatchUpStrategyRequest,
-  CatchUpStrategyResult,
-  ComprehensiveAnalysisRequest,
-  ComprehensiveAnalysisResult,
-  ContributionOptimizationRequest,
-  ContributionOptimizationResult,
-  FundingActionItem,
-  FundingCalculatorState,
-  FundingCalculatorTab,
-  FundingRequirementsRequest,
-  FundingRequirementsResult,
-  FundingScenarioComparison,
-  FundingStatusDisplay,
-  RequiredSavingsForProbabilityRequest,
-  RequiredSavingsForProbabilityResult,
-  SuccessProbabilityRequest,
-  SuccessProbabilityResult,
-};
+// Note: All types are already exported inline above, no need for duplicate exports
