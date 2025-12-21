@@ -123,10 +123,10 @@ export function generateSampleFactorData(): FactorAnalysisResponse {
     interpretation:
       'Portfolio generated significant positive alpha of 7.56% annually, outperforming the factor model expectations. Significant factor exposures: MKT_RF (β=0.95), SMB (β=0.12), HML (β=0.18). The model explains 89.0% of portfolio variance (excellent fit).',
     recommendations: [
-      '✅ Strong positive alpha (7.56%). Strategy is adding value above factor exposures.',
-      '📈 Moderate small-cap tilt (SMB β=0.12). Expect some size premium capture.',
-      '📈 Moderate value tilt (HML β=0.18). Portfolio favors value stocks over growth.',
-      '✅ Factor exposures are well-balanced. Continue regular monitoring of performance attribution.',
+      '[SUCCESS] Strong positive alpha (7.56%). Strategy is adding value above factor exposures.',
+      '[TREND] Moderate small-cap tilt (SMB β=0.12). Expect some size premium capture.',
+      '[TREND] Moderate value tilt (HML β=0.18). Portfolio favors value stocks over growth.',
+      '[SUCCESS] Factor exposures are well-balanced. Continue regular monitoring of performance attribution.',
     ],
   };
 }

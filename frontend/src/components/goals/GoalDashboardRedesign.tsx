@@ -14,6 +14,7 @@ import { GoalCardSkeleton } from './GoalCardSkeleton';
 import { EmptyGoalsState } from './EmptyGoalsState';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
+import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import type { Goal, GoalCategory, GoalPriority, GoalStatus } from './GoalCardRedesign';
 
 export interface GoalDashboardProps {
@@ -407,12 +408,12 @@ function StatCard({ label, value, subtitle, trend, variant }: StatCardProps) {
           <div className="flex items-baseline gap-2 mb-1">
             <p className="text-3xl font-bold text-gray-900 font-mono">{value}</p>
             {trend && (
-              <span
-                className={`text-sm font-medium ${
-                  trend === 'up' ? 'text-success-600' : 'text-error-600'
-                }`}
-              >
-                {trend === 'up' ? '↑' : '↓'}
+              <span className="flex items-center">
+                {trend === 'up' ? (
+                  <ChevronUpIcon className="w-5 h-5 text-success-600" />
+                ) : (
+                  <ChevronDownIcon className="w-5 h-5 text-error-600" />
+                )}
               </span>
             )}
           </div>

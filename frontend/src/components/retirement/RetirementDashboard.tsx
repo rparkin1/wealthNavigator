@@ -19,6 +19,7 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   InformationCircleIcon,
+  LightBulbIcon,
 } from '@heroicons/react/24/outline';
 import { SocialSecurityCalculator } from './SocialSecurityCalculator';
 import { SpendingPatternEditor } from './SpendingPatternEditor';
@@ -543,9 +544,10 @@ function ProjectionsTab({ socialSecurity, spending, longevity }: ProjectionsTabP
                     <p>
                       Using default: <strong>${metadata.portfolio_value.toLocaleString()}</strong>
                     </p>
-                    <p className="text-xs mt-1">
-                      💡 Connect your investment accounts for accurate projections based on your
-                      actual portfolio value.
+                    <p className="text-xs mt-1 flex items-start gap-1">
+                      <LightBulbIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <span>Connect your investment accounts for accurate projections based on your
+                      actual portfolio value.</span>
                     </p>
                   </>
                 ) : (

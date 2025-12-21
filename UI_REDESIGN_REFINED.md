@@ -12,11 +12,12 @@ This document tracks the comprehensive UI redesign effort to replace all emoji t
 
 ### Overall Progress
 
-- **Total Components Updated**: 86
-- **Total Emoji Removed**: 460
-- **Total Components Verified**: 60 (10 in Session 26, 50 in Session 27)
-- **Total Sessions Completed**: 27
-- **Status**: ✅ **COMPLETE** - Production Component Emoji Removal Initiative Complete (96% compliance in Session 27)
+- **Total Components Updated**: 87 (86 + App.tsx partial in Session 28)
+- **Total Emoji Removed**: 486 (460 + 26 in Session 28)
+- **Total Components Verified**: 60 (from Sessions 26-27)
+- **Total Sessions Completed**: 28 (In Progress)
+- **Status**: ⏳ **IN PROGRESS** - Session 28 completing final high-visibility components
+- **Estimated Completion**: 2-3 additional sessions (App.tsx + remaining 15 files)
 
 ---
 
@@ -859,6 +860,126 @@ Sessions 16-27 achieved:
 
 ---
 
+### Session 28: App.tsx Navigation & High-Visibility Components
+**Date**: 2025-12-20
+**Focus**: Complete emoji removal from App.tsx (highest visibility file) and remaining production components
+**Files Analyzed**: 16 production files (54 total including tests, filtered to production only)
+**Files Updated**: 1 (App.tsx - partial completion)
+**Emoji Removed**: 26
+
+**Strategic Achievement**: Session 28 began final phase of emoji removal, focusing on the most user-visible file (App.tsx). Completed all navigation sidebar icons and established patterns for DataEntryView cards.
+
+**App.tsx Updates**:
+
+#### Navigation Sidebar (Complete - 20 icons)
+
+All navigation menu icons replaced with professional Heroicons:
+
+**Navigation Section**:
+- 🏠 Home → HomeIcon
+- 📝 Data Entry → DocumentTextIcon
+- 💬 Chat → ChatBubbleLeftIcon
+
+**Planning Section** (11 icons):
+- 🎯 Goals → FlagIcon
+- 💰 Budget → BanknotesIcon
+- 🔄 Recurring → ArrowPathIcon
+- 📊 Portfolio → ChartBarIcon
+- 🏖️ Retirement → CalendarDaysIcon
+- 🎓 Education → AcademicCapIcon
+- 💰 Tax → ReceiptPercentIcon
+- 🏛️ Estate → ScaleIcon
+- 🛡️ Hedging → ShieldCheckIcon
+- 🏥 Insurance → HeartIcon
+- 🏦 Bank → BuildingLibraryIcon
+
+**Analysis Section** (7 icons):
+- ⚠️ Risk → ExclamationTriangleIcon
+- 💰 Reserves → BanknotesIcon
+- 🎯 Diversification → FlagIcon
+- 📊 Sensitivity → ChartBarIcon
+- 🔮 What-If → SparklesIcon
+- 📅 Life Events → CalendarDaysIcon
+- 📊 Scenarios → ChartBarIcon
+
+**Header**:
+- ⚙️ Settings → Cog6ToothIcon
+
+#### DataEntryView Cards (Partial - 2 of 12)
+
+**1. Financial Goals Card**
+- Large Icon: 🎯 → FlagIcon (w-16 h-16 text-blue-600)
+- Checkmarks: ✓ x3 → CheckIcon (w-4 h-4 text-green-600)
+
+**2. Budget Management Card**
+- Large Icon: 💰 → BanknotesIcon (w-16 h-16 text-green-600)
+- Checkmarks: ✓ x3 → CheckIcon (w-4 h-4 text-green-600)
+
+#### TypeScript Fix
+
+**BuildingColumnsIcon Issue**:
+- Error: Icon name doesn't exist in Heroicons v2
+- Resolution: Replaced with ScaleIcon for Estate Planning
+- ScaleIcon represents law/justice, semantically appropriate
+
+#### Remaining Work in App.tsx (31 emoji)
+
+**DataEntryView Cards** (10 cards remaining):
+- Recurring, Bank Connections, Portfolio, Retirement, Tax, Estate, Hedging, Insurance, Risk, Reserves, Diversification, Sensitivity, Settings
+- Each has: 1 large icon (🔄🏦📊🏖️💰🏛️🛡️🏥⚠️💰🎯📊⚙️) + 3 checkmarks (✓)
+
+**Header Quick-Start** (2 icons):
+- 📝 Data Entry prompt icon
+- 💬 Chat prompt icon
+
+**Getting Started** (1 icon):
+- 💡 Tips section icon
+
+**Decorative Arrows** (2 - correctly preserved):
+- "Go to Data Entry →"
+- "Start Chatting →"
+
+#### Remaining Production Files (15 files)
+
+**High Priority (4 components)**:
+1. GoalDashboardRedesign.tsx - Trend arrows
+2. RetirementDashboard.tsx - Review for regression
+3. TaxAwareAllocationView.tsx - Tax optimization display
+4. TradeoffAnalysisChart.tsx - Re-verify Session 26 status
+
+**API Layer (6 files - architectural refactor)**:
+1. services/hedgingStrategiesApi.ts - getStrategyIcon() function
+2. services/riskManagementApi.ts - getStrategyIcon() function
+3. services/portfolioOptimizationApi.ts - Audit needed
+4. services/lifeEventsApi.ts - getEventTypeIcon() function
+5. types/historicalScenarios.ts - SCENARIO_METADATA object
+6. types/lifeEvents.ts - EVENT_TYPE_METADATA object
+
+**Hooks (2 files)**:
+1. hooks/useSSEStream.ts - Console.log emoji
+2. hooks/useFactorAnalysis.ts - Console.log emoji
+
+**Other (3 files)**:
+1. InsuranceGapAnalysis.tsx - Re-verify compliance
+2. App-simple-backup.tsx - Archive file (exclude)
+
+**Key Icons**:
+- **New in Session 28**: CalendarDaysIcon, ReceiptPercentIcon, ScaleIcon (first uses)
+- **Reused from Previous**: HomeIcon, FlagIcon, BanknotesIcon, ChartBarIcon, ShieldCheckIcon, etc.
+
+**Patterns Established**:
+- Navigation: `flex items-center gap-2` with w-5 h-5 icons
+- Feature Cards: Centered w-16 h-16 icon with CheckIcon checkmark lists
+- Decorative Classification: Inline arrows in button text preserved
+
+**Edit Success Rate**: 100% (all edits successful, 1 TypeScript error fixed)
+
+**Efficiency**: Focused on highest-visibility file first for maximum user impact
+
+**Documentation**: SESSION_28_PROGRESS.md created with comprehensive implementation details and remaining work breakdown
+
+---
+
 ## Component Categories
 
 ### ✅ Completed Categories
@@ -1105,6 +1226,7 @@ All updated components follow these standards:
 | 2025-12-13 | 23 | 6 | 7 | 442 |
 | 2025-12-13 | 24 | 2 | 10 | 452 |
 | 2025-12-13 | 25 | 2 | 3 | 455 |
+| 2025-12-20 | 28 | 1 (partial) | 26 | 486 |
 
 ---
 
@@ -1127,8 +1249,8 @@ All updated components follow these standards:
 
 ---
 
-**Last Updated**: 2025-12-13 (Session 25 completion)
-**Status**: ✅ Active Development - 84 components completed (455 emoji removed)
-**Remaining**: ~38 files estimated with emoji (from Grep: 44 found, 2 updated, 4 preserved)
-**Next Session**: Continue with remaining component categories
-**Sessions 24-25 Innovation**: Decorative vs. functional emoji distinction validated across diverse component types
+**Last Updated**: 2025-12-20 (Session 28 in progress)
+**Status**: ⏳ Active Development - 87 components updated (486 emoji removed)
+**Remaining**: ~16 production files with functional emoji (31 in App.tsx + 15 other files)
+**Next Session**: Complete App.tsx DataEntryView cards, then remaining high-priority components
+**Session 28 Achievement**: App.tsx navigation sidebar complete (20 icons), highest-visibility file prioritized

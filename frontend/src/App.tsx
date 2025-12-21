@@ -14,6 +14,26 @@ import { SkipLink } from './components/common/SkipLink';
 import { useOnboarding } from './hooks/useOnboarding';
 import { useGoals } from './hooks/useGoals';
 import { usePortfolioData } from './hooks/usePortfolioData';
+import {
+  HomeIcon,
+  DocumentTextIcon,
+  ChatBubbleLeftIcon,
+  FlagIcon,
+  BanknotesIcon,
+  ArrowPathIcon,
+  ChartBarIcon,
+  CalendarDaysIcon,
+  AcademicCapIcon,
+  ReceiptPercentIcon,
+  ScaleIcon,
+  ShieldCheckIcon,
+  HeartIcon,
+  BuildingLibraryIcon,
+  ExclamationTriangleIcon,
+  SparklesIcon,
+  Cog6ToothIcon,
+  CheckIcon,
+} from '@heroicons/react/24/outline';
 import './index.css';
 
 // Lazy load components for better error isolation
@@ -627,7 +647,7 @@ function App() {
             <div className="mt-2 space-y-1 px-2" role="list" aria-labelledby="nav-heading">
               <button
                 onClick={() => setCurrentView('home')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'home'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
@@ -635,11 +655,12 @@ function App() {
                 aria-current={currentView === 'home' ? 'page' : undefined}
                 aria-label="Home"
               >
-                <span aria-hidden="true">🏠</span> Home
+                <HomeIcon className="w-5 h-5" />
+                <span>Home</span>
               </button>
               <button
                 onClick={() => setCurrentView('data-entry')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'data-entry'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
@@ -647,14 +668,16 @@ function App() {
                 aria-current={currentView === 'data-entry' ? 'page' : undefined}
                 aria-label="Data Entry"
               >
-                <span aria-hidden="true">📝</span> Data Entry
+                <DocumentTextIcon className="w-5 h-5" />
+                <span>Data Entry</span>
               </button>
               <button
                 onClick={() => setCurrentView('chat')}
-                className="w-full px-3 py-2 text-left text-sm rounded-lg transition-colors text-gray-700 hover:bg-gray-100"
+                className="w-full px-3 py-2 text-left text-sm rounded-lg transition-colors text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                 aria-label="Chat with AI Assistant"
               >
-                <span aria-hidden="true">💬</span> Chat
+                <ChatBubbleLeftIcon className="w-5 h-5" />
+                <span>Chat</span>
               </button>
             </div>
 
@@ -666,7 +689,7 @@ function App() {
             <div className="mt-2 space-y-1 px-2" role="list" aria-labelledby="planning-heading">
               <button
                 onClick={() => setCurrentView('goals')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'goals'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
@@ -674,107 +697,118 @@ function App() {
                 aria-current={currentView === 'goals' ? 'page' : undefined}
                 aria-label="Financial Goals"
               >
-                <span aria-hidden="true">🎯</span> Goals
+                <FlagIcon className="w-5 h-5" />
+                <span>Goals</span>
               </button>
               <button
                 onClick={() => setCurrentView('budget')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'budget'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                💰 Budget
+                <BanknotesIcon className="w-5 h-5" />
+                <span>Budget</span>
               </button>
               <button
                 onClick={() => setCurrentView('recurring')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'recurring'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                🔄 Recurring
+                <ArrowPathIcon className="w-5 h-5" />
+                <span>Recurring</span>
               </button>
               <button
                 onClick={() => setCurrentView('portfolio')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'portfolio'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                📊 Portfolio
+                <ChartBarIcon className="w-5 h-5" />
+                <span>Portfolio</span>
               </button>
               <button
                 onClick={() => setCurrentView('retirement')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'retirement'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                🏖️ Retirement
+                <CalendarDaysIcon className="w-5 h-5" />
+                <span>Retirement</span>
               </button>
               <button
                 onClick={() => setCurrentView('education')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'education' || currentView === '529-calculator'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                🎓 Education Funding
+                <AcademicCapIcon className="w-5 h-5" />
+                <span>Education Funding</span>
               </button>
               <button
                 onClick={() => setCurrentView('tax')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'tax'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                💰 Tax Management
+                <ReceiptPercentIcon className="w-5 h-5" />
+                <span>Tax Management</span>
               </button>
               <button
                 onClick={() => setCurrentView('estate-planning')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'estate-planning'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                🏛️ Estate Planning
+                <ScaleIcon className="w-5 h-5" />
+                <span>Estate Planning</span>
               </button>
               <button
                 onClick={() => setCurrentView('hedging')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'hedging'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                🛡️ Hedging Strategies
+                <ShieldCheckIcon className="w-5 h-5" />
+                <span>Hedging Strategies</span>
               </button>
               <button
                 onClick={() => setCurrentView('insurance')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'insurance'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                🏥 Insurance Optimization
+                <HeartIcon className="w-5 h-5" />
+                <span>Insurance Optimization</span>
               </button>
               <button
                 onClick={() => setCurrentView('plaid')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'plaid'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                🏦 Bank Connections
+                <BuildingLibraryIcon className="w-5 h-5" />
+                <span>Bank Connections</span>
               </button>
             </div>
 
@@ -786,7 +820,7 @@ function App() {
             <div className="mt-2 space-y-1 px-2" role="list" aria-labelledby="analysis-heading">
               <button
                 onClick={() => setCurrentView('risk')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'risk'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
@@ -794,67 +828,74 @@ function App() {
                 aria-current={currentView === 'risk' ? 'page' : undefined}
                 aria-label="Risk Management"
               >
-                <span aria-hidden="true">⚠️</span> Risk Management
+                <ExclamationTriangleIcon className="w-5 h-5" />
+                <span>Risk Management</span>
               </button>
               <button
                 onClick={() => setCurrentView('reserves')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'reserves'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                💰 Reserve Monitoring
+                <BanknotesIcon className="w-5 h-5" />
+                <span>Reserve Monitoring</span>
               </button>
               <button
                 onClick={() => setCurrentView('diversification')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'diversification'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                🎯 Diversification
+                <FlagIcon className="w-5 h-5" />
+                <span>Diversification</span>
               </button>
               <button
                 onClick={() => setCurrentView('sensitivity')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'sensitivity'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                📊 Sensitivity Analysis
+                <ChartBarIcon className="w-5 h-5" />
+                <span>Sensitivity Analysis</span>
               </button>
               <button
                 onClick={() => setCurrentView('what-if')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'what-if'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                🔮 What-If Analysis
+                <SparklesIcon className="w-5 h-5" />
+                <span>What-If Analysis</span>
               </button>
               <button
                 onClick={() => setCurrentView('life-events')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'life-events'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                📅 Life Events
+                <CalendarDaysIcon className="w-5 h-5" />
+                <span>Life Events</span>
               </button>
               <button
                 onClick={() => setCurrentView('scenarios')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
                   currentView === 'scenarios'
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                📊 Historical Scenarios
+                <ChartBarIcon className="w-5 h-5" />
+                <span>Historical Scenarios</span>
               </button>
             </div>
           </nav>
@@ -902,10 +943,11 @@ function App() {
                 />
                 <button
                   onClick={() => setCurrentView('settings')}
-                  className="btn-secondary"
+                  className="btn-secondary flex items-center gap-2"
                   aria-label="Open settings"
                 >
-                  <span aria-hidden="true">⚙️</span> Settings
+                  <Cog6ToothIcon className="w-5 h-5" />
+                  <span>Settings</span>
                 </button>
               </div>
             </div>
@@ -959,7 +1001,9 @@ function HomeView({ onStartChat, onNavigate }: { onStartChat: () => void; onNavi
         <div className="grid md:grid-cols-2 gap-6 mb-6">
           <div className="card cursor-pointer hover:shadow-lg transition-shadow" onClick={() => onNavigate('data-entry')}>
             <div className="flex items-start">
-              <div className="text-blue-600 text-3xl mr-4">📝</div>
+              <div className="text-blue-600 text-3xl mr-4">
+                <DocumentTextIcon className="w-10 h-10" />
+              </div>
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Enter Your Financial Data</h3>
                 <p className="text-sm text-gray-600 mb-3">
@@ -974,7 +1018,9 @@ function HomeView({ onStartChat, onNavigate }: { onStartChat: () => void; onNavi
 
           <div className="card cursor-pointer hover:shadow-lg transition-shadow" onClick={onStartChat}>
             <div className="flex items-start">
-              <div className="text-green-600 text-3xl mr-4">💬</div>
+              <div className="text-green-600 text-3xl mr-4">
+                <ChatBubbleLeftIcon className="w-10 h-10" />
+              </div>
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Chat with AI Assistant</h3>
                 <p className="text-sm text-gray-600 mb-3">
@@ -1161,22 +1207,24 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
           {/* Goals */}
           <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('goals')}>
             <div className="text-center">
-              <div className="text-5xl mb-4">🎯</div>
+              <div className="flex justify-center mb-4">
+                <FlagIcon className="w-16 h-16 text-blue-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Financial Goals</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Set and track your financial goals with AI-powered planning and Monte Carlo simulations.
               </p>
               <div className="text-left space-y-2 mb-4">
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Retirement, education, home purchase</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Success probability calculations</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Priority-based planning</span>
                 </div>
               </div>
@@ -1189,22 +1237,24 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
           {/* Budget Entry */}
           <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('budget')}>
             <div className="text-center">
-              <div className="text-5xl mb-4">💰</div>
+              <div className="flex justify-center mb-4">
+                <BanknotesIcon className="w-16 h-16 text-green-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Budget Management</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Track your income, expenses, and savings. AI will analyze patterns and suggest optimizations.
               </p>
               <div className="text-left space-y-2 mb-4">
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Income tracking (salary, wages, bonuses)</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Expense categorization (50+ categories)</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">AI-powered budget analysis</span>
                 </div>
               </div>
@@ -1217,22 +1267,24 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
           {/* Recurring Transactions */}
           <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('recurring')}>
             <div className="text-center">
-              <div className="text-5xl mb-4">🔄</div>
+              <div className="flex justify-center mb-4">
+                <ArrowPathIcon className="w-16 h-16 text-purple-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Recurring Transactions</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Automate regular income and expenses. Set it once, never forget again.
               </p>
               <div className="text-left space-y-2 mb-4">
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Automatic entry generation</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">5 frequencies (weekly to annual)</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Pause/resume functionality</span>
                 </div>
               </div>
@@ -1245,22 +1297,24 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
           {/* Accounts & Holdings */}
           <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('portfolio-data')}>
             <div className="text-center">
-              <div className="text-5xl mb-4">🏦</div>
+              <div className="flex justify-center mb-4">
+                <BuildingLibraryIcon className="w-16 h-16 text-indigo-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Accounts & Holdings</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Add investment accounts and holdings for portfolio tracking and analysis.
               </p>
               <div className="text-left space-y-2 mb-4">
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Multiple account types (401k, IRA, Brokerage)</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Stocks, bonds, ETFs, mutual funds</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">CSV import/export functionality</span>
                 </div>
               </div>
@@ -1273,22 +1327,24 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
           {/* Portfolio Analysis */}
           <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('portfolio')}>
             <div className="text-center">
-              <div className="text-5xl mb-4">📊</div>
+              <div className="flex justify-center mb-4">
+                <ChartBarIcon className="w-16 h-16 text-blue-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Portfolio Analysis</h3>
               <p className="text-sm text-gray-600 mb-4">
                 View comprehensive portfolio analysis, performance, and optimization recommendations.
               </p>
               <div className="text-left space-y-2 mb-4">
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Performance metrics & charts</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Tax-loss harvesting opportunities</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Rebalancing recommendations</span>
                 </div>
               </div>
@@ -1301,22 +1357,24 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
           {/* Retirement Planning */}
           <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('retirement')}>
             <div className="text-center">
-              <div className="text-5xl mb-4">🏖️</div>
+              <div className="flex justify-center mb-4">
+                <CalendarDaysIcon className="w-16 h-16 text-orange-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Retirement Planning</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Plan your retirement with Social Security calculator, spending patterns, and Monte Carlo simulations.
               </p>
               <div className="text-left space-y-2 mb-4">
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Social Security benefit calculator</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Retirement spending patterns</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Longevity & income projections</span>
                 </div>
               </div>
@@ -1329,22 +1387,24 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
           {/* Tax Management */}
           <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('tax')}>
             <div className="text-center">
-              <div className="text-5xl mb-4">💰</div>
+              <div className="flex justify-center mb-4">
+                <ReceiptPercentIcon className="w-16 h-16 text-red-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Tax Management</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Comprehensive tax optimization tools including Backdoor Roth conversion analysis and tax-loss harvesting.
               </p>
               <div className="text-left space-y-2 mb-4">
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Backdoor Roth conversion analyzer</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Tax-loss harvesting opportunities</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Municipal bond optimization</span>
                 </div>
               </div>
@@ -1357,22 +1417,24 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
           {/* Estate Planning */}
           <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('estate-planning')}>
             <div className="text-center">
-              <div className="text-5xl mb-4">🏛️</div>
+              <div className="flex justify-center mb-4">
+                <ScaleIcon className="w-16 h-16 text-gray-700" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Estate Planning</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Plan your legacy with estate tax projections, trust structures, and beneficiary optimization.
               </p>
               <div className="text-left space-y-2 mb-4">
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Estate tax calculator & projections</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Trust structure recommendations</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Beneficiary & gifting strategies</span>
                 </div>
               </div>
@@ -1385,22 +1447,24 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
           {/* Hedging Strategies */}
           <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('hedging')}>
             <div className="text-center">
-              <div className="text-5xl mb-4">🛡️</div>
+              <div className="flex justify-center mb-4">
+                <ShieldCheckIcon className="w-16 h-16 text-purple-700" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Hedging Strategies</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Protect your portfolio with options strategies, downside protection, and risk management tools.
               </p>
               <div className="text-left space-y-2 mb-4">
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Protective put calculator</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Collar strategy builder</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Market volatility hedging</span>
                 </div>
               </div>
@@ -1413,22 +1477,24 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
           {/* Insurance Optimization */}
           <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('insurance')}>
             <div className="text-center">
-              <div className="text-5xl mb-4">🏥</div>
+              <div className="flex justify-center mb-4">
+                <HeartIcon className="w-16 h-16 text-pink-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Insurance Optimization</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Optimize your insurance coverage with comprehensive analysis for life, disability, and long-term care.
               </p>
               <div className="text-left space-y-2 mb-4">
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Life insurance needs calculator</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Disability coverage analyzer</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Long-term care planning</span>
                 </div>
               </div>
@@ -1441,22 +1507,24 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
           {/* Risk Management */}
           <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('risk')}>
             <div className="text-center">
-              <div className="text-5xl mb-4">⚠️</div>
+              <div className="flex justify-center mb-4">
+                <ExclamationTriangleIcon className="w-16 h-16 text-yellow-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Risk Management</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Comprehensive risk assessment, stress testing, and hedging strategies for your portfolio.
               </p>
               <div className="text-left space-y-2 mb-4">
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Portfolio risk assessment (VaR, Sharpe)</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Stress testing & scenario analysis</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Diversification & hedging strategies</span>
                 </div>
               </div>
@@ -1469,22 +1537,24 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
           {/* Reserve Monitoring */}
           <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('reserves')}>
             <div className="text-center">
-              <div className="text-5xl mb-4">💰</div>
+              <div className="flex justify-center mb-4">
+                <BanknotesIcon className="w-16 h-16 text-emerald-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Reserve Monitoring</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Monitor your emergency fund and ensure adequate reserves for unexpected expenses.
               </p>
               <div className="text-left space-y-2 mb-4">
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Emergency fund status & alerts</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Replenishment planning</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Reserve growth simulator</span>
                 </div>
               </div>
@@ -1497,22 +1567,24 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
           {/* Diversification Analysis */}
           <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('diversification')}>
             <div className="text-center">
-              <div className="text-5xl mb-4">🎯</div>
+              <div className="flex justify-center mb-4">
+                <FlagIcon className="w-16 h-16 text-teal-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Diversification Analysis</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Analyze portfolio diversification and identify concentration risks across holdings.
               </p>
               <div className="text-left space-y-2 mb-4">
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Concentration risk analysis</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Sector & geographic exposure</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Diversification recommendations</span>
                 </div>
               </div>
@@ -1525,22 +1597,24 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
           {/* Sensitivity Analysis */}
           <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('sensitivity')}>
             <div className="text-center">
-              <div className="text-5xl mb-4">📊</div>
+              <div className="flex justify-center mb-4">
+                <ChartBarIcon className="w-16 h-16 text-indigo-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Sensitivity Analysis</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Advanced sensitivity analysis to understand which variables impact your financial goals the most.
               </p>
               <div className="text-left space-y-2 mb-4">
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Tornado diagrams (one-way)</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Heat maps (two-way)</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Threshold & break-even analysis</span>
                 </div>
               </div>
@@ -1553,22 +1627,24 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
           {/* User Settings */}
           <div className="card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('settings')}>
             <div className="text-center">
-              <div className="text-5xl mb-4">⚙️</div>
+              <div className="flex justify-center mb-4">
+                <Cog6ToothIcon className="w-16 h-16 text-gray-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">User Settings</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Configure your profile, risk tolerance, tax rates, and preferences.
               </p>
               <div className="text-left space-y-2 mb-4">
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Risk tolerance configuration</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Tax rate settings</span>
                 </div>
                 <div className="flex items-start text-sm">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <CheckIcon className="w-4 h-4 text-green-600 mr-2 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">Personal information</span>
                 </div>
               </div>
@@ -1581,7 +1657,10 @@ function DataEntryView({ onNavigate }: { onNavigate: (view: View) => void }) {
 
         {/* Quick Tips */}
         <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="font-semibold text-blue-900 mb-3">💡 Getting Started Tips</h3>
+          <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+            <SparklesIcon className="w-5 h-5" />
+            <span>Getting Started Tips</span>
+          </h3>
           <div className="grid md:grid-cols-3 gap-4 text-sm text-blue-800">
             <div>
               <strong>Step 1:</strong> Configure your risk tolerance and tax settings in Settings to personalize recommendations.

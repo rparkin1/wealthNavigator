@@ -64,10 +64,10 @@ export function useSSEStream() {
       },
 
       visualization: (event: SSEEvent) => {
-        console.log('📊 Visualization event received:', event.data);
+        console.log('[VISUALIZATION] Event received:', event.data);
         setState(prev => {
           const newVisualizations = [...prev.visualizations, event.data];
-          console.log('📊 Updated visualizations array:', newVisualizations);
+          console.log('[VISUALIZATION] Updated visualizations array:', newVisualizations);
           return {
             ...prev,
             visualizations: newVisualizations,

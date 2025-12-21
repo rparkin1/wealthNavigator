@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import {
   analyzeTaxEfficiency,
   formatCurrency,
@@ -197,7 +198,7 @@ export const TaxAwareAllocationView: React.FC<TaxAwareAllocationViewProps> = ({
                               {asset}
                               {!isOptimal && (
                                 <span className="suboptimal-badge" title="May be suboptimal placement">
-                                  ⚠️
+                                  <ExclamationTriangleIcon className="w-4 h-4" />
                                 </span>
                               )}
                             </span>

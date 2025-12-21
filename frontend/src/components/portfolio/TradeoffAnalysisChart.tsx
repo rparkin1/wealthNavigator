@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from 'react';
-import { BanknotesIcon, FlagIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { BanknotesIcon, FlagIcon, CalendarIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import {
   formatCurrency,
   formatPercentage,
@@ -300,7 +300,13 @@ export const TradeoffAnalysisChart: React.FC<TradeoffAnalysisChartProps> = ({
                 <div className="col-impact">
                   {change !== 0 ? (
                     <div className={`impact ${change > 0 ? 'positive' : 'negative'}`}>
-                      <span className="impact-icon">{change > 0 ? '↑' : '↓'}</span>
+                      <span className="impact-icon">
+                        {change > 0 ? (
+                          <ChevronUpIcon className="w-5 h-5" />
+                        ) : (
+                          <ChevronDownIcon className="w-5 h-5" />
+                        )}
+                      </span>
                       <span className="impact-value">
                         {Math.abs(fundingChange * 100).toFixed(1)}pp
                       </span>
