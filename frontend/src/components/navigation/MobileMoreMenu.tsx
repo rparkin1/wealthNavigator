@@ -11,7 +11,6 @@ import {
   AcademicCapIcon,
   ReceiptPercentIcon,
   BuildingLibraryIcon,
-  ScaleIcon,
   ChartPieIcon,
   Cog6ToothIcon,
   XMarkIcon,
