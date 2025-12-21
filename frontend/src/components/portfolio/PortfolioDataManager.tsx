@@ -17,6 +17,7 @@ import type { Account } from './AccountForm';
 import { HoldingForm } from './HoldingForm';
 import type { Holding } from './HoldingForm';
 import { ImportExportPanel } from './ImportExportPanel';
+import { PlaidLinkButton } from '../plaid/PlaidLinkButton';
 
 export interface PortfolioDataManagerProps {
   userId: string;
@@ -273,12 +274,21 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
         <div className="bg-white border border-gray-200 rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">Investment Accounts</h3>
-            <button
-              onClick={handleAddAccount}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              + Add Account
-            </button>
+            <div className="flex gap-3">
+              <PlaidLinkButton
+                onSuccess={() => {
+                  loadData(); // Reload accounts after successful Plaid connection
+                }}
+                buttonText="Connect Bank Account"
+                className="px-4 py-2"
+              />
+              <button
+                onClick={handleAddAccount}
+                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+              >
+                + Add Manually
+              </button>
+            </div>
           </div>
 
           {accounts.length === 0 ? (

@@ -9,7 +9,7 @@ import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   DocumentTextIcon,
-  BuildingColumnsIcon,
+  BuildingLibraryIcon,
   CurrencyDollarIcon,
   SparklesIcon,
 } from '@heroicons/react/24/outline';
@@ -52,7 +52,7 @@ export const TaxDashboard: React.FC<TaxDashboardProps> = ({
     { id: 'projection' as TabType, label: 'Tax Projection', icon: <ArrowTrendingUpIcon className="w-5 h-5" /> },
     { id: 'tlh' as TabType, label: 'Tax-Loss Harvesting', icon: <ArrowTrendingDownIcon className="w-5 h-5" /> },
     { id: 'export' as TabType, label: 'Tax Export', icon: <DocumentTextIcon className="w-5 h-5" /> },
-    { id: 'muni' as TabType, label: 'Municipal Bonds', icon: <BuildingColumnsIcon className="w-5 h-5" /> },
+    { id: 'muni' as TabType, label: 'Municipal Bonds', icon: <BuildingLibraryIcon className="w-5 h-5" /> },
     { id: 'roth' as TabType, label: 'Roth Conversion', icon: <CurrencyDollarIcon className="w-5 h-5" /> },
   ];
 

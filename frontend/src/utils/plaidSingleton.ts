@@ -1,78 +1,42 @@
 /**
- * Plaid Link Singleton Manager
- * Ensures only one Plaid Link script is loaded globally
- * Handles React StrictMode double-mounting
+ * Plaid Singleton Utility
+ * Ensures Plaid script is loaded only once to prevent duplicate initialization
  */
 
 let plaidScriptLoaded = false;
-let plaidScriptLoading = false;
-let plaidInstanceCreated = false;
-const plaidScriptCallbacks: Array<() => void> = [];
+let plaidInitialized = false;
 
-/**
- * Check if Plaid Link is already initialized
- */
-export function isPlaidInitialized(): boolean {
-  return plaidInstanceCreated || !!document.querySelector('script[src*="plaid.com/link"]');
-}
-
-/**
- * Mark Plaid as initialized (called by PlaidLinkButton)
- */
-export function markPlaidInitialized(): void {
-  plaidInstanceCreated = true;
-  plaidScriptLoaded = true;
-}
-
-/**
- * Ensures Plaid Link script is loaded only once
- * Returns a promise that resolves when the script is ready
- */
 export function ensurePlaidScript(): Promise<void> {
-  return new Promise((resolve) => {
-    // Already loaded
-    if (plaidScriptLoaded) {
+  if (plaidScriptLoaded) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve, reject) => {
+    // Check if script is already in DOM
+    if (document.querySelector('script[src*="plaid.com/link"]')) {
+      plaidScriptLoaded = true;
       resolve();
       return;
     }
 
-    // Currently loading, add to callbacks
-    if (plaidScriptLoading) {
-      plaidScriptCallbacks.push(resolve);
-      return;
-    }
-
-    // Start loading
-    plaidScriptLoading = true;
-    plaidScriptCallbacks.push(resolve);
-
-    // Check if script already exists in DOM
-    const existingScript = document.querySelector('script[src*="plaid.com/link"]');
-    if (existingScript) {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.plaid.com/link/v2/stable/link-initialize.js';
+    script.async = true;
+    script.onload = () => {
       plaidScriptLoaded = true;
-      plaidScriptLoading = false;
-      plaidScriptCallbacks.forEach(cb => cb());
-      plaidScriptCallbacks.length = 0;
-      return;
-    }
-
-    // Script will be loaded by react-plaid-link
-    // Just mark as loaded after a short delay
-    setTimeout(() => {
-      plaidScriptLoaded = true;
-      plaidScriptLoading = false;
-      plaidScriptCallbacks.forEach(cb => cb());
-      plaidScriptCallbacks.length = 0;
-    }, 100);
+      resolve();
+    };
+    script.onerror = () => {
+      reject(new Error('Failed to load Plaid script'));
+    };
+    document.body.appendChild(script);
   });
 }
 
-/**
- * Reset singleton state (useful for testing)
- */
-export function resetPlaidScript() {
-  plaidScriptLoaded = false;
-  plaidScriptLoading = false;
-  plaidInstanceCreated = false;
-  plaidScriptCallbacks.length = 0;
+export function isPlaidInitialized(): boolean {
+  return plaidInitialized;
+}
+
+export function markPlaidInitialized(): void {
+  plaidInitialized = true;
 }

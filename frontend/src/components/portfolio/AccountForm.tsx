@@ -10,7 +10,6 @@ import {
   BriefcaseIcon,
   BuildingLibraryIcon,
   StarIcon,
-  BuildingColumnsIcon,
   CreditCardIcon,
 } from '@heroicons/react/24/outline';
 
@@ -68,7 +67,7 @@ const ACCOUNT_TYPES: Record<
   },
   depository: {
     label: 'Bank Account',
-    icon: <BuildingColumnsIcon className="w-6 h-6" />,
+    icon: <BuildingLibraryIcon className="w-6 h-6" />,
     description: 'Checking and savings accounts',
     examples: 'Checking, Savings, Money Market, CD',
   },

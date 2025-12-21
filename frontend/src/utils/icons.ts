@@ -9,7 +9,6 @@
 
 import {
   // Goal Categories
-  TrendingUpIcon,
   AcademicCapIcon,
   HomeIcon,
   CurrencyDollarIcon,
@@ -76,7 +75,7 @@ import {
  * Used for goal type identification
  */
 export const categoryIcons = {
-  retirement: TrendingUpIcon,
+  retirement: ArrowTrendingUpIcon,
   education: AcademicCapIcon,
   home: HomeIcon,
   major_expense: CurrencyDollarIcon,

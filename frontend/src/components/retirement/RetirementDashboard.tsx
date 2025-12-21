@@ -11,7 +11,7 @@
 import { useState } from 'react';
 import {
   ChartBarSquareIcon,
-  BuildingColumnsIcon,
+  BuildingLibraryIcon,
   CurrencyDollarIcon,
   ArrowTrendingUpIcon,
   SparklesIcon,
@@ -56,7 +56,7 @@ export function RetirementDashboard() {
 
   const tabs: Array<{ id: TabView; label: string; icon: React.ReactNode }> = [
     { id: 'overview', label: 'Overview', icon: <ChartBarSquareIcon className="w-5 h-5" /> },
-    { id: 'social-security', label: 'Social Security', icon: <BuildingColumnsIcon className="w-5 h-5" /> },
+    { id: 'social-security', label: 'Social Security', icon: <BuildingLibraryIcon className="w-5 h-5" /> },
     { id: 'spending', label: 'Spending Plan', icon: <CurrencyDollarIcon className="w-5 h-5" /> },
     { id: 'longevity', label: 'Life Expectancy', icon: <ArrowTrendingUpIcon className="w-5 h-5" /> },
     { id: 'projections', label: 'Income Projection', icon: <SparklesIcon className="w-5 h-5" /> },
@@ -184,7 +184,7 @@ function OverviewTab({ socialSecurity, spending, longevity, onNavigate }: Overvi
         >
           <div className="flex items-start justify-between mb-4">
             <div className="text-blue-600">
-              <BuildingColumnsIcon className="w-8 h-8" />
+              <BuildingLibraryIcon className="w-8 h-8" />
             </div>
             <div className="text-right">
               {socialSecurity ? (

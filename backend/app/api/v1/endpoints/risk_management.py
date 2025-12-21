@@ -194,7 +194,7 @@ async def assess_risk_auto(
 
         if portfolio_value == 0 or not allocation:
             raise HTTPException(
-                status_code=404,
+                status_code=400,
                 detail="No portfolio data found. Please add holdings first."
             )
 
@@ -312,7 +312,7 @@ async def stress_test_auto(
 
         if portfolio_value == 0 or not allocation:
             raise HTTPException(
-                status_code=404,
+                status_code=400,
                 detail="No portfolio data found. Please add holdings first."
             )
 
@@ -434,7 +434,7 @@ async def hedging_strategies_auto(
 
         if portfolio_value == 0 or not allocation:
             raise HTTPException(
-                status_code=404,
+                status_code=400,
                 detail="No portfolio data found. Please add holdings first."
             )
 
