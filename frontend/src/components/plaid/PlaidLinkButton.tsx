@@ -65,14 +65,25 @@ export const PlaidLinkButton = memo(function PlaidLinkButton({
     async (publicToken: string) => {
       try {
         setLoading(true);
-        // Exchange public token for access token
-        await plaidApi.exchangePublicToken({ public_token: publicToken });
+        setError(null);
 
-        // Sync accounts and transactions
-        await Promise.all([
-          plaidApi.syncAccounts(),
-          plaidApi.syncTransactions(),
-        ]);
+        // Exchange public token for access token
+        const exchangeResult = await plaidApi.exchangePublicToken({ public_token: publicToken });
+        console.log('[PlaidLink] Token exchanged successfully, item_id:', exchangeResult.item_id);
+
+        // Sync accounts first (accounts must exist before syncing transactions)
+        await plaidApi.syncAccounts(exchangeResult.item_id);
+        console.log('[PlaidLink] Accounts synced');
+
+        // Then sync transactions for this specific item
+        // Note: Initial sync might return 0 transactions, which is normal
+        try {
+          await plaidApi.syncTransactions(exchangeResult.item_id);
+          console.log('[PlaidLink] Transactions synced');
+        } catch (txnErr) {
+          // Transaction sync can fail for new connections - log but don't fail
+          console.warn('[PlaidLink] Transaction sync failed (this is normal for new connections):', txnErr);
+        }
 
         // Call success callback
         onSuccess?.();

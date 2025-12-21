@@ -385,10 +385,14 @@ async def sync_transactions(
 
     except Exception as e:
         await db.rollback()
-        logger.error(f"Error syncing transactions: {e}")
+        logger.error(f"Error syncing transactions: {e}", exc_info=True)
+        # Return more detailed error for debugging
+        error_detail = str(e)
+        if hasattr(e, '__dict__'):
+            logger.error(f"Exception details: {e.__dict__}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to sync transactions: {str(e)}"
+            detail=f"Failed to sync transactions: {error_detail}"
         )
 
 
