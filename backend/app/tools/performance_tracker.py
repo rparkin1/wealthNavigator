@@ -492,10 +492,38 @@ async def generate_performance_report(
     Returns:
         Complete performance report
     """
+    # Handle empty portfolio - return minimal report
+    if not historical_values or len(historical_values) == 0:
+        return PerformanceReport(
+            portfolio_id=portfolio_id,
+            as_of_date=datetime.now().isoformat(),
+            total_value=0.0,
+            total_return_ytd=0.0,
+            total_return_since_inception=0.0,
+            metrics_by_period=[],
+            benchmark_comparison=[],
+            attribution=[],
+            risk_metrics={
+                "var_95": 0.0,
+                "var_99": 0.0,
+                "conditional_var_95": 0.0,
+                "max_drawdown": 0.0,
+                "correlation_to_market": 0.0,
+                "downside_deviation": 0.0
+            },
+            notable_events=["Portfolio is empty - no performance data available"]
+        )
+
     # Convert to arrays and calculate returns
     dates = sorted(historical_values.keys())
     values = np.array([historical_values[d] for d in dates])
-    returns = np.diff(values) / values[:-1]
+
+    # Prevent division by zero in return calculation
+    if len(values) < 2:
+        returns = np.array([])
+    else:
+        # Only calculate returns where previous value is non-zero
+        returns = np.diff(values) / np.where(values[:-1] != 0, values[:-1], 1.0)
 
     # Calculate metrics for different periods
     periods = [TimePeriod.ONE_MONTH, TimePeriod.THREE_MONTHS, TimePeriod.YTD, TimePeriod.ONE_YEAR]

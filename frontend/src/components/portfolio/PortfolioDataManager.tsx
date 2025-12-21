@@ -73,18 +73,62 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
       setLoading(true);
       setError(null);
 
-      // Load from localStorage
-      const savedAccounts = localStorage.getItem(ACCOUNTS_KEY);
-      const savedHoldings = localStorage.getItem(HOLDINGS_KEY);
+      // Fetch accounts from Plaid API
+      try {
+        const accountsResponse = await fetch('http://localhost:8000/api/v1/plaid/accounts', {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-User-Id': userId || 'test-user-123',
+          },
+        });
 
-      if (savedAccounts) {
-        const parsedAccounts = JSON.parse(savedAccounts);
-        setAccounts(parsedAccounts);
-        console.log('[PortfolioDataManager] Loaded', parsedAccounts.length, 'accounts from localStorage');
-      } else {
-        setAccounts([]);
+        if (accountsResponse.ok) {
+          const accountsData = await accountsResponse.json();
+          console.log('[PortfolioDataManager] Fetched from API:', accountsData);
+
+          // Transform Plaid accounts to Account format
+          const plaidAccounts = accountsData.accounts.map((acc: any) => ({
+            id: acc.id,
+            name: acc.name || acc.official_name || 'Unknown Account',
+            accountType: acc.subtype || acc.type || 'unknown',
+            institution: 'Plaid Connected', // Institution name is in PlaidItem, not PlaidAccount
+            accountNumber: acc.mask ? `****${acc.mask}` : undefined,
+            balance: acc.current_balance || 0,
+            notes: `${acc.type} account - Last updated: ${new Date(acc.last_balance_update || Date.now()).toLocaleDateString()}`,
+          }));
+
+          setAccounts(plaidAccounts);
+          console.log('[PortfolioDataManager] Loaded', plaidAccounts.length, 'accounts from Plaid API');
+        } else {
+          console.log('[PortfolioDataManager] No accounts from Plaid API, checking localStorage');
+
+          // Fallback to localStorage if API fails
+          const savedAccounts = localStorage.getItem(ACCOUNTS_KEY);
+          if (savedAccounts) {
+            const parsedAccounts = JSON.parse(savedAccounts);
+            setAccounts(parsedAccounts);
+            console.log('[PortfolioDataManager] Loaded', parsedAccounts.length, 'accounts from localStorage');
+          } else {
+            setAccounts([]);
+          }
+        }
+      } catch (apiErr) {
+        console.error('[PortfolioDataManager] API error, falling back to localStorage:', apiErr);
+
+        // Fallback to localStorage on error
+        const savedAccounts = localStorage.getItem(ACCOUNTS_KEY);
+        if (savedAccounts) {
+          const parsedAccounts = JSON.parse(savedAccounts);
+          setAccounts(parsedAccounts);
+          console.log('[PortfolioDataManager] Loaded', parsedAccounts.length, 'accounts from localStorage');
+        } else {
+          setAccounts([]);
+        }
       }
 
+      // Load holdings from localStorage for now
+      // TODO: Fetch holdings from Plaid API when available
+      const savedHoldings = localStorage.getItem(HOLDINGS_KEY);
       if (savedHoldings) {
         const parsedHoldings = JSON.parse(savedHoldings);
         setHoldings(parsedHoldings);
@@ -92,10 +136,6 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
       } else {
         setHoldings([]);
       }
-
-      // TODO: Replace with actual API calls when backend is ready
-      // const accountsResponse = await fetch(`/api/v1/portfolio/accounts?user_id=${userId}`);
-      // const holdingsResponse = await fetch(`/api/v1/portfolio/holdings?user_id=${userId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load portfolio data');
       console.error('[PortfolioDataManager] Error loading data:', err);

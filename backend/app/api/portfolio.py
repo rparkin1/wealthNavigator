@@ -286,6 +286,10 @@ async def get_sample_historical_values(user_id: str, db: AsyncSession) -> dict:
     # Get actual current portfolio value
     current_value = await get_portfolio_total_value(user_id, db)
 
+    # Handle empty portfolio - return empty dict
+    if current_value == 0 or not np.isfinite(current_value):
+        return {}
+
     # For now, create a simple historical series using current value
     # In production, this would query actual historical snapshots
     dates = [f"2024-{month:02d}-01" for month in range(1, 13)]
@@ -297,6 +301,10 @@ async def get_sample_historical_values(user_id: str, db: AsyncSession) -> dict:
     cumulative = np.cumprod(1 + returns)
 
     # Scale so the last value equals current portfolio value
+    # Prevent division by zero
+    if cumulative[-1] == 0:
+        return {}
+
     scale_factor = current_value / cumulative[-1]
     values = {date: scale_factor * cum for date, cum in zip(dates, cumulative)}
 
