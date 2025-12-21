@@ -21,6 +21,7 @@ import {
   CheckCircleIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline';
+import { IconRenderer } from '../ui/IconRenderer';
 import type {
   DiversificationTab,
   DiversificationAnalysisResult,
@@ -149,7 +150,9 @@ export function DiversificationAnalysisDashboard({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-            <div style={{ fontSize: '48px', marginRight: '16px' }}>{scoreDisplay.icon}</div>
+            <div style={{ marginRight: '16px' }}>
+              <IconRenderer name={scoreDisplay.icon} className="w-12 h-12" color={scoreDisplay.color} />
+            </div>
             <div>
               <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>
                 Diversification Score
@@ -336,8 +339,12 @@ export function DiversificationAnalysisDashboard({
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
-                  <div style={{ fontSize: '24px', marginRight: '12px' }}>
-                    {diversificationApi.getConcentrationTypeIcon(risk.risk_type)}
+                  <div style={{ marginRight: '12px' }}>
+                    <IconRenderer
+                      name={diversificationApi.getConcentrationTypeIcon(risk.risk_type)}
+                      className="w-6 h-6"
+                      color={diversificationApi.getSeverityColor(risk.severity)}
+                    />
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>

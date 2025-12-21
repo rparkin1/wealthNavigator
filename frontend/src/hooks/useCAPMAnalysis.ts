@@ -151,7 +151,7 @@ export function generateSampleCAPMData(): CAPMMetrics {
     interpretation:
       'Portfolio moves roughly in line with the market (β=1.05). Positive alpha of 1.2% indicates outperformance relative to CAPM expectations. High R² (92.0%) means market explains most variance.',
     investment_recommendation:
-      '🟢 BUY - Security appears undervalued (positive alpha 1.20%). Strong information ratio (0.34) suggests consistent alpha generation with controlled tracking error.',
+      'BUY - Security appears undervalued (positive alpha 1.20%). Strong information ratio (0.34) suggests consistent alpha generation with controlled tracking error.',
   };
 }
 

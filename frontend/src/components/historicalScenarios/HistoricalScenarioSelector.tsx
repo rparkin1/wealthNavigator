@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { ChartBarIcon, StarIcon } from '@heroicons/react/24/outline';
+import { IconRenderer } from '../ui/IconRenderer';
 import type {
   ScenarioListItem,
   ScenarioResult,
@@ -282,7 +283,13 @@ export function HistoricalScenarioSelector({
                 className="text-left p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="flex items-start gap-4">
-                  <div className="text-4xl">{metadata?.icon || <ChartBarIcon className="w-10 h-10 text-gray-600" />}</div>
+                  <div>
+                    {metadata?.icon ? (
+                      <IconRenderer name={metadata.icon} className="w-10 h-10" color={riskColors.color} />
+                    ) : (
+                      <ChartBarIcon className="w-10 h-10 text-gray-600" />
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">
                       {scenario.name}

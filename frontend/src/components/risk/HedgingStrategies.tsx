@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FlagIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { IconRenderer } from '../ui/IconRenderer';
 import { useRiskManagement } from '../../hooks/useRiskManagement';
 import {
   formatCurrency,
@@ -291,8 +292,12 @@ export const HedgingStrategies: React.FC<HedgingStrategiesProps> = ({
                 <div style={{ padding: '24px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '24px' }}>
                     <div>
-                      <div style={{ fontSize: '32px', marginBottom: '8px' }}>
-                        {getStrategyIcon(selectedStrategy.strategy_type)}
+                      <div style={{ marginBottom: '8px' }}>
+                        <IconRenderer
+                          name={getStrategyIcon(selectedStrategy.strategy_type)}
+                          className="w-8 h-8"
+                          color="#111827"
+                        />
                       </div>
                       <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 600 }}>
                         {selectedStrategy.name}
@@ -486,7 +491,11 @@ const StrategyCard: React.FC<StrategyCardProps> = ({ strategy, isSelected, isOpt
     )}
 
     <div style={{ display: 'flex', gap: '16px', alignItems: 'start' }}>
-      <div style={{ fontSize: '48px' }}>{getStrategyIcon(strategy.strategy_type)}</div>
+      <IconRenderer
+        name={getStrategyIcon(strategy.strategy_type)}
+        className="w-12 h-12"
+        color="#111827"
+      />
       <div style={{ flex: 1 }}>
         <h4 style={{ margin: '0 0 8px', fontSize: '18px', fontWeight: 600 }}>
           {strategy.name}

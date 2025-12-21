@@ -14,6 +14,7 @@ import {
   FlagIcon,
   StarIcon,
 } from '@heroicons/react/24/outline';
+import { IconRenderer } from '../ui/IconRenderer';
 import {
   getHedgingRecommendations,
   getHedgingRecommendationsAuto,
@@ -422,9 +423,11 @@ export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> =
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '32px' }}>
-                        {getStrategyIcon(recommendation.optimal_strategy.strategy_type)}
-                      </span>
+                      <IconRenderer
+                        name={getStrategyIcon(recommendation.optimal_strategy.strategy_type)}
+                        className="w-8 h-8"
+                        color="#059669"
+                      />
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#059669', fontWeight: 600 }}>
                           <StarIcon style={{ width: '16px', height: '16px', flexShrink: 0 }} />
@@ -552,9 +555,11 @@ export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> =
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '24px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontSize: '48px' }}>
-                      {getStrategyIcon(selectedStrategy.strategy_type)}
-                    </span>
+                    <IconRenderer
+                      name={getStrategyIcon(selectedStrategy.strategy_type)}
+                      className="w-12 h-12"
+                      color="#111827"
+                    />
                     <div>
                       <div style={{ fontSize: '24px', fontWeight: 700, color: '#111827' }}>
                         {selectedStrategy.name}
@@ -708,7 +713,11 @@ const StrategyCard: React.FC<StrategyCardProps> = ({ strategy, isSelected, onCli
   >
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span style={{ fontSize: '24px' }}>{getStrategyIcon(strategy.strategy_type)}</span>
+        <IconRenderer
+          name={getStrategyIcon(strategy.strategy_type)}
+          className="w-6 h-6"
+          color="#111827"
+        />
         <div style={{ fontSize: '16px', fontWeight: 600, color: '#111827' }}>
           {strategy.name}
         </div>

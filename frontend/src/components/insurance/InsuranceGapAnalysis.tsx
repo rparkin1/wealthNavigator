@@ -181,18 +181,27 @@ const InsuranceGapAnalysis: React.FC<InsuranceGapAnalysisProps> = ({
           Priority Actions
         </h3>
         <div className="space-y-3">
-          {gapAnalysis.priority_actions.map((action, idx) => (
-            <div key={idx} className="flex items-start gap-3">
-              {action.startsWith('🚨') ? (
-                <ExclamationCircleIcon className="w-6 h-6 text-red-600 flex-shrink-0" />
-              ) : action.startsWith('⚠️') ? (
-                <ExclamationTriangleIcon className="w-6 h-6 text-yellow-600 flex-shrink-0" />
-              ) : (
-                <CheckCircleIcon className="w-6 h-6 text-green-600 flex-shrink-0" />
-              )}
-              <div className="flex-1 text-gray-800">{action.replace(/^[🚨⚠️✅]\s*/, '')}</div>
-            </div>
-          ))}
+          {gapAnalysis.priority_actions.map((action, idx) => {
+            // Determine icon based on action severity (checking for emoji prefixes or severity keywords)
+            const isUrgent = action.startsWith('🚨') || action.toLowerCase().includes('urgent') || action.toLowerCase().includes('critical');
+            const isWarning = action.startsWith('⚠️') || action.toLowerCase().includes('warning') || action.toLowerCase().includes('should');
+            const isSuccess = action.startsWith('✅') || action.toLowerCase().includes('adequate') || action.toLowerCase().includes('sufficient');
+
+            return (
+              <div key={idx} className="flex items-start gap-3">
+                {isUrgent ? (
+                  <ExclamationCircleIcon className="w-6 h-6 text-red-600 flex-shrink-0" />
+                ) : isWarning ? (
+                  <ExclamationTriangleIcon className="w-6 h-6 text-yellow-600 flex-shrink-0" />
+                ) : isSuccess ? (
+                  <CheckCircleIcon className="w-6 h-6 text-green-600 flex-shrink-0" />
+                ) : (
+                  <LightBulbIcon className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                )}
+                <div className="flex-1 text-gray-800">{action.replace(/^[🚨⚠️✅]\s*/, '')}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

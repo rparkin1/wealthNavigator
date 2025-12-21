@@ -415,13 +415,14 @@ export function getAlertSeverityColor(severity: string): string {
 }
 
 /**
- * Get insight impact icon
+ * Get insight impact icon name (for use with icon components)
+ * Returns icon name compatible with @heroicons/react
  */
 export function getInsightImpactIcon(impact: string): string {
   const icons: Record<string, string> = {
-    positive: '✅',
-    negative: '⚠️',
-    neutral: 'ℹ️',
+    positive: 'CheckCircleIcon',
+    negative: 'ExclamationTriangleIcon',
+    neutral: 'InformationCircleIcon',
   };
 
   return icons[impact] || icons.neutral;

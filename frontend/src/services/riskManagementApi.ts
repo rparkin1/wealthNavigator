@@ -418,19 +418,19 @@ export function getSeverityColor(severity: string): string {
 }
 
 /**
- * Get strategy type icon
+ * Get strategy type icon (returns Heroicon component name)
  */
 export function getStrategyIcon(strategyType: string): string {
   const icons: Record<string, string> = {
-    protective_put: '🛡️',
-    collar: '🎯',
-    put_spread: '📊',
-    tail_risk_hedge: '🚨',
-    diversification: '🌐',
-    volatility_hedge: '📈',
-    inverse_etf: '🔄',
+    protective_put: 'ShieldCheckIcon',
+    collar: 'FlagIcon',
+    put_spread: 'ChartBarIcon',
+    tail_risk_hedge: 'ExclamationTriangleIcon',
+    diversification: 'GlobeAltIcon',
+    volatility_hedge: 'ArrowTrendingUpIcon',
+    inverse_etf: 'ArrowPathIcon',
   };
-  return icons[strategyType] || '💼';
+  return icons[strategyType] || 'BriefcaseIcon';
 }
 
 /**

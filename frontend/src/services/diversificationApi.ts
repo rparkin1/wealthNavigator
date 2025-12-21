@@ -287,24 +287,24 @@ export function getDiversificationLevelColor(level: string): string {
 }
 
 /**
- * Get icon for concentration type
+ * Get icon for concentration type (returns Heroicon component name)
  */
 export function getConcentrationTypeIcon(type: string): string {
   switch (type) {
     case 'single_holding':
-      return '🎯';
+      return 'FlagIcon';
     case 'top_5':
-      return '📊';
+      return 'ChartBarIcon';
     case 'sector':
-      return '🏭';
+      return 'BuildingOffice2Icon';
     case 'geography':
-      return '🌍';
+      return 'GlobeAltIcon';
     case 'asset_class':
-      return '💼';
+      return 'BriefcaseIcon';
     case 'manager':
-      return '👤';
+      return 'UserIcon';
     default:
-      return '⚠️';
+      return 'ExclamationTriangleIcon';
   }
 }
 
@@ -337,35 +337,35 @@ export function getDiversificationScoreDisplay(score: number): {
     return {
       level: 'Excellent',
       color: '#10b981',
-      icon: '✅',
+      icon: 'CheckCircleIcon',
       description: 'Your portfolio is well-diversified',
     };
   } else if (score >= 60) {
     return {
       level: 'Good',
       color: '#3b82f6',
-      icon: '👍',
+      icon: 'CheckCircleIcon',
       description: 'Your portfolio is adequately diversified',
     };
   } else if (score >= 40) {
     return {
       level: 'Fair',
       color: '#f59e0b',
-      icon: '⚠️',
+      icon: 'ExclamationTriangleIcon',
       description: 'Consider improving diversification',
     };
   } else if (score >= 20) {
     return {
       level: 'Poor',
       color: '#f97316',
-      icon: '⚠️',
+      icon: 'ExclamationTriangleIcon',
       description: 'Significant concentration risks present',
     };
   } else {
     return {
       level: 'Critical',
       color: '#ef4444',
-      icon: '🚨',
+      icon: 'ExclamationCircleIcon',
       description: 'Urgent action needed to reduce risk',
     };
   }

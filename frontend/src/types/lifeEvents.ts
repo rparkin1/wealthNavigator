@@ -286,7 +286,7 @@ export const EVENT_TYPE_METADATA: Record<LifeEventType, EventTypeMetadata> = {
   job_loss: {
     value: 'job_loss',
     label: 'Job Loss',
-    icon: '💼',
+    icon: 'BriefcaseIcon',
     category: 'negative',
     defaultDuration: 1,
     defaultProbability: 1.0,
@@ -294,7 +294,7 @@ export const EVENT_TYPE_METADATA: Record<LifeEventType, EventTypeMetadata> = {
   disability: {
     value: 'disability',
     label: 'Disability',
-    icon: '🏥',
+    icon: 'HeartIcon',
     category: 'negative',
     defaultDuration: 5,
     defaultProbability: 1.0,
@@ -302,7 +302,7 @@ export const EVENT_TYPE_METADATA: Record<LifeEventType, EventTypeMetadata> = {
   divorce: {
     value: 'divorce',
     label: 'Divorce',
-    icon: '💔',
+    icon: 'HeartIcon',
     category: 'negative',
     defaultDuration: 1,
     defaultProbability: 1.0,
@@ -310,7 +310,7 @@ export const EVENT_TYPE_METADATA: Record<LifeEventType, EventTypeMetadata> = {
   inheritance: {
     value: 'inheritance',
     label: 'Inheritance',
-    icon: '💰',
+    icon: 'BanknotesIcon',
     category: 'positive',
     defaultDuration: 1,
     defaultProbability: 0.5,
@@ -318,7 +318,7 @@ export const EVENT_TYPE_METADATA: Record<LifeEventType, EventTypeMetadata> = {
   major_medical: {
     value: 'major_medical',
     label: 'Major Medical',
-    icon: '🏥',
+    icon: 'HeartIcon',
     category: 'negative',
     defaultDuration: 3,
     defaultProbability: 1.0,
@@ -326,7 +326,7 @@ export const EVENT_TYPE_METADATA: Record<LifeEventType, EventTypeMetadata> = {
   home_purchase: {
     value: 'home_purchase',
     label: 'Home Purchase',
-    icon: '🏡',
+    icon: 'HomeIcon',
     category: 'neutral',
     defaultDuration: 1,
     defaultProbability: 1.0,
@@ -334,7 +334,7 @@ export const EVENT_TYPE_METADATA: Record<LifeEventType, EventTypeMetadata> = {
   business_start: {
     value: 'business_start',
     label: 'Business Start',
-    icon: '🚀',
+    icon: 'RocketLaunchIcon',
     category: 'neutral',
     defaultDuration: 5,
     defaultProbability: 1.0,
@@ -342,7 +342,7 @@ export const EVENT_TYPE_METADATA: Record<LifeEventType, EventTypeMetadata> = {
   career_change: {
     value: 'career_change',
     label: 'Career Change',
-    icon: '📊',
+    icon: 'ChartBarIcon',
     category: 'neutral',
     defaultDuration: 2,
     defaultProbability: 1.0,
@@ -350,7 +350,7 @@ export const EVENT_TYPE_METADATA: Record<LifeEventType, EventTypeMetadata> = {
   marriage: {
     value: 'marriage',
     label: 'Marriage',
-    icon: '💍',
+    icon: 'HeartIcon',
     category: 'positive',
     defaultDuration: 1,
     defaultProbability: 1.0,
@@ -358,7 +358,7 @@ export const EVENT_TYPE_METADATA: Record<LifeEventType, EventTypeMetadata> = {
   child_birth: {
     value: 'child_birth',
     label: 'Child Birth',
-    icon: '👶',
+    icon: 'UserIcon',
     category: 'neutral',
     defaultDuration: 18,
     defaultProbability: 1.0,
@@ -366,7 +366,7 @@ export const EVENT_TYPE_METADATA: Record<LifeEventType, EventTypeMetadata> = {
   relocation: {
     value: 'relocation',
     label: 'Relocation',
-    icon: '📦',
+    icon: 'ArchiveBoxIcon',
     category: 'neutral',
     defaultDuration: 1,
     defaultProbability: 1.0,
@@ -374,7 +374,7 @@ export const EVENT_TYPE_METADATA: Record<LifeEventType, EventTypeMetadata> = {
   windfall: {
     value: 'windfall',
     label: 'Windfall',
-    icon: '🎰',
+    icon: 'SparklesIcon',
     category: 'positive',
     defaultDuration: 1,
     defaultProbability: 0.2,

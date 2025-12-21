@@ -281,24 +281,24 @@ export async function initializeTemplates(): Promise<{ message: string; count: n
 // ============================================================================
 
 /**
- * Get event type icon
+ * Get event type icon (returns Heroicon component name)
  */
 export function getEventTypeIcon(eventType: string): string {
   const icons: Record<string, string> = {
-    job_loss: '💼',
-    disability: '🏥',
-    divorce: '💔',
-    inheritance: '💰',
-    major_medical: '🏥',
-    home_purchase: '🏡',
-    business_start: '🚀',
-    career_change: '📊',
-    marriage: '💍',
-    child_birth: '👶',
-    relocation: '📦',
-    windfall: '🎰',
+    job_loss: 'BriefcaseIcon',
+    disability: 'HeartIcon',
+    divorce: 'HeartIcon',
+    inheritance: 'BanknotesIcon',
+    major_medical: 'HeartIcon',
+    home_purchase: 'HomeIcon',
+    business_start: 'RocketLaunchIcon',
+    career_change: 'ChartBarIcon',
+    marriage: 'HeartIcon',
+    child_birth: 'UserIcon',
+    relocation: 'ArchiveBoxIcon',
+    windfall: 'SparklesIcon',
   };
-  return icons[eventType] || '📅';
+  return icons[eventType] || 'CalendarDaysIcon';
 }
 
 /**

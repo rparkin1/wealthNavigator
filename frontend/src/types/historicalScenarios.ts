@@ -222,70 +222,70 @@ export const SCENARIO_METADATA: Record<ScenarioPeriod, ScenarioMetadata> = {
   financial_crisis: {
     period: 'financial_crisis',
     label: 'Financial Crisis',
-    icon: '📉',
+    icon: 'ArrowTrendingDownIcon',
     color: 'red',
     description: 'Major market downturns (2008, etc.)',
   },
   dot_com_bust: {
     period: 'dot_com_bust',
     label: 'Dot-Com Bust',
-    icon: '💻',
+    icon: 'ComputerDesktopIcon',
     color: 'orange',
     description: 'Tech bubble burst (2000-2002)',
   },
   covid_crash: {
     period: 'covid_crash',
     label: 'COVID-19 Crash',
-    icon: '🦠',
+    icon: 'ExclamationCircleIcon',
     color: 'purple',
     description: 'Pandemic market crash (2020)',
   },
   great_depression: {
     period: 'great_depression',
     label: 'Great Depression',
-    icon: '📊',
+    icon: 'ChartBarIcon',
     color: 'gray',
     description: 'The 1929 crash and depression',
   },
   stagflation_70s: {
     period: 'stagflation_70s',
     label: '1970s Stagflation',
-    icon: '📈',
+    icon: 'ArrowTrendingUpIcon',
     color: 'yellow',
     description: 'High inflation, stagnant growth',
   },
   black_monday_1987: {
     period: 'black_monday_1987',
     label: 'Black Monday',
-    icon: '⚫',
+    icon: 'ExclamationCircleIcon',
     color: 'black',
     description: '1987 single-day crash',
   },
   asian_crisis_1997: {
     period: 'asian_crisis_1997',
     label: 'Asian Crisis',
-    icon: '🌏',
+    icon: 'GlobeAltIcon',
     color: 'teal',
     description: '1997 Asian financial crisis',
   },
   bull_market: {
     period: 'bull_market',
     label: 'Bull Market',
-    icon: '🐂',
+    icon: 'ArrowTrendingUpIcon',
     color: 'green',
     description: 'Extended market growth periods',
   },
   lost_decade: {
     period: 'lost_decade',
     label: 'Lost Decade',
-    icon: '⏳',
+    icon: 'ClockIcon',
     color: 'gray',
     description: 'Flat or negative returns (Japan)',
   },
   recovery_period: {
     period: 'recovery_period',
     label: 'Recovery',
-    icon: '📊',
+    icon: 'ChartBarIcon',
     color: 'blue',
     description: 'Post-crash recovery periods',
   },
@@ -326,7 +326,7 @@ export function getScenarioColor(period: ScenarioPeriod): string {
 }
 
 export function getScenarioIcon(period: ScenarioPeriod): string {
-  return SCENARIO_METADATA[period]?.icon || '📊';
+  return SCENARIO_METADATA[period]?.icon || 'ChartBarIcon';
 }
 
 // Note: All types are already exported inline above, no need for duplicate exports

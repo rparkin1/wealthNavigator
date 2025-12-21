@@ -109,21 +109,21 @@ export function formatPercentage(value: number, decimals: number = 2): string {
 }
 
 /**
- * Get strategy type icon
+ * Get strategy type icon (returns Heroicon component name)
  */
 export function getStrategyIcon(strategyType: string): string {
   const icons: Record<string, string> = {
-    protective_put: '🛡️',
-    collar: '🎯',
-    covered_call: '💰',
-    put_spread: '📊',
-    tail_risk_hedge: '🚨',
-    diversification: '🌐',
-    volatility_hedge: '📈',
-    inverse_etf: '🔄',
-    correlation_hedge: '🔗',
+    protective_put: 'ShieldCheckIcon',
+    collar: 'FlagIcon',
+    covered_call: 'BanknotesIcon',
+    put_spread: 'ChartBarIcon',
+    tail_risk_hedge: 'ExclamationTriangleIcon',
+    diversification: 'GlobeAltIcon',
+    volatility_hedge: 'ArrowTrendingUpIcon',
+    inverse_etf: 'ArrowPathIcon',
+    correlation_hedge: 'LinkIcon',
   };
-  return icons[strategyType] || '💼';
+  return icons[strategyType] || 'BriefcaseIcon';
 }
 
 /**

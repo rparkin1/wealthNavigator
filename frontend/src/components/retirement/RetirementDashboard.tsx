@@ -376,8 +376,8 @@ function ProjectionsTab({ socialSecurity, spending, longevity }: ProjectionsTabP
   const projectionRequest: RetirementProjectionRequest | null =
     socialSecurity && spending && longevity
       ? {
-          user_id: userProfile.userId, // ✅ Now uses actual user ID from localStorage
-          current_age: userProfile.age || 65, // ✅ Now uses user's actual age
+          user_id: userProfile.userId, // Now uses actual user ID from localStorage
+          current_age: userProfile.age || 65, // Now uses user's actual age
           retirement_age: userProfile.retirementAge || 65,
           social_security: {
             primary_insurance_amount: socialSecurity.primary_insurance_amount,
