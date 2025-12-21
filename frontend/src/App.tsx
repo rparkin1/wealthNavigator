@@ -14,6 +14,10 @@ import { SkipLink } from './components/common/SkipLink';
 import { useOnboarding } from './hooks/useOnboarding';
 import { useGoals } from './hooks/useGoals';
 import { usePortfolioData } from './hooks/usePortfolioData';
+import { AppShell } from './components/layout/AppShell';
+import { TopBar } from './components/layout/TopBar';
+import { Sidebar } from './components/layout/Sidebar';
+import { MobileNav, MobileNavItem } from './components/layout/MobileNav';
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -624,351 +628,35 @@ function App() {
         />
       )}
 
-      <div className="flex h-screen bg-gray-50">
-      {/* Sidebar Navigation */}
-      {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'education' || currentView === '529-calculator' || currentView === 'tax' || currentView === 'estate-planning' || currentView === 'hedging' || currentView === 'insurance' || currentView === 'risk' || currentView === 'reserves' || currentView === 'diversification' || currentView === 'sensitivity' || currentView === 'budget' || currentView === 'recurring' || currentView === 'plaid' || currentView === 'data-entry' || currentView === 'what-if' || currentView === 'life-events' || currentView === 'scenarios') ? (
-        sidebarOpen && (
-          <aside
-            className="w-64 transition-all duration-300 bg-white border-r border-gray-200 flex flex-col h-screen"
-            role="navigation"
-            aria-label="Main navigation"
-          >
-          <div className="flex-none p-4">
-            <h2 className="text-lg font-semibold text-gray-900">WealthNavigator AI</h2>
-            <p className="text-sm text-gray-600 mt-1">Financial Planning Assistant</p>
-          </div>
-
-          <nav className="flex-1 overflow-y-auto mt-6" aria-label="Main menu">
-            <div className="px-4 py-2">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider" id="nav-heading">
-                Navigation
-              </h3>
-            </div>
-            <div className="mt-2 space-y-1 px-2" role="list" aria-labelledby="nav-heading">
-              <button
-                onClick={() => setCurrentView('home')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'home'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-                aria-current={currentView === 'home' ? 'page' : undefined}
-                aria-label="Home"
-              >
-                <HomeIcon className="w-5 h-5" />
-                <span>Home</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('data-entry')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'data-entry'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-                aria-current={currentView === 'data-entry' ? 'page' : undefined}
-                aria-label="Data Entry"
-              >
-                <DocumentTextIcon className="w-5 h-5" />
-                <span>Data Entry</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('chat')}
-                className="w-full px-3 py-2 text-left text-sm rounded-lg transition-colors text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                aria-label="Chat with AI Assistant"
-              >
-                <ChatBubbleLeftIcon className="w-5 h-5" />
-                <span>Chat</span>
-              </button>
-            </div>
-
-            <div className="px-4 py-2 mt-6">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider" id="planning-heading">
-                Planning
-              </h3>
-            </div>
-            <div className="mt-2 space-y-1 px-2" role="list" aria-labelledby="planning-heading">
-              <button
-                onClick={() => setCurrentView('goals')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'goals'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-                aria-current={currentView === 'goals' ? 'page' : undefined}
-                aria-label="Financial Goals"
-              >
-                <FlagIcon className="w-5 h-5" />
-                <span>Goals</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('budget')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'budget'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <BanknotesIcon className="w-5 h-5" />
-                <span>Budget</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('recurring')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'recurring'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <ArrowPathIcon className="w-5 h-5" />
-                <span>Recurring</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('portfolio')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'portfolio'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <ChartBarIcon className="w-5 h-5" />
-                <span>Portfolio</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('retirement')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'retirement'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <CalendarDaysIcon className="w-5 h-5" />
-                <span>Retirement</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('education')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'education' || currentView === '529-calculator'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <AcademicCapIcon className="w-5 h-5" />
-                <span>Education Funding</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('tax')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'tax'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <ReceiptPercentIcon className="w-5 h-5" />
-                <span>Tax Management</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('estate-planning')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'estate-planning'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <ScaleIcon className="w-5 h-5" />
-                <span>Estate Planning</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('hedging')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'hedging'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <ShieldCheckIcon className="w-5 h-5" />
-                <span>Hedging Strategies</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('insurance')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'insurance'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <HeartIcon className="w-5 h-5" />
-                <span>Insurance Optimization</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('plaid')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'plaid'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <BuildingLibraryIcon className="w-5 h-5" />
-                <span>Bank Connections</span>
-              </button>
-            </div>
-
-            <div className="px-4 py-2 mt-6">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider" id="analysis-heading">
-                Analysis & Scenarios
-              </h3>
-            </div>
-            <div className="mt-2 space-y-1 px-2" role="list" aria-labelledby="analysis-heading">
-              <button
-                onClick={() => setCurrentView('risk')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'risk'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-                aria-current={currentView === 'risk' ? 'page' : undefined}
-                aria-label="Risk Management"
-              >
-                <ExclamationTriangleIcon className="w-5 h-5" />
-                <span>Risk Management</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('reserves')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'reserves'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <BanknotesIcon className="w-5 h-5" />
-                <span>Reserve Monitoring</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('diversification')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'diversification'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <FlagIcon className="w-5 h-5" />
-                <span>Diversification</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('sensitivity')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'sensitivity'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <ChartBarIcon className="w-5 h-5" />
-                <span>Sensitivity Analysis</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('what-if')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'what-if'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <SparklesIcon className="w-5 h-5" />
-                <span>What-If Analysis</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('life-events')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'life-events'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <CalendarDaysIcon className="w-5 h-5" />
-                <span>Life Events</span>
-              </button>
-              <button
-                onClick={() => setCurrentView('scenarios')}
-                className={`w-full px-3 py-2 text-left text-sm rounded-lg transition-colors flex items-center gap-2 ${
-                  currentView === 'scenarios'
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <ChartBarIcon className="w-5 h-5" />
-                <span>Historical Scenarios</span>
-              </button>
-            </div>
-          </nav>
-        </aside>
-        )
-      ) : null}
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {(currentView === 'home' || currentView === 'goals' || currentView === 'portfolio' || currentView === 'retirement' || currentView === 'tax' || currentView === 'estate-planning' || currentView === 'hedging' || currentView === 'insurance' || currentView === 'risk' || currentView === 'reserves' || currentView === 'diversification' || currentView === 'sensitivity' || currentView === 'what-if' || currentView === 'life-events' || currentView === 'scenarios') && (
-          <header className="flex-none bg-white border-b border-gray-200 px-6 py-4" role="banner">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-                  aria-expanded={sidebarOpen}
-                  aria-controls="sidebar-navigation"
-                >
-                  <svg
-                    className="w-5 h-5 text-gray-600"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path d="M4 6h16M4 12h16M4 18h16"></path>
-                  </svg>
-                  <span className="sr-only">{sidebarOpen ? 'Close' : 'Open'} navigation menu</span>
-                </button>
-                <h1 className="text-xl font-semibold text-gray-900">
-                  Financial Planning
-                </h1>
-              </div>
-
-              <div className="flex items-center space-x-4">
-                <NotificationSystem maxNotifications={10} autoHideDuration={5000} />
-                <HelpMenu
-                  onOpenDocumentation={handleOpenDocumentation}
-                  onOpenTutorial={handleOpenTutorial}
-                />
-                <button
-                  onClick={() => setCurrentView('settings')}
-                  className="btn-secondary flex items-center gap-2"
-                  aria-label="Open settings"
-                >
-                  <Cog6ToothIcon className="w-5 h-5" />
-                  <span>Settings</span>
-                </button>
-              </div>
-            </div>
-          </header>
-        )}
-
-        <main
-          id="main-content"
-          className="flex-1 overflow-y-auto"
-          role="main"
-          aria-label="Main content"
-          tabIndex={-1}
-        >
-          {renderView()}
+      {/* NEW: AppShell wrapper */}
+      <AppShell
+        topBar={null} // TODO: Phase 2
+        sidebar={null} // TODO: Phase 3
+        mobileNav={null} // TODO: Phase 4
+        sidebarDefaultOpen={sidebarOpen}
+        onSidebarChange={setSidebarOpen}
+      >
+        {/* Main content */}
+        <main id="main-content" className="h-full">
+          <ErrorBoundary>
+            <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
+              {renderView()}
+            </Suspense>
+          </ErrorBoundary>
         </main>
-      </div>
-    </div>
+      </AppShell>
+
+      {/* Notification System */}
+      <NotificationSystem />
+
+      {/* Help Menu */}
+      <HelpMenu
+        onOpenDocumentation={handleOpenDocumentation}
+        onOpenTutorial={handleOpenTutorial}
+      />
     </>
   );
 }
-
 function LoadingView({ message }: { message: string }) {
   return (
     <div className="h-full flex items-center justify-center bg-gray-50">
