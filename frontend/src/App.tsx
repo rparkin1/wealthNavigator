@@ -19,6 +19,7 @@ import { TopBar } from './components/layout/TopBar';
 import { Sidebar } from './components/layout/Sidebar';
 import { MobileNav, MobileNavItem } from './components/layout/MobileNav';
 import { AppTopBar } from './components/navigation/AppTopBar';
+import { AppSidebar } from './components/navigation/AppSidebar';
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -652,7 +653,12 @@ function App() {
             onMenuClick={() => setSidebarOpen(!sidebarOpen)}
           />
         }
-        sidebar={null} // TODO: Phase 3
+        sidebar={
+          <AppSidebar
+            currentView={currentView}
+            onNavigate={setCurrentView}
+          />
+        }
         mobileNav={null} // TODO: Phase 4
         sidebarDefaultOpen={sidebarOpen}
         onSidebarChange={setSidebarOpen}
