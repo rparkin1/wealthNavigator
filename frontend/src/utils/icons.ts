@@ -20,7 +20,7 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   XCircleIcon,
-  BadgeCheckIcon,
+  CheckBadgeIcon,
 
   // Actions
   PlusIcon,
@@ -46,7 +46,7 @@ import {
   CalendarDaysIcon,
   ChartBarIcon,
   DocumentTextIcon,
-  CogIcon,
+  Cog6ToothIcon,
   BellIcon,
   UserCircleIcon,
   Bars3Icon,
@@ -68,7 +68,7 @@ import {
   CheckCircleIcon as CheckCircleIconSolid,
   ExclamationTriangleIcon as ExclamationTriangleIconSolid,
   XCircleIcon as XCircleIconSolid,
-  BadgeCheckIcon as BadgeCheckIconSolid,
+  CheckBadgeIcon as CheckBadgeIconSolid,
 } from '@heroicons/react/24/solid';
 
 /**
@@ -94,14 +94,14 @@ export const statusIcons = {
   on_track: CheckCircleIcon,
   behind: ExclamationTriangleIcon,
   at_risk: XCircleIcon,
-  achieved: BadgeCheckIcon,
+  achieved: CheckBadgeIcon,
 } as const;
 
 export const statusIconsSolid = {
   on_track: CheckCircleIconSolid,
   behind: ExclamationTriangleIconSolid,
   at_risk: XCircleIconSolid,
-  achieved: BadgeCheckIconSolid,
+  achieved: CheckBadgeIconSolid,
 } as const;
 
 export type GoalStatus = keyof typeof statusIcons;
@@ -122,7 +122,7 @@ export const actionIcons = {
   refresh: ArrowPathIcon,
   back: ArrowLeftIcon,
   forward: ArrowRightIcon,
-  settings: CogIcon,
+  settings: Cog6ToothIcon,
   notifications: BellIcon,
   user: UserCircleIcon,
   menu: Bars3Icon,

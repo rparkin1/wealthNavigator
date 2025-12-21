@@ -20,7 +20,6 @@ import { AppSidebar } from './components/navigation/AppSidebar';
 import { AppMobileNav } from './components/navigation/AppMobileNav';
 import { MobileMoreMenu } from './components/navigation/MobileMoreMenu';
 import {
-  HomeIcon,
   DocumentTextIcon,
   ChatBubbleLeftIcon,
   FlagIcon,
@@ -28,7 +27,6 @@ import {
   ArrowPathIcon,
   ChartBarIcon,
   CalendarDaysIcon,
-  AcademicCapIcon,
   ReceiptPercentIcon,
   ScaleIcon,
   ShieldCheckIcon,
@@ -253,6 +251,10 @@ function App() {
 
   const handleOpenSettings = () => {
     setCurrentView('settings');
+  };
+
+  const handleNavigate = (view: string) => {
+    setCurrentView(view as View);
   };
 
   const renderView = () => {
@@ -656,13 +658,13 @@ function App() {
         sidebar={
           <AppSidebar
             currentView={currentView}
-            onNavigate={setCurrentView}
+            onNavigate={handleNavigate}
           />
         }
         mobileNav={
           <AppMobileNav
             currentView={currentView}
-            onNavigate={setCurrentView}
+            onNavigate={handleNavigate}
             onMoreClick={() => setShowMobileMore(true)}
           />
         }
@@ -692,7 +694,7 @@ function App() {
       <MobileMoreMenu
         isOpen={showMobileMore}
         onClose={() => setShowMobileMore(false)}
-        onNavigate={setCurrentView}
+        onNavigate={handleNavigate}
       />
     </>
   );
