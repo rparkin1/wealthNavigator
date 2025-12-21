@@ -18,6 +18,7 @@ import { AppShell } from './components/layout/AppShell';
 import { TopBar } from './components/layout/TopBar';
 import { Sidebar } from './components/layout/Sidebar';
 import { MobileNav, MobileNavItem } from './components/layout/MobileNav';
+import { AppTopBar } from './components/navigation/AppTopBar';
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -238,6 +239,19 @@ function App() {
   const handleOpenTutorial = (tutorialId: string) => {
     setCurrentDocPath(tutorialId);
     setShowDocumentation(true);
+  };
+
+  // TopBar action handlers
+  const handleNewGoal = () => {
+    setCurrentView('goals');
+  };
+
+  const handleNewThread = () => {
+    setCurrentView('chat');
+  };
+
+  const handleOpenSettings = () => {
+    setCurrentView('settings');
   };
 
   const renderView = () => {
@@ -630,7 +644,14 @@ function App() {
 
       {/* NEW: AppShell wrapper */}
       <AppShell
-        topBar={null} // TODO: Phase 2
+        topBar={
+          <AppTopBar
+            onNewGoal={handleNewGoal}
+            onNewThread={handleNewThread}
+            onOpenSettings={handleOpenSettings}
+            onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+          />
+        }
         sidebar={null} // TODO: Phase 3
         mobileNav={null} // TODO: Phase 4
         sidebarDefaultOpen={sidebarOpen}
