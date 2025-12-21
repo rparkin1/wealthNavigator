@@ -20,6 +20,8 @@ import { Sidebar } from './components/layout/Sidebar';
 import { MobileNav, MobileNavItem } from './components/layout/MobileNav';
 import { AppTopBar } from './components/navigation/AppTopBar';
 import { AppSidebar } from './components/navigation/AppSidebar';
+import { AppMobileNav } from './components/navigation/AppMobileNav';
+import { MobileMoreMenu } from './components/navigation/MobileMoreMenu';
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -191,6 +193,7 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showDocumentation, setShowDocumentation] = useState(false);
   const [currentDocPath, setCurrentDocPath] = useState<string>('');
+  const [showMobileMore, setShowMobileMore] = useState(false);
 
   // Test user ID matching backend database - in production, get from auth
   const userId = 'test-user-123';
@@ -659,7 +662,13 @@ function App() {
             onNavigate={setCurrentView}
           />
         }
-        mobileNav={null} // TODO: Phase 4
+        mobileNav={
+          <AppMobileNav
+            currentView={currentView}
+            onNavigate={setCurrentView}
+            onMoreClick={() => setShowMobileMore(true)}
+          />
+        }
         sidebarDefaultOpen={sidebarOpen}
         onSidebarChange={setSidebarOpen}
       >
@@ -680,6 +689,13 @@ function App() {
       <HelpMenu
         onOpenDocumentation={handleOpenDocumentation}
         onOpenTutorial={handleOpenTutorial}
+      />
+
+      {/* Mobile More Menu */}
+      <MobileMoreMenu
+        isOpen={showMobileMore}
+        onClose={() => setShowMobileMore(false)}
+        onNavigate={setCurrentView}
       />
     </>
   );
