@@ -637,7 +637,7 @@ async def sync_holdings(
                 continue
 
             # Decrypt access token
-            access_token = encryption_service.decrypt(item.access_token)
+            access_token = encryption_service.decrypt_access_token(item.access_token)
 
             # Get holdings
             holdings_data = plaid_service.get_investments_holdings(access_token)
@@ -849,7 +849,7 @@ async def sync_investment_transactions(
                 continue  # Skip non-investment items
 
             # Decrypt access token
-            access_token = encryption_service.decrypt(item.access_token)
+            access_token = encryption_service.decrypt_access_token(item.access_token)
 
             # Fetch investment transactions from Plaid
             inv_data = plaid_service.get_investment_transactions(
