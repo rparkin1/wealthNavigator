@@ -267,6 +267,9 @@ class PlaidHolding(Base, TimestampMixin):
     # Metadata
     unofficial_currency_code: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
 
+    # Status
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
     # Relationships
     account: Mapped["PlaidAccount"] = relationship("PlaidAccount", back_populates="holdings")
     user: Mapped["User"] = relationship("User", back_populates="plaid_holdings")
@@ -275,6 +278,7 @@ class PlaidHolding(Base, TimestampMixin):
     __table_args__ = (
         Index("ix_plaid_holdings_user_ticker", "user_id", "ticker_symbol"),
         Index("ix_plaid_holdings_account", "account_id"),
+        Index("ix_plaid_holdings_user_active", "user_id", "is_active"),
     )
 
     def __repr__(self) -> str:

@@ -7,6 +7,7 @@ API routes for net worth history, tracking, and analysis.
 from datetime import datetime, timedelta
 from typing import List, Optional
 from uuid import UUID
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,6 +25,7 @@ from app.schemas.net_worth import (
 )
 
 router = APIRouter(prefix="/net-worth", tags=["net-worth"])
+logger = logging.getLogger(__name__)
 
 
 # ==================== Helper Functions ====================
@@ -173,19 +175,66 @@ async def generate_historical_data(
     """
     Generate historical net worth data points.
 
-    Currently uses current holdings as the latest snapshot and simulates
-    historical values with realistic growth patterns.
-
-    In the future, this could:
-    1. Query actual portfolio snapshots from database
-    2. Aggregate account balances over time
-    3. Include Plaid transaction history
+    NEW: Uses real historical snapshots from database.
+    Falls back to simulation if no snapshots exist.
     """
+    from app.services.net_worth_snapshot_service import NetWorthSnapshotService
+    from app.services.net_worth_backfill_service import NetWorthBackfillService
+
     # Default to last year if no dates provided
     if not end_date:
         end_date = datetime.utcnow()
     if not start_date:
         start_date = end_date - timedelta(days=365)
+
+    # Convert datetime to date for snapshot queries
+    start_date_only = start_date.date() if isinstance(start_date, datetime) else start_date
+    end_date_only = end_date.date() if isinstance(end_date, datetime) else end_date
+
+    # Try to get real snapshots from database
+    snapshot_service = NetWorthSnapshotService()
+    snapshots = await snapshot_service.get_snapshots(
+        user_id=user_id,
+        start_date=start_date_only,
+        end_date=end_date_only,
+        db=db
+    )
+
+    if snapshots and len(snapshots) > 0:
+        # We have real data! Convert snapshots to data points
+        logger.info(f"Using {len(snapshots)} real snapshots for user {user_id}")
+
+        data_points = []
+        for snapshot in snapshots:
+            # Convert assets_by_class keys to camelCase for frontend
+            assets_by_class = {}
+            for key, value in (snapshot.assets_by_class or {}).items():
+                assets_by_class[key] = value
+
+            point = NetWorthDataPoint(
+                date=snapshot.snapshot_date.strftime("%Y-%m-%d"),
+                totalNetWorth=snapshot.total_net_worth,
+                totalAssets=snapshot.total_assets,
+                totalLiabilities=snapshot.total_liabilities,
+                liquidNetWorth=snapshot.liquid_net_worth,
+                assetsByClass=assets_by_class,
+            )
+            data_points.append(point)
+
+        # If we have data but it's sparse, still return it (weekly is fine)
+        return data_points
+
+    # No snapshots exist - check if we should trigger backfill
+    logger.warning(f"No snapshots found for user {user_id}, checking backfill status")
+
+    backfill_service = NetWorthBackfillService()
+    status = await backfill_service.get_backfill_status(user_id, db)
+
+    if status.get("needs_backfill"):
+        logger.info(f"User {user_id} needs backfill. Recommend calling /backfill endpoint")
+
+    # Fall back to simulation (legacy behavior)
+    logger.info(f"Falling back to simulated data for user {user_id}")
 
     # Get current actual values from database
     current_assets_by_class = await calculate_asset_breakdown(user_id, db)
@@ -210,7 +259,7 @@ async def generate_historical_data(
 
     # Generate historical series scaling backwards from current values
     data_points = []
-    days = (end_date - start_date).days
+    days = (end_date_only - start_date_only).days
 
     # Use consistent seed for reproducible results
     np.random.seed(42)
@@ -244,7 +293,7 @@ async def generate_historical_data(
         )
 
         point = NetWorthDataPoint(
-            date=(start_date + timedelta(days=i)).strftime("%Y-%m-%d"),
+            date=(start_date_only + timedelta(days=i)).strftime("%Y-%m-%d"),
             totalNetWorth=historical_net_worth,
             totalAssets=historical_assets,
             totalLiabilities=current_liabilities,
@@ -438,6 +487,225 @@ async def get_net_worth_summary(
     )
 
 
+@router.post(
+    "/{user_id}/backfill",
+    summary="Backfill Historical Net Worth Data",
+    description="""
+    Backfill net worth history from Plaid transaction data.
+
+    This will:
+    1. Fetch all transactions from Plaid
+    2. Reconstruct daily balances from transaction history
+    3. Create snapshots for each day
+
+    **Note**: This is a one-time operation for each user. Subsequent calls
+    will only fill in missing days.
+    """
+)
+async def backfill_net_worth_history(
+    user_id: str,
+    days_back: int = Query(365, description="Number of days to backfill", ge=1, le=1825),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Backfill historical net worth data from Plaid"""
+
+    # Verify user authorization
+    if str(current_user.id) != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this data")
+
+    from app.services.net_worth_backfill_service import NetWorthBackfillService
+
+    backfill_service = NetWorthBackfillService()
+
+    try:
+        result = await backfill_service.backfill_user_history(
+            user_id=user_id,
+            days_back=days_back,
+            db=db,
+        )
+
+        return result
+    except Exception as e:
+        logger.error(f"Backfill failed for user {user_id}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Backfill failed: {str(e)}")
+
+
+@router.post(
+    "/{user_id}/snapshot/create",
+    summary="Create Current Net Worth Snapshot",
+    description="""
+    Create a snapshot of current net worth from Plaid data.
+
+    This is typically called:
+    - Daily by a background job
+    - After account sync
+    - Manually for testing
+    """
+)
+async def create_snapshot(
+    user_id: str,
+    snapshot_date: Optional[str] = Query(None, description="Date for snapshot (YYYY-MM-DD), defaults to today"),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a net worth snapshot for today or specified date"""
+
+    # Verify user authorization
+    if str(current_user.id) != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this data")
+
+    from app.services.net_worth_snapshot_service import NetWorthSnapshotService
+    from datetime import date
+
+    snapshot_service = NetWorthSnapshotService()
+
+    # Parse date
+    target_date = date.fromisoformat(snapshot_date) if snapshot_date else date.today()
+
+    try:
+        snapshot = await snapshot_service.calculate_and_store_snapshot(
+            user_id=user_id,
+            snapshot_date=target_date,
+            db=db,
+        )
+
+        return {
+            "success": True,
+            "snapshot": snapshot.to_dict(),
+        }
+    except Exception as e:
+        logger.error(f"Snapshot creation failed for user {user_id}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Snapshot creation failed: {str(e)}")
+
+
+@router.get(
+    "/{user_id}/backfill/status",
+    summary="Get Backfill Status",
+    description="Check the status of historical data and whether backfill is needed"
+)
+async def get_backfill_status(
+    user_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get backfill status for a user"""
+
+    # Verify user authorization
+    if str(current_user.id) != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this data")
+
+    from app.services.net_worth_backfill_service import NetWorthBackfillService
+
+    backfill_service = NetWorthBackfillService()
+    status = await backfill_service.get_backfill_status(user_id, db)
+
+    return status
+
+
+@router.get(
+    "/{user_id}/retention/status",
+    summary="Get Data Retention Status",
+    description="Check how many snapshots would be affected by retention policy"
+)
+async def get_retention_status(
+    user_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get data retention status and preview"""
+
+    # Verify user authorization
+    if str(current_user.id) != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this data")
+
+    from app.services.data_retention_service import DataRetentionService
+
+    retention_service = DataRetentionService()
+
+    # Get current stats
+    stats = await retention_service.get_retention_stats(user_id, db)
+
+    # Preview what would be deleted
+    preview = await retention_service.preview_retention_changes(user_id, db)
+
+    return {
+        "stats": stats,
+        "preview": preview,
+    }
+
+
+@router.post(
+    "/{user_id}/retention/apply",
+    summary="Apply Data Retention Policy",
+    description="Apply retention policy: keep daily for 1 year, weekly for 5 years"
+)
+async def apply_retention_policy(
+    user_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Apply data retention policy for a user"""
+
+    # Verify user authorization
+    if str(current_user.id) != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this data")
+
+    from app.services.data_retention_service import DataRetentionService
+
+    retention_service = DataRetentionService()
+
+    try:
+        result = await retention_service.apply_retention_policy(user_id, db)
+        return result
+    except Exception as e:
+        logger.error(f"Retention policy failed for user {user_id}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Retention policy failed: {str(e)}")
+
+
+# Admin endpoints (should be protected with admin auth in production)
+@router.get(
+    "/admin/scheduler/status",
+    summary="Get Scheduler Status (Admin)",
+    description="Check status of all scheduled background jobs"
+)
+async def get_scheduler_status(
+    current_user: User = Depends(get_current_user),
+):
+    """Get scheduler status"""
+    from app.services.scheduler_service import get_scheduler
+
+    scheduler = get_scheduler()
+    jobs = scheduler.get_job_status()
+
+    return {
+        "is_running": scheduler._is_running,
+        "jobs": jobs,
+    }
+
+
+@router.post(
+    "/admin/snapshots/run-daily-job",
+    summary="Run Daily Snapshot Job Now (Admin)",
+    description="Manually trigger the daily snapshot creation job for all users"
+)
+async def run_daily_snapshot_job(
+    current_user: User = Depends(get_current_user),
+):
+    """Manually trigger daily snapshot job"""
+    from app.services.scheduler_service import get_scheduler
+
+    scheduler = get_scheduler()
+
+    try:
+        # Run the job immediately
+        await scheduler._create_daily_snapshots()
+        return {"status": "success", "message": "Daily snapshot job completed"}
+    except Exception as e:
+        logger.error(f"Manual daily snapshot job failed: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Job failed: {str(e)}")
+
+
 @router.get(
     "/health",
     summary="Net Worth API Health Check",
@@ -448,10 +716,17 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "net-worth-api",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "features": [
             "net_worth_history",
             "net_worth_summary",
             "asset_breakdown",
+            "historical_snapshots",
+            "backfill_support",
+            "real_data_tracking",
+            "data_retention",           # NEW
+            "webhook_integration",      # NEW
+            "background_scheduler",     # NEW
+            "enhanced_classification",  # NEW
         ]
     }

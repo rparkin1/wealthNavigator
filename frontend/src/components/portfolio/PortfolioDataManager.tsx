@@ -11,6 +11,7 @@ import {
   BuildingLibraryIcon,
   ChartBarIcon,
   ArrowDownTrayIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import { AccountForm } from './AccountForm';
 import type { Account } from './AccountForm';
@@ -18,6 +19,7 @@ import { HoldingForm } from './HoldingForm';
 import type { Holding } from './HoldingForm';
 import { ImportExportPanel } from './ImportExportPanel';
 import { PlaidLinkButton } from '../plaid/PlaidLinkButton';
+import { plaidApi } from '../../services/plaidApi';
 
 export interface PortfolioDataManagerProps {
   userId: string;
@@ -39,6 +41,19 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
   // LocalStorage keys for persistence
   const ACCOUNTS_KEY = `portfolio_accounts_${userId}`;
   const HOLDINGS_KEY = `portfolio_holdings_${userId}`;
+  const DELETED_ACCOUNTS_KEY = `portfolio_deleted_accounts_${userId}`;
+  const DELETED_HOLDINGS_KEY = `portfolio_deleted_holdings_${userId}`;
+
+  // Track deleted IDs to persist deletions across page reloads
+  const getDeletedAccountIds = (): Set<string> => {
+    const stored = localStorage.getItem(DELETED_ACCOUNTS_KEY);
+    return stored ? new Set(JSON.parse(stored)) : new Set();
+  };
+
+  const getDeletedHoldingIds = (): Set<string> => {
+    const stored = localStorage.getItem(DELETED_HOLDINGS_KEY);
+    return stored ? new Set(JSON.parse(stored)) : new Set();
+  };
 
   useEffect(() => {
     loadData();
@@ -73,6 +88,10 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
       setLoading(true);
       setError(null);
 
+      // Get deleted IDs to filter them out
+      const deletedAccountIds = getDeletedAccountIds();
+      const deletedHoldingIds = getDeletedHoldingIds();
+
       // Fetch accounts from Plaid API
       try {
         const accountsResponse = await fetch('http://localhost:8000/api/v1/plaid/accounts', {
@@ -86,26 +105,63 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
           const accountsData = await accountsResponse.json();
           console.log('[PortfolioDataManager] Fetched from API:', accountsData);
 
-          // Transform Plaid accounts to Account format
-          const plaidAccounts = accountsData.accounts.map((acc: any) => ({
-            id: acc.id,
-            name: acc.name || acc.official_name || 'Unknown Account',
-            accountType: acc.subtype || acc.type || 'unknown',
-            institution: 'Plaid Connected', // Institution name is in PlaidItem, not PlaidAccount
-            accountNumber: acc.mask ? `****${acc.mask}` : undefined,
-            balance: acc.current_balance || 0,
-            notes: `${acc.type} account - Last updated: ${new Date(acc.last_balance_update || Date.now()).toLocaleDateString()}`,
-          }));
+          // Map Plaid account types to AccountForm types
+          const mapPlaidAccountType = (plaidType: string, plaidSubtype?: string): Account['accountType'] => {
+            const subtype = plaidSubtype?.toLowerCase() || '';
+            const type = plaidType?.toLowerCase() || '';
+
+            // Tax-deferred retirement accounts
+            if (['401k', '403b', '457b', 'pension', 'profit sharing plan', 'keogh', 'traditional ira', 'rollover ira', 'simple ira', 'sep ira', 'sarsep'].includes(subtype)) {
+              return 'tax_deferred';
+            }
+
+            // Tax-exempt retirement accounts
+            if (['roth', 'roth 401k', 'roth ira'].includes(subtype)) {
+              return 'tax_exempt';
+            }
+
+            // Brokerage and investment accounts
+            if (['brokerage', 'investment', 'mutual fund', 'stock plan', 'trust', 'ugma', 'utma', 'ira', 'retirement'].includes(subtype) || type === 'investment') {
+              return 'taxable';
+            }
+
+            // Credit cards and loans
+            if (['credit card', 'loan', 'mortgage', 'line of credit', 'auto', 'student'].includes(subtype) || type === 'credit') {
+              return 'credit';
+            }
+
+            // Depository accounts (checking, savings, etc.)
+            if (['checking', 'savings', 'cd', 'money market', 'paypal', 'prepaid', 'cash management', 'ebt'].includes(subtype) || type === 'depository') {
+              return 'depository';
+            }
+
+            // Default to taxable for unknown types
+            console.warn('[PortfolioDataManager] Unknown account type:', { type, subtype }, '- defaulting to taxable');
+            return 'taxable';
+          };
+
+          // Transform Plaid accounts to Account format and filter out deleted ones
+          const plaidAccounts = accountsData.accounts
+            .filter((acc: any) => !deletedAccountIds.has(acc.id))
+            .map((acc: any) => ({
+              id: acc.id,
+              name: acc.name || acc.official_name || 'Unknown Account',
+              accountType: mapPlaidAccountType(acc.type, acc.subtype),
+              institution: 'Plaid Connected', // Institution name is in PlaidItem, not PlaidAccount
+              accountNumber: acc.mask ? `****${acc.mask}` : undefined,
+              balance: acc.current_balance || 0,
+              notes: `${acc.type}${acc.subtype ? ` (${acc.subtype})` : ''} - Last updated: ${new Date(acc.last_balance_update || Date.now()).toLocaleDateString()}`,
+            }));
 
           setAccounts(plaidAccounts);
-          console.log('[PortfolioDataManager] Loaded', plaidAccounts.length, 'accounts from Plaid API');
+          console.log('[PortfolioDataManager] Loaded', plaidAccounts.length, 'accounts from Plaid API (filtered', deletedAccountIds.size, 'deleted)');
         } else {
           console.log('[PortfolioDataManager] No accounts from Plaid API, checking localStorage');
 
           // Fallback to localStorage if API fails
           const savedAccounts = localStorage.getItem(ACCOUNTS_KEY);
           if (savedAccounts) {
-            const parsedAccounts = JSON.parse(savedAccounts);
+            const parsedAccounts = JSON.parse(savedAccounts).filter((acc: Account) => !deletedAccountIds.has(acc.id || ''));
             setAccounts(parsedAccounts);
             console.log('[PortfolioDataManager] Loaded', parsedAccounts.length, 'accounts from localStorage');
           } else {
@@ -118,7 +174,7 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
         // Fallback to localStorage on error
         const savedAccounts = localStorage.getItem(ACCOUNTS_KEY);
         if (savedAccounts) {
-          const parsedAccounts = JSON.parse(savedAccounts);
+          const parsedAccounts = JSON.parse(savedAccounts).filter((acc: Account) => !deletedAccountIds.has(acc.id || ''));
           setAccounts(parsedAccounts);
           console.log('[PortfolioDataManager] Loaded', parsedAccounts.length, 'accounts from localStorage');
         } else {
@@ -126,15 +182,81 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
         }
       }
 
-      // Load holdings from localStorage for now
-      // TODO: Fetch holdings from Plaid API when available
-      const savedHoldings = localStorage.getItem(HOLDINGS_KEY);
-      if (savedHoldings) {
-        const parsedHoldings = JSON.parse(savedHoldings);
-        setHoldings(parsedHoldings);
-        console.log('[PortfolioDataManager] Loaded', parsedHoldings.length, 'holdings from localStorage');
-      } else {
-        setHoldings([]);
+      // Fetch holdings from Plaid API
+      try {
+        const holdingsResponse = await fetch('http://localhost:8000/api/v1/plaid/holdings', {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-User-Id': userId || 'test-user-123',
+          },
+        });
+
+        if (holdingsResponse.ok) {
+          const holdingsData = await holdingsResponse.json();
+          console.log('[PortfolioDataManager] Fetched holdings from API:', holdingsData);
+
+          // Map Plaid security types to HoldingForm security types
+          const mapPlaidSecurityType = (plaidType?: string): Holding['securityType'] => {
+            const type = plaidType?.toLowerCase() || '';
+
+            if (['equity', 'stock'].includes(type)) return 'stock';
+            if (['etf', 'exchange traded fund'].includes(type)) return 'etf';
+            if (['mutual fund', 'mutual_fund'].includes(type)) return 'mutual_fund';
+            if (['bond', 'fixed income'].includes(type)) return 'bond';
+
+            // Default to stock for unknown types
+            console.warn('[PortfolioDataManager] Unknown security type:', type, '- defaulting to stock');
+            return 'stock';
+          };
+
+          // Transform Plaid holdings to Holding format and filter out deleted ones
+          const plaidHoldings = holdingsData.holdings
+            .filter((h: any) => !deletedHoldingIds.has(h.id) && !deletedAccountIds.has(h.account_id))
+            .map((h: any) => ({
+              id: h.id,
+              ticker: h.ticker_symbol || 'N/A',
+              name: h.name || 'Unknown Security',
+              securityType: mapPlaidSecurityType(h.type),
+              shares: h.quantity || 0,
+              costBasis: h.cost_basis || 0,
+              currentValue: h.institution_value || (h.quantity * (h.institution_price || 0)),
+              purchaseDate: new Date().toISOString().split('T')[0], // Plaid doesn't provide purchase date
+              accountId: h.account_id,
+              assetClass: h.type || 'Unknown',
+              expenseRatio: undefined, // Plaid doesn't provide expense ratio in basic holdings
+            }));
+
+          setHoldings(plaidHoldings);
+          console.log('[PortfolioDataManager] Loaded', plaidHoldings.length, 'holdings from Plaid API (filtered', deletedHoldingIds.size, 'deleted)');
+        } else {
+          console.log('[PortfolioDataManager] No holdings from Plaid API, checking localStorage');
+
+          // Fallback to localStorage if API fails
+          const savedHoldings = localStorage.getItem(HOLDINGS_KEY);
+          if (savedHoldings) {
+            const parsedHoldings = JSON.parse(savedHoldings).filter((h: Holding) =>
+              !deletedHoldingIds.has(h.id || '') && !deletedAccountIds.has(h.accountId || '')
+            );
+            setHoldings(parsedHoldings);
+            console.log('[PortfolioDataManager] Loaded', parsedHoldings.length, 'holdings from localStorage');
+          } else {
+            setHoldings([]);
+          }
+        }
+      } catch (apiErr) {
+        console.error('[PortfolioDataManager] API error fetching holdings, falling back to localStorage:', apiErr);
+
+        // Fallback to localStorage on error
+        const savedHoldings = localStorage.getItem(HOLDINGS_KEY);
+        if (savedHoldings) {
+          const parsedHoldings = JSON.parse(savedHoldings).filter((h: Holding) =>
+            !deletedHoldingIds.has(h.id || '') && !deletedAccountIds.has(h.accountId || '')
+          );
+          setHoldings(parsedHoldings);
+          console.log('[PortfolioDataManager] Loaded', parsedHoldings.length, 'holdings from localStorage');
+        } else {
+          setHoldings([]);
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load portfolio data');
@@ -181,11 +303,32 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
     if (!confirm('Delete this account and all its holdings?')) return;
 
     try {
-      // TODO: API call
+      // Call API to mark account as inactive (soft delete)
+      const result = await plaidApi.deleteAccount(id);
+      console.log('[PortfolioDataManager] Account deleted via API:', result);
+
+      // Add to deleted accounts list (for local filtering as backup)
+      const deletedAccountIds = getDeletedAccountIds();
+      deletedAccountIds.add(id);
+      localStorage.setItem(DELETED_ACCOUNTS_KEY, JSON.stringify([...deletedAccountIds]));
+
+      // Also mark all holdings from this account as deleted in localStorage
+      const holdingsToDelete = holdings.filter(h => h.accountId === id);
+      if (holdingsToDelete.length > 0) {
+        const deletedHoldingIds = getDeletedHoldingIds();
+        holdingsToDelete.forEach(h => {
+          if (h.id) deletedHoldingIds.add(h.id);
+        });
+        localStorage.setItem(DELETED_HOLDINGS_KEY, JSON.stringify([...deletedHoldingIds]));
+        console.log('[PortfolioDataManager] Marked', holdingsToDelete.length, 'holdings as deleted locally');
+      }
+
+      // Update state
       setAccounts(prev => prev.filter(a => a.id !== id));
       setHoldings(prev => prev.filter(h => h.accountId !== id));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete account');
+      console.error('[PortfolioDataManager] Error deleting account:', err);
     }
   };
 
@@ -225,13 +368,45 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
     if (!confirm('Delete this holding?')) return;
 
     try {
-      // TODO: API call
+      // Call API to mark holding as inactive (soft delete)
+      const result = await plaidApi.deleteHolding(id);
+      console.log('[PortfolioDataManager] Holding deleted via API:', result);
+
+      // Add to deleted holdings list (for local filtering as backup)
+      const deletedHoldingIds = getDeletedHoldingIds();
+      deletedHoldingIds.add(id);
+      localStorage.setItem(DELETED_HOLDINGS_KEY, JSON.stringify([...deletedHoldingIds]));
+
+      // Update state
       setHoldings(prev => prev.filter(h => h.id !== id));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete holding');
+      console.error('[PortfolioDataManager] Error deleting holding:', err);
     }
   };
 
+  const handleSyncHoldings = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Sync holdings from Plaid (all investment items)
+      const result = await plaidApi.syncHoldings();
+      console.log('[PortfolioDataManager] Holdings synced:', result.holdings_count, 'holdings,', result.securities_count, 'securities');
+
+      // Reload data to get updated holdings
+      await loadData();
+
+      // Show success message (optional - you could use a toast notification)
+      console.log('[PortfolioDataManager] Holdings refresh complete');
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to sync holdings';
+      setError(errorMsg);
+      console.error('[PortfolioDataManager] Error syncing holdings:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-US', {
@@ -384,13 +559,23 @@ export function PortfolioDataManager({ userId }: PortfolioDataManagerProps) {
         <div className="bg-white border border-gray-200 rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">Portfolio Holdings</h3>
-            <button
-              onClick={handleAddHolding}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              disabled={accounts.length === 0}
-            >
-              + Add Holding
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={handleSyncHoldings}
+                className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 flex items-center gap-2"
+                disabled={loading}
+              >
+                <ArrowPathIcon className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                Sync Holdings
+              </button>
+              <button
+                onClick={handleAddHolding}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                disabled={accounts.length === 0}
+              >
+                + Add Holding
+              </button>
+            </div>
           </div>
 
           {accounts.length === 0 ? (

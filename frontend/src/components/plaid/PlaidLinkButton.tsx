@@ -75,6 +75,15 @@ export const PlaidLinkButton = memo(function PlaidLinkButton({
         await plaidApi.syncAccounts(exchangeResult.item_id);
         console.log('[PlaidLink] Accounts synced');
 
+        // Sync holdings for investment accounts
+        try {
+          const holdingsResult = await plaidApi.syncHoldings(exchangeResult.item_id);
+          console.log('[PlaidLink] Holdings synced:', holdingsResult.holdings_count, 'holdings,', holdingsResult.securities_count, 'securities');
+        } catch (holdingsErr) {
+          // Holdings sync can fail for non-investment accounts - log but don't fail
+          console.warn('[PlaidLink] Holdings sync failed (this is normal for non-investment accounts):', holdingsErr);
+        }
+
         // Then sync transactions for this specific item
         // Note: Initial sync might return 0 transactions, which is normal
         try {

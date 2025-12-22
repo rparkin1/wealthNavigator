@@ -15,6 +15,7 @@ from .analysis import Analysis, MonteCarloSimulation, AnalysisType, SimulationSt
 from .plaid import PlaidItem, PlaidAccount, PlaidTransaction, PlaidHolding
 from .life_event import LifeEvent, EventTemplate, LifeEventType
 from .historical_scenario import HistoricalScenario
+from .net_worth_snapshot import NetWorthSnapshot
 
 __all__ = [
     # Base classes
@@ -70,4 +71,7 @@ __all__ = [
     "EventTemplate",
     "LifeEventType",
     "HistoricalScenario",
+
+    # Net Worth Tracking
+    "NetWorthSnapshot",
 ]

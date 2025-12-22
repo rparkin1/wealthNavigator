@@ -93,6 +93,16 @@ async def startup_event():
     """Initialize services on startup"""
     logger.info("Starting WealthNavigator AI backend...")
     await cache.connect()
+
+    # Initialize background scheduler for net worth snapshots
+    try:
+        from app.services.scheduler_service import start_scheduler
+        await start_scheduler()
+        logger.info("Background scheduler initialized")
+    except Exception as e:
+        logger.error(f"Failed to start background scheduler: {e}")
+        # Continue startup even if scheduler fails
+
     logger.info("Startup complete")
 
 
@@ -100,6 +110,15 @@ async def startup_event():
 async def shutdown_event():
     """Cleanup on shutdown"""
     logger.info("Shutting down WealthNavigator AI backend...")
+
+    # Shutdown background scheduler
+    try:
+        from app.services.scheduler_service import shutdown_scheduler
+        await shutdown_scheduler()
+        logger.info("Background scheduler stopped")
+    except Exception as e:
+        logger.error(f"Error stopping scheduler: {e}")
+
     await cache.disconnect()
     logger.info("Shutdown complete")
 

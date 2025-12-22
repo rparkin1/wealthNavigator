@@ -307,6 +307,120 @@ async def sync_accounts(
         )
 
 
+@router.patch("/accounts/{account_id}")
+async def update_account(
+    account_id: str,
+    is_active: bool,
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user)
+):
+    """
+    Update account status (mark as active/inactive)
+
+    This allows soft-deleting accounts by setting is_active to False.
+    Inactive accounts are filtered out from list queries.
+    """
+    # Get the account
+    result = await db.execute(
+        select(PlaidAccount)
+        .where(and_(
+            PlaidAccount.id == account_id,
+            PlaidAccount.user_id == current_user.id
+        ))
+    )
+    account = result.scalar_one_or_none()
+
+    if not account:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Account not found"
+        )
+
+    try:
+        # Update account status
+        account.is_active = is_active
+        await db.commit()
+        await db.refresh(account)
+
+        logger.info(f"Account {account_id} marked as {'active' if is_active else 'inactive'}")
+
+        return {
+            "message": f"Account marked as {'active' if is_active else 'inactive'}",
+            "account_id": account_id,
+            "is_active": is_active
+        }
+
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Error updating account: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update account: {str(e)}"
+        )
+
+
+@router.delete("/accounts/{account_id}")
+async def delete_account(
+    account_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user)
+):
+    """
+    Soft-delete an account by marking it as inactive
+
+    This also marks all associated holdings as inactive.
+    The account data is preserved but hidden from queries.
+    """
+    # Get the account
+    result = await db.execute(
+        select(PlaidAccount)
+        .where(and_(
+            PlaidAccount.id == account_id,
+            PlaidAccount.user_id == current_user.id
+        ))
+    )
+    account = result.scalar_one_or_none()
+
+    if not account:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Account not found"
+        )
+
+    try:
+        # Mark account as inactive
+        account.is_active = False
+
+        # Also mark all holdings as inactive
+        holdings_result = await db.execute(
+            select(PlaidHolding).where(PlaidHolding.account_id == account_id)
+        )
+        holdings = holdings_result.scalars().all()
+
+        holdings_count = 0
+        for holding in holdings:
+            holding.is_active = False
+            holdings_count += 1
+
+        await db.commit()
+
+        logger.info(f"Account {account_id} and {holdings_count} holdings marked as inactive")
+
+        return {
+            "message": "Account deleted successfully",
+            "account_id": account_id,
+            "holdings_deleted": holdings_count
+        }
+
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Error deleting account: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete account: {str(e)}"
+        )
+
+
 # Transactions
 @router.post("/transactions/sync", response_model=TransactionsSyncResponse)
 async def sync_transactions(
@@ -356,12 +470,16 @@ async def sync_transactions(
 
             # Process added transactions
             for txn_data in sync_result["added"]:
-                await _upsert_transaction(db, item, txn_data, current_user.id)
+                # Convert Plaid transaction object to dict
+                txn_dict = _convert_plaid_object_to_dict(txn_data)
+                await _upsert_transaction(db, item, txn_dict, current_user.id)
                 total_added += 1
 
             # Process modified transactions
             for txn_data in sync_result["modified"]:
-                await _upsert_transaction(db, item, txn_data, current_user.id)
+                # Convert Plaid transaction object to dict
+                txn_dict = _convert_plaid_object_to_dict(txn_data)
+                await _upsert_transaction(db, item, txn_dict, current_user.id)
                 total_modified += 1
 
             # Process removed transactions
@@ -555,8 +673,13 @@ async def list_holdings(
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user)
 ):
-    """List investment holdings"""
-    query = select(PlaidHolding).where(PlaidHolding.user_id == current_user.id)
+    """List investment holdings (only active ones)"""
+    query = select(PlaidHolding).where(
+        and_(
+            PlaidHolding.user_id == current_user.id,
+            PlaidHolding.is_active == True
+        )
+    )
 
     if account_id:
         query = query.where(PlaidHolding.account_id == account_id)
@@ -570,6 +693,106 @@ async def list_holdings(
         holdings=[PlaidHoldingResponse.model_validate(h) for h in holdings],
         total=len(holdings)
     )
+
+
+@router.patch("/holdings/{holding_id}")
+async def update_holding(
+    holding_id: str,
+    is_active: bool,
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user)
+):
+    """
+    Update holding status (mark as active/inactive)
+
+    This allows soft-deleting holdings by setting is_active to False.
+    Inactive holdings are filtered out from list queries.
+    """
+    # Get the holding
+    result = await db.execute(
+        select(PlaidHolding)
+        .where(and_(
+            PlaidHolding.id == holding_id,
+            PlaidHolding.user_id == current_user.id
+        ))
+    )
+    holding = result.scalar_one_or_none()
+
+    if not holding:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Holding not found"
+        )
+
+    try:
+        # Update holding status
+        holding.is_active = is_active
+        await db.commit()
+        await db.refresh(holding)
+
+        logger.info(f"Holding {holding_id} marked as {'active' if is_active else 'inactive'}")
+
+        return {
+            "message": f"Holding marked as {'active' if is_active else 'inactive'}",
+            "holding_id": holding_id,
+            "is_active": is_active
+        }
+
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Error updating holding: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update holding: {str(e)}"
+        )
+
+
+@router.delete("/holdings/{holding_id}")
+async def delete_holding(
+    holding_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user)
+):
+    """
+    Soft-delete a holding by marking it as inactive
+
+    The holding data is preserved but hidden from queries.
+    """
+    # Get the holding
+    result = await db.execute(
+        select(PlaidHolding)
+        .where(and_(
+            PlaidHolding.id == holding_id,
+            PlaidHolding.user_id == current_user.id
+        ))
+    )
+    holding = result.scalar_one_or_none()
+
+    if not holding:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Holding not found"
+        )
+
+    try:
+        # Mark holding as inactive
+        holding.is_active = False
+        await db.commit()
+
+        logger.info(f"Holding {holding_id} marked as inactive")
+
+        return {
+            "message": "Holding deleted successfully",
+            "holding_id": holding_id
+        }
+
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Error deleting holding: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete holding: {str(e)}"
+        )
 
 
 # Investment Transactions
@@ -787,10 +1010,45 @@ async def handle_webhook(
             return {"status": "ignored"}
 
         # Handle different webhook types
+        snapshot_created = False
+
         if webhook_data.webhook_type == "TRANSACTIONS":
             if webhook_data.webhook_code in ["SYNC_UPDATES_AVAILABLE", "DEFAULT_UPDATE"]:
                 # Trigger transaction sync (in production, use background task)
                 logger.info(f"New transactions available for item {item.id}")
+
+                # Create net worth snapshot after transaction update
+                try:
+                    from app.services.net_worth_snapshot_service import NetWorthSnapshotService
+                    snapshot_service = NetWorthSnapshotService()
+                    await snapshot_service.calculate_and_store_snapshot(
+                        user_id=item.user_id,
+                        snapshot_date=date.today(),
+                        db=db,
+                    )
+                    snapshot_created = True
+                    logger.info(f"Created net worth snapshot for user {item.user_id} after transaction update")
+                except Exception as e:
+                    logger.error(f"Failed to create snapshot after transaction update: {e}")
+
+        elif webhook_data.webhook_type == "HOLDINGS":
+            if webhook_data.webhook_code == "DEFAULT_UPDATE":
+                # Holdings updated (investment accounts)
+                logger.info(f"Holdings updated for item {item.id}")
+
+                # Create net worth snapshot after holdings update
+                try:
+                    from app.services.net_worth_snapshot_service import NetWorthSnapshotService
+                    snapshot_service = NetWorthSnapshotService()
+                    await snapshot_service.calculate_and_store_snapshot(
+                        user_id=item.user_id,
+                        snapshot_date=date.today(),
+                        db=db,
+                    )
+                    snapshot_created = True
+                    logger.info(f"Created net worth snapshot for user {item.user_id} after holdings update")
+                except Exception as e:
+                    logger.error(f"Failed to create snapshot after holdings update: {e}")
 
         elif webhook_data.webhook_type == "ITEM":
             if webhook_data.webhook_code == "ERROR":
@@ -799,7 +1057,10 @@ async def handle_webhook(
                 item.error_message = webhook_data.error.get("error_message") if webhook_data.error else None
                 await db.commit()
 
-        return {"status": "processed"}
+        return {
+            "status": "processed",
+            "snapshot_created": snapshot_created
+        }
 
     except Exception as e:
         logger.error(f"Error processing webhook: {e}")
@@ -861,6 +1122,48 @@ async def _sync_accounts_for_item(
     return len(accounts_data)
 
 
+def _convert_plaid_object_to_dict(obj):
+    """Convert any Plaid object to a dict recursively, preserving dates"""
+    import json
+    from datetime import date, datetime
+
+    if obj is None:
+        return None
+
+    # Preserve date and datetime objects
+    if isinstance(obj, (date, datetime)):
+        return obj
+
+    # Try to use to_dict() method if available
+    if hasattr(obj, 'to_dict'):
+        try:
+            result = obj.to_dict()
+            obj = result
+        except Exception as e:
+            logger.warning(f"to_dict() failed: {e}")
+
+    # If it's already a basic dict/list/primitive, process it
+    if isinstance(obj, dict):
+        # Recursively convert dict values
+        return {k: _convert_plaid_object_to_dict(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        # Recursively convert list items
+        return [_convert_plaid_object_to_dict(item) for item in obj]
+    elif isinstance(obj, (str, int, float, bool, type(None))):
+        # Primitive types - return as-is
+        return obj
+
+    # For other objects, try JSON serialization
+    try:
+        serialized = json.dumps(obj, default=str)
+        result = json.loads(serialized)
+        return result
+    except Exception as e:
+        logger.error(f"JSON serialization failed for {type(obj)}: {e}")
+        # Return string representation as last resort
+        return str(obj)
+
+
 async def _upsert_transaction(
     db: AsyncSession,
     item: PlaidItem,
@@ -894,7 +1197,8 @@ async def _upsert_transaction(
         transaction.personal_finance_category = txn_data.get("personal_finance_category")
         transaction.pending = txn_data.get("pending", False)
     else:
-        # Create new
+        # Create new - txn_data should already be fully converted to dict
+        # All Plaid objects have been converted by _convert_plaid_object_to_dict
         transaction = PlaidTransaction(
             account_id=account.id,
             user_id=user_id,
@@ -905,13 +1209,13 @@ async def _upsert_transaction(
             authorized_date=txn_data.get("authorized_date"),
             name=txn_data["name"],
             merchant_name=txn_data.get("merchant_name"),
-            category=txn_data.get("category"),
+            category=txn_data.get("category"),  # Already converted
             category_id=txn_data.get("category_id"),
-            personal_finance_category=txn_data.get("personal_finance_category"),
+            personal_finance_category=txn_data.get("personal_finance_category"),  # Already converted
             pending=txn_data.get("pending", False),
             payment_channel=txn_data.get("payment_channel"),
-            location=txn_data.get("location"),
-            payment_meta=txn_data.get("payment_meta")
+            location=txn_data.get("location"),  # Already converted
+            payment_meta=txn_data.get("payment_meta")  # Already converted
         )
         db.add(transaction)
 

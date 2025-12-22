@@ -184,6 +184,42 @@ class PlaidApiService {
     });
     return response.data;
   }
+
+  /**
+   * Delete (soft-delete) an account by marking it as inactive
+   */
+  async deleteAccount(accountId: string): Promise<{ message: string; account_id: string; holdings_deleted: number }> {
+    const response = await this.client.delete(`/accounts/${accountId}`);
+    return response.data;
+  }
+
+  /**
+   * Update account active status
+   */
+  async updateAccount(accountId: string, isActive: boolean): Promise<{ message: string; account_id: string; is_active: boolean }> {
+    const response = await this.client.patch(`/accounts/${accountId}`, null, {
+      params: { is_active: isActive }
+    });
+    return response.data;
+  }
+
+  /**
+   * Delete (soft-delete) a holding by marking it as inactive
+   */
+  async deleteHolding(holdingId: string): Promise<{ message: string; holding_id: string }> {
+    const response = await this.client.delete(`/holdings/${holdingId}`);
+    return response.data;
+  }
+
+  /**
+   * Update holding active status
+   */
+  async updateHolding(holdingId: string, isActive: boolean): Promise<{ message: string; holding_id: string; is_active: boolean }> {
+    const response = await this.client.patch(`/holdings/${holdingId}`, null, {
+      params: { is_active: isActive }
+    });
+    return response.data;
+  }
 }
 
 // Export singleton instance

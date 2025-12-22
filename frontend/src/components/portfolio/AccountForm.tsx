@@ -99,9 +99,18 @@ const POPULAR_INSTITUTIONS = [
 ];
 
 export function AccountForm({ account, onSubmit, onCancel, mode = 'create' }: AccountFormProps) {
+  // Ensure accountType is valid, fallback to 'taxable' if not
+  const getValidAccountType = (type?: AccountType): AccountType => {
+    if (!type || !ACCOUNT_TYPES[type]) {
+      console.warn('[AccountForm] Invalid account type:', type, '- defaulting to taxable');
+      return 'taxable';
+    }
+    return type;
+  };
+
   const [formData, setFormData] = useState<FormData>({
     name: account?.name || '',
-    accountType: account?.accountType || 'taxable',
+    accountType: getValidAccountType(account?.accountType),
     institution: account?.institution || '',
     accountNumber: account?.accountNumber || '',
     balance: account?.balance?.toString() || '0',
@@ -445,7 +454,7 @@ export function AccountForm({ account, onSubmit, onCancel, mode = 'create' }: Ac
                 <div className="flex justify-between">
                   <span className="text-gray-600">Type:</span>
                   <span className="font-medium text-gray-900">
-                    {ACCOUNT_TYPES[formData.accountType].label}
+                    {ACCOUNT_TYPES[formData.accountType]?.label || 'Unknown'}
                   </span>
                 </div>
                 <div className="flex justify-between">
