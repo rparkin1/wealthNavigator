@@ -219,6 +219,44 @@ export async function getRecommendationsOnly(
   }
 }
 
+/**
+ * Analyze diversification using Plaid portfolio data automatically
+ *
+ * Automatically fetches the user's holdings from database/Plaid and performs
+ * comprehensive diversification analysis. No manual input required.
+ *
+ * Similar to assessRiskAuto in risk management API.
+ */
+export async function analyzeDiversificationAuto(): Promise<DiversificationAnalysisResult> {
+  try {
+    const response = await fetch(`${API_BASE_URL}${BASE_PATH}/analyze`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new DiversificationApiError(
+        errorData.detail || 'Failed to analyze diversification automatically',
+        response.status,
+        errorData
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    if (error instanceof DiversificationApiError) {
+      throw error;
+    }
+    throw new DiversificationApiError(
+      error instanceof Error ? error.message : 'Unknown error analyzing diversification automatically'
+    );
+  }
+}
+
 // ============================================================================
 // Helper Functions
 // ============================================================================

@@ -33,9 +33,10 @@ import type {
 import * as diversificationApi from '../../services/diversificationApi';
 
 export interface DiversificationAnalysisDashboardProps {
-  portfolioValue: number;
-  holdings: HoldingInfo[];
+  portfolioValue?: number;
+  holdings?: HoldingInfo[];
   onAnalysisComplete?: (analysis: DiversificationAnalysisResult) => void;
+  usePlaidData?: boolean; // New prop to control whether to use Plaid data
 }
 
 // Helper function to transform breakdown data from API format to component format
@@ -49,8 +50,9 @@ function transformBreakdown(breakdown: Record<string, number>): Array<{ name: st
 
 export function DiversificationAnalysisDashboard({
   portfolioValue,
-  holdings,
+  holdings = [],
   onAnalysisComplete,
+  usePlaidData = false, // Default to manual data
 }: DiversificationAnalysisDashboardProps) {
   // Tab state
   const [selectedTab, setSelectedTab] = useState<DiversificationTab>('overview');
@@ -80,12 +82,16 @@ export function DiversificationAnalysisDashboard({
     loadThresholds();
   }, []);
 
-  // Run analysis when holdings change
+  // Run analysis when holdings change or when using Plaid data
   useEffect(() => {
-    if (holdings.length > 0) {
+    if (usePlaidData) {
+      // Use Plaid data automatically
+      runAnalysisAuto();
+    } else if (holdings.length > 0 && portfolioValue) {
+      // Use manual data if provided
       runAnalysis();
     }
-  }, [portfolioValue, holdings]);
+  }, [usePlaidData, portfolioValue, holdings]);
 
   const loadThresholds = async () => {
     try {
@@ -101,9 +107,25 @@ export function DiversificationAnalysisDashboard({
     setError(null);
     try {
       const result = await diversificationApi.analyzeDiversification({
-        portfolio_value: portfolioValue,
+        portfolio_value: portfolioValue || 0,
         holdings: holdings,
       });
+      setAnalysis(result);
+      if (onAnalysisComplete) {
+        onAnalysisComplete(result);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to analyze diversification');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const runAnalysisAuto = async () => {
+    setIsAnalyzing(true);
+    setError(null);
+    try {
+      const result = await diversificationApi.analyzeDiversificationAuto();
       setAnalysis(result);
       if (onAnalysisComplete) {
         onAnalysisComplete(result);
@@ -654,15 +676,15 @@ export function DiversificationAnalysisDashboard({
       {/* Action Buttons */}
       <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
         <button
-          onClick={runAnalysis}
-          disabled={isAnalyzing || holdings.length === 0}
+          onClick={usePlaidData ? runAnalysisAuto : runAnalysis}
+          disabled={isAnalyzing || (!usePlaidData && holdings.length === 0)}
           style={{
             padding: '10px 20px',
             backgroundColor: isAnalyzing ? '#9ca3af' : '#3b82f6',
             color: '#ffffff',
             border: 'none',
             borderRadius: '6px',
-            cursor: isAnalyzing || holdings.length === 0 ? 'not-allowed' : 'pointer',
+            cursor: isAnalyzing || (!usePlaidData && holdings.length === 0) ? 'not-allowed' : 'pointer',
             fontSize: '14px',
             fontWeight: 600,
           }}
@@ -750,7 +772,7 @@ export function DiversificationAnalysisDashboard({
       )}
 
       {/* Empty State */}
-      {!analysis && !isAnalyzing && holdings.length === 0 && (
+      {!analysis && !isAnalyzing && !usePlaidData && holdings.length === 0 && (
         <div style={{ padding: '60px 20px', textAlign: 'center', color: '#6b7280' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
             <ChartBarIcon style={{ width: '64px', height: '64px', color: '#9ca3af' }} />

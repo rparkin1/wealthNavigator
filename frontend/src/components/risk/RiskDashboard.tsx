@@ -716,7 +716,7 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
           <div style={{ padding: '24px' }}>
             <DiversificationAnalysisDashboard
               portfolioValue={portfolioValue}
-              holdings={Object.entries(allocation || {}).map(([assetClass, weight]) => ({
+              holdings={usePlaidData ? undefined : Object.entries(allocation || {}).map(([assetClass, weight]) => ({
                 symbol: assetClass,
                 name: assetClass.replace(/_/g, ' '),
                 value: (portfolioValue || 0) * weight,
@@ -727,6 +727,7 @@ export const RiskDashboard: React.FC<RiskDashboardProps> = ({
                 geography: undefined,
                 manager: undefined,
               }))}
+              usePlaidData={usePlaidData}
               onAnalysisComplete={(analysis) => {
                 console.log('Diversification analysis complete:', analysis);
               }}

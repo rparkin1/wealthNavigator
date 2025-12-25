@@ -21,6 +21,7 @@ from app.core.database import get_db
 from app.models.user import User
 from app.models.portfolio_db import Portfolio, Account, Holding
 from app.api.deps import get_current_user
+from app.services.portfolio_data_service import get_holdings_details
 
 router = APIRouter()
 
@@ -58,9 +59,9 @@ async def analyze_user_portfolio_diversification(
     db: AsyncSession = Depends(get_db)
 ) -> DiversificationAnalysisResult:
     """
-    Analyze diversification of user's portfolio holdings from database
+    Analyze diversification of user's portfolio holdings from Plaid
 
-    Automatically fetches the user's holdings from Plaid/database and performs
+    Automatically fetches the user's holdings from Plaid and performs
     comprehensive diversification analysis.
 
     **REQ-RISK-008:** Diversification metrics
@@ -68,41 +69,20 @@ async def analyze_user_portfolio_diversification(
     **REQ-RISK-010:** Diversification recommendations
     """
     try:
-        # Get user's portfolio
-        portfolio_query = select(Portfolio).where(Portfolio.user_id == current_user.id)
-        result = await db.execute(portfolio_query)
-        portfolio = result.scalar_one_or_none()
+        # Fetch holdings from Plaid using the portfolio data service
+        holdings_data = await get_holdings_details(
+            user_id=current_user.id,
+            db=db
+        )
 
-        if not portfolio:
+        if not holdings_data:
             raise HTTPException(
                 status_code=404,
-                detail="No portfolio found for user. Please add holdings first."
-            )
-
-        # Get all accounts for this portfolio
-        accounts_query = select(Account.id).where(Account.portfolio_id == portfolio.id)
-        result = await db.execute(accounts_query)
-        account_ids = [row[0] for row in result.all()]
-
-        if not account_ids:
-            raise HTTPException(
-                status_code=404,
-                detail="No accounts found. Please add holdings first."
-            )
-
-        # Fetch holdings from database
-        holdings_query = select(Holding).where(Holding.account_id.in_(account_ids))
-        result = await db.execute(holdings_query)
-        db_holdings = result.scalars().all()
-
-        if not db_holdings:
-            raise HTTPException(
-                status_code=404,
-                detail="No holdings found for user. Please add holdings first."
+                detail="No holdings found for user. Please connect your accounts via Plaid first."
             )
 
         # Calculate total portfolio value
-        portfolio_value = sum(float(h.current_value) for h in db_holdings)
+        portfolio_value = sum(h.get("value", 0) for h in holdings_data)
 
         if portfolio_value <= 0:
             raise HTTPException(
@@ -110,42 +90,15 @@ async def analyze_user_portfolio_diversification(
                 detail="Portfolio value must be positive. Please ensure your holdings have valid values."
             )
 
-        # Convert database holdings to HoldingInfo format
+        # Convert holdings_data to HoldingInfo format
         holdings = []
-        for h in db_holdings:
-            value = float(h.current_value)
-            weight = value / portfolio_value if portfolio_value > 0 else 0
-
-            # Normalize asset class
-            asset_class = h.asset_class or "US_LargeCap"
-            if asset_class:
-                asset_class_lower = asset_class.lower()
-                # Map common variations
-                if "cash" in asset_class_lower:
-                    asset_class = "Cash"
-                elif "bond" in asset_class_lower or "agg" in asset_class_lower:
-                    asset_class = "US_Bonds"
-                elif "treasury" in asset_class_lower or "govt" in asset_class_lower:
-                    asset_class = "US_Treasury"
-                elif "large cap" in asset_class_lower or "lc" in asset_class_lower:
-                    asset_class = "US_LargeCap"
-                elif "small cap" in asset_class_lower or "sc" in asset_class_lower:
-                    asset_class = "US_SmallCap"
-                elif "international" in asset_class_lower or "intl" in asset_class_lower:
-                    asset_class = "International_Developed"
-                elif "emerging" in asset_class_lower:
-                    asset_class = "Emerging_Markets"
-                elif "reit" in asset_class_lower:
-                    asset_class = "REIT"
-                elif "gold" in asset_class_lower:
-                    asset_class = "Gold"
-
+        for h in holdings_data:
             holdings.append(HoldingInfo(
-                symbol=h.ticker,
-                name=h.name,
-                value=value,
-                weight=weight,
-                asset_class=asset_class,
+                symbol=h.get("symbol", "N/A"),
+                name=h.get("name", "Unknown"),
+                value=h.get("value", 0),
+                weight=h.get("weight", 0),
+                asset_class=h.get("asset_class", "Other"),
                 sector=None,  # Could be enriched from external data source
                 industry=None,
                 geography="US",  # Default, could be enhanced
