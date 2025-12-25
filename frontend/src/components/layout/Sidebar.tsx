@@ -72,9 +72,9 @@ export const SidebarSection: React.FC<SidebarSectionProps> = ({
   className = '',
 }) => {
   return (
-    <div className={`px-3 mb-6 ${className}`}>
+    <div className={`px-2 mb-6 ${className}`}>
       {title && (
-        <h3 className="px-3 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        <h3 className="px-2 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
           {title}
         </h3>
       )}
@@ -98,7 +98,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
   className = '',
 }) => {
   const baseClasses = [
-    'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+    'flex items-center gap-3 pl-2 pr-3 py-2 rounded-md text-sm font-medium transition-colors',
     'hover:bg-gray-100',
   ].join(' ');
 
@@ -115,9 +115,9 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
           {icon}
         </span>
       )}
-      <span className="flex-1 truncate">{label}</span>
+      <span className="truncate">{label}</span>
       {badge && (
-        <span className="flex-shrink-0">
+        <span className="flex-shrink-0 ml-auto">
           {badge}
         </span>
       )}
