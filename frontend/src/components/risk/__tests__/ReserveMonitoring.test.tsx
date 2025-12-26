@@ -259,12 +259,12 @@ describe('ReserveAlertsPanel', () => {
 
     render(<ReserveAlertsPanel alerts={alerts} compact={true} />);
 
-    expect(screen.getByText('▼ Click to expand')).toBeInTheDocument();
+    expect(screen.getByText('Click to expand')).toBeInTheDocument();
 
     const alertCard = screen.getByText('Test Alert').closest('div');
     if (alertCard) {
       fireEvent.click(alertCard);
-      expect(screen.getByText('▲ Click to collapse')).toBeInTheDocument();
+      expect(screen.getByText('Click to collapse')).toBeInTheDocument();
     }
   });
 
@@ -549,7 +549,7 @@ describe('ReserveMonitoringDashboard', () => {
       expect(screen.getByText('Emergency Fund Monitoring')).toBeInTheDocument();
     });
 
-    const refreshButton = screen.getByText('🔄 Refresh Data');
+    const refreshButton = screen.getByText('Refresh Data');
     fireEvent.click(refreshButton);
 
     await waitFor(() => {

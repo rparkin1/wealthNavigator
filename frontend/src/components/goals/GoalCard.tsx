@@ -72,7 +72,10 @@ export function GoalCard({
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
             <div className="text-primary-600">
-              {getCategoryIcon(goal.category as IconGoalCategory)({ className: iconSizes.lg })}
+              {(() => {
+                const Icon = getCategoryIcon(goal.category as IconGoalCategory);
+                return <Icon className={iconSizes.lg} />;
+              })()}
             </div>
             <div>
               <h3 className="font-semibold text-gray-900">{goal.title}</h3>
@@ -97,7 +100,10 @@ export function GoalCard({
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start space-x-3">
             <div className="text-primary-600 mt-1">
-              {getCategoryIcon(goal.category as IconGoalCategory)({ className: iconSizes.xl })}
+              {(() => {
+                const Icon = getCategoryIcon(goal.category as IconGoalCategory);
+                return <Icon className={iconSizes.xl} />;
+              })()}
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900">{goal.title}</h3>

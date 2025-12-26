@@ -19,6 +19,22 @@ import type {
 import { LightBulbIcon } from '@heroicons/react/24/outline';
 import { getCategoryIcon, type GoalCategory } from '../../utils/icons';
 
+/**
+ * Get emoji icon for D3 SVG text rendering
+ * D3 can't render React components, so we use emoji for visual representation
+ */
+function getGoalIcon(category: string): string {
+  const emojiMap: Record<string, string> = {
+    retirement: '🏖️',
+    education: '🎓',
+    home: '🏠',
+    major_expense: '💰',
+    emergency: '🛡️',
+    legacy: '🎁',
+  };
+  return emojiMap[category] || '💰';
+}
+
 export interface GoalDependencyGraphProps {
   goals: Goal[];
   dependencies: GoalDependency[];

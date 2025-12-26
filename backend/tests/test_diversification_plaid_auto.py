@@ -9,7 +9,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
 
-from app.models.plaid import PlaidAccount, PlaidHolding
+from app.models.plaid import PlaidAccount, PlaidHolding, PlaidItem
 from app.models.user import User
 
 
@@ -25,11 +25,21 @@ class TestDiversificationPlaidAutoFetch:
     ):
         """Test successful analysis with Plaid holdings"""
 
+        # Create Plaid item
+        plaid_item = PlaidItem(
+            id="item_auto_1",
+            user_id=test_user.id,
+            item_id="plaid_item_auto_1",
+            access_token="access-sandbox-test-token",
+        )
+        async_session.add(plaid_item)
+
         # Create Plaid investment account
         account = PlaidAccount(
             id="test_plaid_acc",
+            item_id="item_auto_1",
             user_id=test_user.id,
-            plaid_account_id="plaid_123",
+            account_id="plaid_123",
             type="investment",
             subtype="brokerage",
             name="Test Brokerage",
@@ -37,7 +47,6 @@ class TestDiversificationPlaidAutoFetch:
             current_balance=100000.0,
             available_balance=100000.0,
             is_active=True,
-            last_synced=datetime.utcnow()
         )
         async_session.add(account)
 
@@ -46,6 +55,8 @@ class TestDiversificationPlaidAutoFetch:
             PlaidHolding(
                 id="h1",
                 account_id="test_plaid_acc",
+                user_id=test_user.id,
+                security_id="sec_spy_auto",
                 ticker_symbol="SPY",
                 name="SPDR S&P 500 ETF",
                 quantity=100.0,
@@ -56,6 +67,8 @@ class TestDiversificationPlaidAutoFetch:
             PlaidHolding(
                 id="h2",
                 account_id="test_plaid_acc",
+                user_id=test_user.id,
+                security_id="sec_bnd_auto",
                 ticker_symbol="BND",
                 name="Vanguard Total Bond Market ETF",
                 quantity=400.0,
@@ -66,6 +79,8 @@ class TestDiversificationPlaidAutoFetch:
             PlaidHolding(
                 id="h3",
                 account_id="test_plaid_acc",
+                user_id=test_user.id,
+                security_id="sec_vea_auto",
                 ticker_symbol="VEA",
                 name="Vanguard FTSE Developed Markets ETF",
                 quantity=300.0,
@@ -76,6 +91,8 @@ class TestDiversificationPlaidAutoFetch:
             PlaidHolding(
                 id="h4",
                 account_id="test_plaid_acc",
+                user_id=test_user.id,
+                security_id="sec_gld_auto",
                 ticker_symbol="GLD",
                 name="SPDR Gold Trust",
                 quantity=50.0,
@@ -125,11 +142,21 @@ class TestDiversificationPlaidAutoFetch:
     ):
         """Test endpoint ignores inactive Plaid accounts"""
 
+        # Create Plaid item
+        plaid_item = PlaidItem(
+            id="item_auto_inactive",
+            user_id=test_user.id,
+            item_id="plaid_item_auto_inactive",
+            access_token="access-sandbox-test-token",
+        )
+        async_session.add(plaid_item)
+
         # Create inactive account
         account = PlaidAccount(
             id="test_inactive",
+            item_id="item_auto_inactive",
             user_id=test_user.id,
-            plaid_account_id="plaid_456",
+            account_id="plaid_456",
             type="investment",
             subtype="brokerage",
             name="Inactive Account",
@@ -137,13 +164,14 @@ class TestDiversificationPlaidAutoFetch:
             current_balance=50000.0,
             available_balance=50000.0,
             is_active=False,  # Inactive
-            last_synced=datetime.utcnow()
         )
         async_session.add(account)
 
         holding = PlaidHolding(
             id="h_inactive",
             account_id="test_inactive",
+            user_id=test_user.id,
+            security_id="sec_spy_inactive_auto",
             ticker_symbol="SPY",
             name="SPDR S&P 500 ETF",
             quantity=100.0,

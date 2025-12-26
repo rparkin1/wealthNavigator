@@ -48,20 +48,21 @@ describe('GoalCard', () => {
   it('shows status badge', () => {
     render(<GoalCard {...defaultProps} />);
 
-    expect(screen.getByText('On Track')).toBeInTheDocument();
+    expect(screen.getByText('ON TRACK')).toBeInTheDocument();
   });
 
   it('shows priority badge', () => {
     render(<GoalCard {...defaultProps} />);
 
-    expect(screen.getByText('Essential')).toBeInTheDocument();
+    expect(screen.getByText('ESSENTIAL')).toBeInTheDocument();
   });
 
   it('displays category icon', () => {
     const { container } = render(<GoalCard {...defaultProps} />);
 
-    // Check for retirement emoji
-    expect(container.textContent).toContain('🏖️');
+    // Check for SVG icon (should have svg element with proper class)
+    const svg = container.querySelector('svg');
+    expect(svg).toBeInTheDocument();
   });
 
   it('shows monthly contribution', () => {
@@ -187,7 +188,7 @@ describe('GoalCard', () => {
 
     // Should not show detailed information
     expect(screen.queryByText('Success Probability')).not.toBeInTheDocument();
-    expect(screen.queryByText('Essential')).not.toBeInTheDocument();
+    expect(screen.queryByText('ESSENTIAL')).not.toBeInTheDocument();
   });
 
   it('applies correct color for high success probability', () => {
@@ -230,9 +231,9 @@ describe('GoalCard', () => {
       );
 
       const labels: Record<typeof priority, string> = {
-        essential: 'Essential',
-        important: 'Important',
-        aspirational: 'Aspirational',
+        essential: 'ESSENTIAL',
+        important: 'IMPORTANT',
+        aspirational: 'ASPIRATIONAL',
       };
 
       expect(screen.getByText(labels[priority])).toBeInTheDocument();
@@ -249,10 +250,10 @@ describe('GoalCard', () => {
       );
 
       const labels: Record<typeof status, string> = {
-        on_track: 'On Track',
-        behind: 'Behind',
-        at_risk: 'At Risk',
-        achieved: 'Achieved',
+        on_track: 'ON TRACK',
+        behind: 'BEHIND',
+        at_risk: 'AT RISK',
+        achieved: 'ACHIEVED',
       };
 
       expect(screen.getByText(labels[status])).toBeInTheDocument();
@@ -262,21 +263,15 @@ describe('GoalCard', () => {
 
   it('displays all category icons correctly', () => {
     const categories = ['retirement', 'education', 'home', 'major_expense', 'emergency', 'legacy'] as const;
-    const icons: Record<typeof categories[number], string> = {
-      retirement: '🏖️',
-      education: '🎓',
-      home: '🏠',
-      major_expense: '💰',
-      emergency: '🚨',
-      legacy: '🌟',
-    };
 
     categories.forEach((category) => {
       const { container, unmount } = render(
         <GoalCard goal={{ ...mockGoal, category }} />
       );
 
-      expect(container.textContent).toContain(icons[category]);
+      // Check for SVG icon presence
+      const svg = container.querySelector('svg');
+      expect(svg).toBeInTheDocument();
       unmount();
     });
   });

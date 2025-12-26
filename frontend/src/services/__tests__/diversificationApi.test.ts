@@ -342,12 +342,12 @@ describe('diversificationApi', () => {
 
     describe('getConcentrationTypeIcon', () => {
       it('should return correct icons for concentration types', () => {
-        expect(diversificationApi.getConcentrationTypeIcon('single_holding')).toBe('🎯');
-        expect(diversificationApi.getConcentrationTypeIcon('top_5')).toBe('📊');
-        expect(diversificationApi.getConcentrationTypeIcon('sector')).toBe('🏭');
-        expect(diversificationApi.getConcentrationTypeIcon('geography')).toBe('🌍');
-        expect(diversificationApi.getConcentrationTypeIcon('asset_class')).toBe('💼');
-        expect(diversificationApi.getConcentrationTypeIcon('manager')).toBe('👤');
+        expect(diversificationApi.getConcentrationTypeIcon('single_holding')).toBe('FlagIcon');
+        expect(diversificationApi.getConcentrationTypeIcon('top_5')).toBe('ChartBarIcon');
+        expect(diversificationApi.getConcentrationTypeIcon('sector')).toBe('BuildingOffice2Icon');
+        expect(diversificationApi.getConcentrationTypeIcon('geography')).toBe('GlobeAltIcon');
+        expect(diversificationApi.getConcentrationTypeIcon('asset_class')).toBe('BriefcaseIcon');
+        expect(diversificationApi.getConcentrationTypeIcon('manager')).toBe('UserIcon');
       });
     });
 
@@ -364,24 +364,27 @@ describe('diversificationApi', () => {
         const excellent = diversificationApi.getDiversificationScoreDisplay(85);
         expect(excellent.level).toBe('Excellent');
         expect(excellent.color).toBe('#10b981');
-        expect(excellent.icon).toBe('✅');
+        expect(excellent.icon).toBe('CheckCircleIcon');
 
         const good = diversificationApi.getDiversificationScoreDisplay(70);
         expect(good.level).toBe('Good');
         expect(good.color).toBe('#3b82f6');
+        expect(good.icon).toBe('CheckCircleIcon');
 
         const fair = diversificationApi.getDiversificationScoreDisplay(50);
         expect(fair.level).toBe('Fair');
         expect(fair.color).toBe('#f59e0b');
+        expect(fair.icon).toBe('ExclamationTriangleIcon');
 
         const poor = diversificationApi.getDiversificationScoreDisplay(30);
         expect(poor.level).toBe('Poor');
         expect(poor.color).toBe('#f97316');
+        expect(poor.icon).toBe('ExclamationTriangleIcon');
 
         const critical = diversificationApi.getDiversificationScoreDisplay(15);
         expect(critical.level).toBe('Critical');
         expect(critical.color).toBe('#ef4444');
-        expect(critical.icon).toBe('🚨');
+        expect(critical.icon).toBe('ExclamationCircleIcon');
       });
     });
   });

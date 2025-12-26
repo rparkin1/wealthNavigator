@@ -151,8 +151,6 @@ export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> =
                 fontSize: '14px',
                 fontWeight: 500,
                 cursor: 'pointer',
-              }}
-              style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
@@ -368,8 +366,6 @@ export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> =
                     borderRadius: '6px',
                     fontSize: '14px',
                     color: '#92400e',
-                  }}
-                  style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
@@ -394,8 +390,6 @@ export const HedgingStrategyDashboard: React.FC<HedgingStrategyDashboardProps> =
                         fontWeight: 500,
                         backgroundColor: met ? '#d1fae5' : '#fee2e2',
                         color: met ? '#065f46' : '#991b1b',
-                      }}
-                      style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '4px',

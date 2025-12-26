@@ -83,7 +83,7 @@ describe('GoalForm', () => {
     const educationButton = screen.getByText('Education').closest('button');
     fireEvent.click(educationButton!);
 
-    expect(educationButton).toHaveClass('border-blue-600');
+    expect(educationButton).toHaveClass('border-primary-600');
   });
 
   it('moves to step 2 after valid step 1', () => {

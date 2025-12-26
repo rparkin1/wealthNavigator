@@ -270,9 +270,9 @@ describe('Life Events API Service', () => {
 
   describe('Utility Functions', () => {
     it('returns correct event type icon', () => {
-      expect(lifeEventsApi.getEventTypeIcon('job_loss')).toBe('💼');
-      expect(lifeEventsApi.getEventTypeIcon('inheritance')).toBe('💰');
-      expect(lifeEventsApi.getEventTypeIcon('unknown')).toBe('📅');
+      expect(lifeEventsApi.getEventTypeIcon('job_loss')).toBe('BriefcaseIcon');
+      expect(lifeEventsApi.getEventTypeIcon('inheritance')).toBe('BanknotesIcon');
+      expect(lifeEventsApi.getEventTypeIcon('unknown')).toBe('CalendarDaysIcon');
     });
 
     it('returns correct event type label', () => {
