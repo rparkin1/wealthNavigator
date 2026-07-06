@@ -5,11 +5,13 @@
 
 import { useState, useEffect } from 'react';
 import { plaidApi } from '../../services/plaidApi';
+import { generateCSV, downloadCSV } from '../../utils/csvUtils';
 import type { PlaidHolding, PlaidAccount } from '../../types/plaid';
 
 export function InvestmentHoldings() {
   const [holdings, setHoldings] = useState<PlaidHolding[]>([]);
   const [accounts, setAccounts] = useState<PlaidAccount[]>([]);
+  const [cashCreditAccounts, setCashCreditAccounts] = useState<PlaidAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,12 +24,20 @@ export function InvestmentHoldings() {
     try {
       setLoading(true);
       setError(null);
-      const [holdingsData, accountsData] = await Promise.all([
+      // Fetch holdings, the investment accounts that drive the grouped display,
+      // and all accounts (so cash/credit balances can be included in the export).
+      const [holdingsData, investmentAccountsData, allAccountsData] = await Promise.all([
         plaidApi.listHoldings(),
         plaidApi.listAccounts(undefined, 'investment'),
+        plaidApi.listAccounts(),
       ]);
       setHoldings(holdingsData.holdings);
-      setAccounts(accountsData.accounts);
+      setAccounts(investmentAccountsData.accounts);
+      setCashCreditAccounts(
+        allAccountsData.accounts.filter(
+          (acc) => acc.type === 'depository' || acc.type === 'credit'
+        )
+      );
     } catch (err) {
       console.error('Failed to load holdings:', err);
       setError('Failed to load investment holdings. Please try again.');
@@ -35,6 +45,87 @@ export function InvestmentHoldings() {
       setLoading(false);
     }
   }
+
+  /**
+   * Export all investment holdings across every account, plus cash (depository)
+   * and credit account balances, to a single CSV file. Credit balances are
+   * emitted as negative values to reflect amounts owed.
+   */
+  function handleExportCSV() {
+    const headers = [
+      'account',
+      'ticker',
+      'name',
+      'type',
+      'quantity',
+      'price',
+      'market_value',
+      'cost_basis',
+      'gain_loss',
+      'gain_loss_pct',
+      'currency',
+    ];
+
+    const accountLabel = (acc: PlaidAccount): string =>
+      acc.mask ? `${acc.name} ••••${acc.mask}` : acc.name;
+
+    const accountById = new Map(accounts.map((acc) => [acc.id, acc]));
+
+    // One row per investment holding.
+    const holdingRows = holdings.map((holding) => {
+      const account = accountById.get(holding.account_id);
+      const gainLoss =
+        holding.institution_value !== null && holding.cost_basis !== null
+          ? holding.institution_value - holding.cost_basis
+          : null;
+      const gainLossPct =
+        gainLoss !== null && holding.cost_basis
+          ? (gainLoss / holding.cost_basis) * 100
+          : null;
+
+      return {
+        account: account ? accountLabel(account) : holding.account_id,
+        ticker: holding.ticker_symbol ?? '',
+        name: holding.name,
+        type: holding.type ?? '',
+        quantity: holding.quantity,
+        price: holding.institution_price,
+        market_value: holding.institution_value,
+        cost_basis: holding.cost_basis,
+        gain_loss: gainLoss,
+        gain_loss_pct: gainLossPct !== null ? gainLossPct.toFixed(2) : '',
+        currency: holding.iso_currency_code,
+      };
+    });
+
+    // One row per cash/credit account balance (credit shown negative).
+    const balanceRows = cashCreditAccounts.map((acc) => {
+      const balance =
+        acc.current_balance !== null && acc.type === 'credit'
+          ? -acc.current_balance
+          : acc.current_balance;
+
+      return {
+        account: accountLabel(acc),
+        ticker: '',
+        name: acc.official_name ?? acc.name,
+        type: acc.type,
+        quantity: '',
+        price: '',
+        market_value: balance,
+        cost_basis: '',
+        gain_loss: '',
+        gain_loss_pct: '',
+        currency: acc.iso_currency_code,
+      };
+    });
+
+    const csv = generateCSV([...holdingRows, ...balanceRows], headers);
+    const timestamp = new Date().toISOString().split('T')[0];
+    downloadCSV(csv, `portfolio-export-${timestamp}.csv`);
+  }
+
+  const hasExportableData = holdings.length > 0 || cashCreditAccounts.length > 0;
 
   async function handleSync() {
     try {
@@ -86,7 +177,10 @@ export function InvestmentHoldings() {
     );
   }
 
-  if (holdings.length === 0) {
+  // Only fully bail when there is nothing to show or export. If there are no
+  // holdings but the user has cash/credit accounts, fall through so the export
+  // button remains reachable.
+  if (!hasExportableData) {
     return (
       <div className="text-center py-12 bg-white rounded-lg shadow-md">
         <div className="text-gray-500 mb-2">No investment accounts found</div>
@@ -122,14 +216,39 @@ export function InvestmentHoldings() {
             Total Portfolio Value: {formatCurrency(totalValue)}
           </p>
         </div>
-        <button
-          onClick={handleSync}
-          disabled={syncing}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700
-            disabled:bg-gray-400 transition-colors text-sm font-medium"
-        >
-          {syncing ? 'Syncing...' : 'Sync Holdings'}
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleExportCSV}
+            disabled={!hasExportableData}
+            title="Export holdings and account balances to CSV"
+            className="flex items-center gap-2 px-4 py-2 bg-white text-green-700 border
+              border-green-600 rounded-lg hover:bg-green-50 disabled:opacity-50
+              disabled:cursor-not-allowed transition-colors text-sm font-medium"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            <span className="hidden sm:inline">Export CSV</span>
+          </button>
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700
+              disabled:bg-gray-400 transition-colors text-sm font-medium"
+          >
+            {syncing ? 'Syncing...' : 'Sync Holdings'}
+          </button>
+        </div>
       </div>
 
       {/* Holdings by Account */}
